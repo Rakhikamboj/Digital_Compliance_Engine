@@ -1,0 +1,153 @@
+.header {
+  background: #ffffff;
+  border-bottom: 1px solid #f0f2e8;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  height: 70px;
+  display: flex;
+  align-items: center;
+  font-family: "Inter", sans-serif;
+}
+
+.container {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0 24px;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logoSection {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: rgb(25, 77, 42);
+}
+
+.logoWrapper {
+  background: #ecfdf5;
+  color: #194d2a;
+  padding: 8px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.titleWrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+.title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #194d2a;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+.badge {
+  font-size: 10px;
+  font-weight: 500;
+  color: #059669;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.userSection {
+  position: relative;
+}
+
+.profileTrigger {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  padding: 6px 12px;
+  border-radius: 8px;
+  transition: background 0.2s;
+}
+
+.profileTrigger:hover {
+  background: #f5f8ee;
+}
+
+.userInfo {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.userName {
+  font-size: 14px;
+  font-weight: 500;
+  color: #194d2a;
+}
+
+.userRole {
+  font-size: 11px;
+  color: #6b7280;
+}
+
+.chevron {
+  color: #9ca3af;
+  transition: transform 0.2s;
+}
+
+.rotated {
+  transform: rotate(180deg);
+}
+
+.dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background: white;
+  border: 1px solid #f5f8ee;
+  border-radius: 12px;
+  box-shadow: 0 10px 15px -3px rgb(25, 77, 42), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  min-width: 200px;
+  padding: 8px;
+  overflow: hidden;
+}
+
+.dropdownItem {
+  width: 100%;
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: none;
+  background: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: "Inter", sans-serif;
+  font-size: 13px;
+  color: #4b5563;
+  text-align: left;
+  transition: background 0.2s;
+}
+
+.dropdownItem:hover {
+  background: #f3f4f6;
+  color: #194d2a;
+}
+
+.divider {
+  height: 1px;
+  background: #fefffa;
+  margin: 6px 0;
+}
+
+.logout {
+  color: #dc2626;
+}
+
+.logout:hover {
+  background: #fef2f2;
+  color: #dc2626;
+}

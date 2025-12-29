@@ -1,0 +1,194 @@
+/* Page */
+.page {
+  background: #ffffff;
+  min-height: calc(100vh - 115px);
+  padding: 24px;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Cards */
+.card {
+  background: #fefffa;
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(25, 77, 42, 0.1);
+  padding: 24px;
+  border: 1px solid #e5f4e2ff;
+  margin-bottom: 24px;
+}
+
+/* Headings */
+.heading {
+  font-size: 16px;
+  font-weight: 600;
+  color: #194d2a;
+  margin: 0 0 16px 0;
+}
+
+.subHeading {
+  font-size: 14px;
+  font-weight: 600;
+  color: #194d2a;
+  margin: 0 0 16px 0;
+}
+
+/* Grid */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+/* Labels & Inputs */
+.label {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  color: #194d2a;
+  margin-bottom: 6px;
+}
+
+.input {
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  outline: none;
+  font-family: 'Inter', sans-serif;
+  box-sizing: border-box;
+}
+
+.inputError {
+  border: 1px solid #e74c3c;
+}
+
+.errorText {
+  font-size: 12px;
+  color: #e74c3c;
+  margin-top: 4px;
+  display: block;
+}
+
+/* Checkbox */
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  margin-bottom: 8px;
+}
+
+.checkbox {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: #194d2a;
+}
+
+/* Disposal Section */
+.disposalBox {
+  background: #fefffa;
+  border: 1px solid #e5f4e2ff;
+  border-radius: 4px;
+  padding: 20px;
+  margin-top: 16px;
+}
+
+/* Buttons */
+.primaryBtn {
+  width: 100%;
+  padding: 11px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #fefffa;
+  background: #194d2a;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  margin-top: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.primaryBtnDisabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.tableWrapper {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;  
+  justify-items: left;
+}
+
+.th {
+  text-align:start;
+  display: flex;
+  padding: 12px;
+  font-weight: 600;
+  color: #194d2a;
+  border-bottom: 2px solid #e5f4e2ff;
+}
+
+.alignHeading {
+  text-align: left;
+}
+
+.thCenter {
+  text-align: left;
+}
+
+.td {
+  padding: 12px;
+  border-bottom: 1px solid #e5f4e2ff;
+}
+
+.tdRight {
+  text-align: right;
+}
+
+.tdCenter {
+  text-align: center;
+}
+
+/* Badges */
+.badgeHazardous {
+  padding: 4px 8px;
+  background: #fee2e2;
+  color: #991b1b;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.badgeNonHazardous {
+  padding: 4px 8px;
+  background: #dbeafe;
+  color: #1e40af;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* Actions */
+.deleteBtn {
+  background: none;
+  border: none;
+  color: #e74c3c;
+  cursor: pointer;
+  padding: 4px;
+}
