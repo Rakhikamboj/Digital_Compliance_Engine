@@ -1,7 +1,10 @@
 import jwt from "jsonwebtoken"
 import User from "../models/User.js"
+import dotenv from "dotenv"
+dotenv.config()
+const JWT_SECRET = process.env.JWT_SECRET
 
-export async function authMiddleware(req, res, next) {
+export const authMiddleware = async (req, res, next) => {
   try {
     const authHeader = req.headers.authorization
 
@@ -10,32 +13,31 @@ export async function authMiddleware(req, res, next) {
     }
 
     const token = authHeader.split(" ")[1]
+    const decoded = jwt.verify(token, JWT_SECRET)
 
-    if (!token) {
-      return res.status(401).json({ message: "No token provided" })
-    }
-
-    // Verify token
-    const decoded = jwt.verify(token, process.env.JWT_SECRET)
-
-    // Find user
     const user = await User.findById(decoded.id).select("-password")
+
     if (!user) {
       return res.status(401).json({ message: "User not found" })
     }
 
-    req.user = user
+    if (user.isActive === false) {
+      return res.status(403).json({ message: "Account disabled" })
+    }
+
+    req.user = {
+      id: user._id,
+      email: user.email,
+      role: user.role || "AUDITOR",
+      companyName: user.companyName || "Organization",
+    }
     next()
   } catch (error) {
-    if (error.name === "JsonWebTokenError") {
-      return res.status(401).json({ message: "Invalid token" })
-    }
     if (error.name === "TokenExpiredError") {
-      return res.status(401).json({ message: "Token expired" })
+      return res.status(401).json({ message: "Token has expired" })
     }
-    return res.status(401).json({ message: "Authentication failed" })
+    return res.status(401).json({ message: "Invalid or expired token" })
   }
 }
 
-// Backward compatibility
 export const verifyToken = authMiddleware

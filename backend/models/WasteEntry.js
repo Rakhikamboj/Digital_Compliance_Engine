@@ -1,33 +1,41 @@
 import mongoose from "mongoose"
 
-const WasteEntrySchema = new mongoose.Schema({
-  userId: {
-    type: String,
-    required: true,
+const wasteDataSchema = new mongoose.Schema(
+  {
+    total: { type: Number, default: 0 },
+    reuse: { type: Number, default: 0 },
+    recycle: { type: Number, default: 0 },
+    composting: { type: Number, default: 0 },
+    incinerationWithHeat: { type: Number, default: 0 },
+    incinerationWithoutHeat: { type: Number, default: 0 },
+    landfill: { type: Number, default: 0 },
+    exemption: { type: Number, default: 0 },
   },
-  reportingPeriodId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "ReportingPeriod",
-  },
-  wasteMaterial: {
-    type: String,
-    required: true,
-  },
-  wasteHandler: String,
-  modeOfDisposal: String,
-  inputDate: Date,
-  includeHazardous: Boolean,
-  includeNonHazardous: Boolean,
-  hazardousData: mongoose.Schema.Types.Mixed,
-  nonHazardousData: mongoose.Schema.Types.Mixed,
-  hazardousDiversion: String,
-  hazardousDiversionPercent: String,
-  nonHazardousDiversion: String,
-  nonHazardousDiversionPercent: String,
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  },
-})
+  { _id: false },
+)
 
-export default mongoose.models.WasteEntry || mongoose.model("WasteEntry", WasteEntrySchema)
+const wasteEntrySchema = new mongoose.Schema(
+  {
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+    reportingPeriod: {
+      periodType: { type: String, enum: ["financial", "calendar"], required: true },
+      year: { type: String, required: true },
+    },
+    wasteMaterial: { type: String, required: true },
+    wasteHandler: { type: String },
+    modeOfDisposal: { type: String },
+    inputDate: { type: Date },
+    includeHazardous: { type: Boolean, default: false },
+    includeNonHazardous: { type: Boolean, default: false },
+    hazardousData: wasteDataSchema,
+    nonHazardousData: wasteDataSchema,
+    hazardousDiversion: { type: Number, default: 0 },
+    hazardousDiversionPercent: { type: Number, default: 0 },
+    nonHazardousDiversion: { type: Number, default: 0 },
+    nonHazardousDiversionPercent: { type: Number, default: 0 },
+    complianceScore: { type: Number, default: 0 },
+  },
+  { timestamps: true },
+)
+
+export default mongoose.model("WasteEntry", wasteEntrySchema)

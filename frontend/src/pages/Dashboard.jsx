@@ -15,7 +15,7 @@ import {
 import styles from "../styles/Dashboard.module.css"
 import { Leaf, Trash2, AlertCircle, Download, FileText, X } from "lucide-react";
 
-const API_URL = "http://localhost:5001/api/waste-entries";
+const API_URL = import.meta.env.VITE_API_KEY + "/api/waste-entries";
 
 // Circular Progress Component
 const CircularProgress = ({ percentage, size = 160, primaryColor = "#194d2a" }) => {

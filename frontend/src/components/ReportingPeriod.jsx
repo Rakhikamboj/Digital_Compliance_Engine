@@ -2,7 +2,7 @@ import { Calendar } from "lucide-react";
 import { useState } from "react";
 import styles from "../styles/ReportingPeriod.module.css";
 
-const API_URL = "http://localhost:5001/api/reporting-period";
+const API_URL = import.meta.env.VITE_API_KEY + "/api/reporting-period";
 
 
 const ReportingPeriod = ({

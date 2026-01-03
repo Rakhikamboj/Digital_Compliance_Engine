@@ -1,115 +1,59 @@
-import { useState } from "react";
-import { BrowserRouter, Routes, Route, Navigate, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react"
+import Auth from "./pages/Auth"
+import Dashboard from "./pages/Dashboard"
+import AdminDashboard from "./pages/AdminDashboard"
+import AuditorDashboard from "./pages/AuditorDashbaord"
+const API_URL = import.meta.env.VITE_API_KEY 
+const App = () => {
+  const [user, setUser] = useState(null)
+  const [loading, setLoading] = useState(true)
 
-import Auth from "./pages/Auth";
-import Header from "./components/Header";
-import NavigationTabs from "./components/NavigationTabs";
-import ReportingPeriod from "./components/ReportingPeriod";
-import WasteDataEntry from "./components/CalculateDiversion";
-import ComplianceDashboard from "./pages/Dashboard";
-
-// Create a wrapper component to use useNavigate
-function AppContent({ currentUser, handleLogout }) {
-  const navigate = useNavigate();
-  const [activeStep, setActiveStep] = useState("period");
-
-  const [reportingPeriod, setReportingPeriod] = useState({
-    periodType: "financial",
-    year: "2024-25",
-  });
-
-  const [wasteEntries, setWasteEntries] = useState([]);
-
-  return (
-    <div style={{ fontFamily: "Inter, sans-serif" }}>
-      <Header currentUser={currentUser} onLogout={handleLogout} />
-
-      <Routes>
-        {/* Compliance Flow (STATE BASED) */}
-        <Route
-          path="/"
-          element={
-            <>
-              <NavigationTabs
-                activeStep={activeStep}
-                setActiveStep={setActiveStep}
-              />
-
-              {activeStep === "period" && (
-                <ReportingPeriod
-                  reportingPeriod={reportingPeriod}
-                  setReportingPeriod={setReportingPeriod}
-                  onNext={() => setActiveStep("data-entry")}
-                />
-              )}
-
-              {activeStep === "data-entry" && (
-                <WasteDataEntry
-                  wasteEntries={wasteEntries}
-                  onAddEntry={(e) =>
-                    setWasteEntries([...wasteEntries, e])
-                  }
-                  onDeleteEntry={(id) =>
-                    setWasteEntries(
-                      wasteEntries.filter((e) => e.id !== id)
-                    )
-                  }
-                  onNext={() => navigate("/dashboard")}
-                />
-              )}
-            </>
+  useEffect(() => {
+    const fetchUser = async () => {
+      const token = localStorage.getItem("token")
+      if (token) {
+        try {
+          const response = await fetch(`${API_URL}/api/auth/me`, {
+            headers: { Authorization: `Bearer ${token}` },
+          })
+          const data = await response.json()
+          if (response.ok) {
+            setUser(data)
+          } else {
+            localStorage.removeItem("token")
           }
-        />
+        } catch (error) {
+          console.error("Auth verify error:", error)
+        }
+      }
+      setLoading(false)
+    }
+    fetchUser()
+  }, [])
 
-        {/* DASHBOARD (ROUTE BASED) */}
-        <Route
-          path="/dashboard"
-          element={
-            <ComplianceDashboard
-              wasteEntries={wasteEntries}
-              reportingPeriod={reportingPeriod}
-            />
-          }
-        />
-
-        {/* fallback */}
-        <Route path="*" element={<Navigate to="/" />} />
-      </Routes>
-    </div>
-  );
-}
-
-function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(
-    Boolean(localStorage.getItem("token"))
-  );
-
-  const [currentUser, setCurrentUser] = useState(null);
-
-  const handleLogin = (user) => {
-    setCurrentUser(user);
-    setIsLoggedIn(true);
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    setIsLoggedIn(false);
-    setCurrentUser(null);
-  };
-
-  if (!isLoggedIn) {
-    return <Auth onLogin={handleLogin} />;
+  const handleLogin = (userData) => {
+    setUser(userData)
   }
 
-  return (
-    <BrowserRouter>
-      <AppContent 
-        isLoggedIn={isLoggedIn}
-        currentUser={currentUser}
-        handleLogout={handleLogout}
-      />
-    </BrowserRouter>
-  );
+  const handleLogout = () => {
+    localStorage.removeItem("token")
+    setUser(null)
+  }
+
+  if (loading) return <div className="flex items-center justify-center h-screen font-sans">Loading...</div>
+
+  if (!user) return <Auth onLogin={handleLogin} />
+
+  // Route based on role
+  if (user.role === "ADMIN") {
+    return <AdminDashboard user={user} onLogout={handleLogout} />
+  }
+
+  if (user.role === "AUDITOR") {
+    return <AuditorDashboard user={user} onLogout={handleLogout} />
+  }
+
+  return <Dashboard user={user} onLogout={handleLogout} />
 }
 
-export default App;
+export default App

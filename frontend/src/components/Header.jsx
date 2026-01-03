@@ -1,22 +1,26 @@
 import { useState, useEffect } from "react"
 import { Leaf, ChevronDown, LogOut, LayoutDashboard, Settings } from "lucide-react"
 import styles from "../styles/Header.module.css"
-
-const Header = ({ onLogout, token }) => {
+const API_URL = import.meta.env.VITE_API_KEY 
+const Header = ({ onLogout }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const [companyName, setCompanyName] = useState("Organization")
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const fetchUserData = async () => {
-      // If no token is provided, stop loading
-      if (!token) {
-        setLoading(false)
-        return
-      }
-
       try {
-        const response = await fetch("/api/auth/me", {
+        const token = localStorage.getItem("token")
+
+        console.log(" Header: Checking session token...")
+
+        if (!token || token === "undefined" || token === "null") {
+          console.log(" Header: No valid session token found")
+          setLoading(false)
+          return
+        }
+
+        const response = await fetch(`${API_URL}/api/auth/me`, {
           method: "GET",
           headers: {
             Authorization: `Bearer ${token}`,
@@ -26,25 +30,26 @@ const Header = ({ onLogout, token }) => {
 
         if (response.ok) {
           const data = await response.json()
-          setCompanyName(data.companyName)
-          
-        } else if (response.status === 401) {
-          // Token is invalid or expired
-          console.error("Authentication failed")
-          onLogout?.()
+          console.log(" Header: User profile retrieved for", data.companyName)
+          setCompanyName(data.companyName || "Organization")
         } else {
-          const errorData = await response.json().catch(() => ({ message: "Unknown error" }))
-          console.error("Server error:", errorData.message)
+          console.error(" Header: Profile fetch failed", response.status)
+
+          if (response.status === 401) {
+            console.log(" Header: Session expired or invalid, logging out")
+            localStorage.removeItem("token")
+            onLogout()
+          }
         }
       } catch (error) {
-        console.error("Error fetching user data:", error)
+        console.error(" Header: Network error during profile fetch", error)
       } finally {
         setLoading(false)
       }
     }
 
     fetchUserData()
-  }, [token, onLogout])
+  }, [onLogout])
 
   return (
     <header className={styles.header}>
@@ -63,7 +68,7 @@ const Header = ({ onLogout, token }) => {
           <div className={styles.profileTrigger} onClick={() => setDropdownOpen(!dropdownOpen)}>
             <div className={styles.userInfo}>
               <span className={styles.userName}>{loading ? "Loading..." : companyName}</span>
-              {/* <span className={styles.userRole}>System Administrator</span> */}
+              <span className={styles.userRole}>System Administrator</span>
             </div>
             <ChevronDown size={16} className={`${styles.chevron} ${dropdownOpen ? styles.rotated : ""}`} />
           </div>
@@ -83,7 +88,7 @@ const Header = ({ onLogout, token }) => {
                 className={`${styles.dropdownItem} ${styles.logout}`}
                 onClick={() => {
                   setDropdownOpen(false)
-                  onLogout?.()
+                  onLogout()
                 }}
               >
                 <LogOut size={16} />

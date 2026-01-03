@@ -1,5 +1,7 @@
+
 import { useState } from "react"
 import styles from "../styles/Auth.module.css"
+const API_URL = import.meta.env.VITE_API_KEY 
 
 const Auth = ({ onLogin }) => {
   const [isLogin, setIsLogin] = useState(true)
@@ -11,9 +13,9 @@ const Auth = ({ onLogin }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    const endpoint = isLogin ? "/api/auth/login" : "/api/auth/signup"
+    const endpoint = isLogin ? `${API_URL}/api/auth/login` : `${API_URL}/api/auth/signup`
     try {
-      const response = await fetch(`http://localhost:5001${endpoint}`, {
+      const response = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),

@@ -3,100 +3,62 @@ import User from "../models/User.js"
 import bcrypt from "bcryptjs"
 import jwt from "jsonwebtoken"
 import { authMiddleware } from "../middleware/auth.js"
-
+import dotenv from "dotenv"
+dotenv.config()
 const router = express.Router()
+const JWT_SECRET = process.env.JWT_SECRET || "development-secret-key-12345"
 
-// Signup route
-router.post("/signup", async (req, res) => {
-  try {
-    const { email, password, companyName } = req.body
+if (!process.env.JWT_SECRET) {
+  console.warn(
+    "Warning: JWT_SECRET environment variable is not defined in routes/auth.js. Using development fallback.",
+  )
+}
 
-    // Validate input
-    if (!email || !password) {
-      return res.status(400).json({ message: "Email and password are required" })
-    }
-
-    // Check if user exists
-    const existingUser = await User.findOne({ email })
-    if (existingUser) {
-      return res.status(400).json({ message: "User already exists" })
-    }
-
-    // Hash password
-    const hashedPassword = await bcrypt.hash(password, 10)
-
-    // Create user
-    const user = new User({ 
-      email, 
-      password: hashedPassword, 
-      companyName: companyName || "Organization" 
-    })
-    await user.save()
-
-    // Generate token
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "1d" })
-    
-    res.status(201).json({ 
-      token, 
-      user: { 
-        email: user.email, 
-        companyName: user.companyName 
-      } 
-    })
-  } catch (error) {
-    console.error("Signup error:", error)
-    res.status(500).json({ message: "Server error", error: error.message })
-  }
-})
-
-// Login route
 router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body
 
-    // Validate input
-    if (!email || !password) {
-      return res.status(400).json({ message: "Email and password are required" })
-    }
-
-    // Find user
     const user = await User.findOne({ email })
     if (!user) {
       return res.status(400).json({ message: "Invalid credentials" })
     }
 
-    // Check password
+    if (user.isActive === false) {
+      return res.status(403).json({ message: "Account disabled" })
+    }
+
     const isMatch = await bcrypt.compare(password, user.password)
+
     if (!isMatch) {
       return res.status(400).json({ message: "Invalid credentials" })
     }
 
-    // Generate token
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "1d" })
-    
-    res.status(200).json({ 
-      token, 
-      user: { 
-        email: user.email, 
-        companyName: user.companyName 
-      } 
+    const token = jwt.sign({ id: user._id, role: user.role || "AUDITOR" }, JWT_SECRET, { expiresIn: "1d" })
+
+    res.status(200).json({
+      token,
+      user: {
+        id: user._id,
+        email: user.email,
+        companyName: user.companyName || "Organization",
+        role: user.role || "AUDITOR",
+      },
     })
   } catch (error) {
-    console.error("Login error:", error)
     res.status(500).json({ message: "Server error", error: error.message })
   }
 })
 
-// Get current user
 router.get("/me", authMiddleware, async (req, res) => {
   try {
     res.status(200).json({
+      id: req.user.id,
       email: req.user.email,
-      companyName: req.user.companyName || "Organization",
+      companyName: req.user.companyName,
+      role: req.user.role,
     })
   } catch (error) {
-    console.error("Get user error:", error)
-    res.status(500).json({ message: "Server error" })
+    res.status(500).json({ message: "Server error", error: error.message })
   }
 })
 

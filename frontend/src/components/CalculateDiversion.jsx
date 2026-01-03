@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Plus, Trash2 } from "lucide-react";
 import styles from "../styles/WasteDataEntry.module.css";
 
-const API_URL = "http://localhost:5001/api/waste-entries";
+const API_URL = import.meta.env.VITE_API_KEY + "/api/waste-entries";
 
 const WasteDataEntry = ({ onNext, reportingPeriodId }) => {
   const [wasteEntries, setWasteEntries] = useState([]);
