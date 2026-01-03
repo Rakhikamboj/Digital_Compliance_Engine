@@ -3,7 +3,7 @@ import { authMiddleware } from "../middleware/auth.js"
 import { allowRoles } from "../middleware/role.js"
 import { createAuditor, getAuditors, createProject, getProjects } from "../controllers/admin.js"
 import Project from "../models/Project.js"// Assuming Project model is imported here
-
+import { updateProjectStatus } from "../controllers/auditor.js"
 const router = express.Router()
 
 router.use(authMiddleware)
