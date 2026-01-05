@@ -1,0 +1,6 @@
+{
+  "watch": ["backend"],
+  "ignore": ["frontend"],
+
+  "exec": "node backend/server.js"
+}

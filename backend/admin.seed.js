@@ -23,7 +23,7 @@ const seedAdmin = async () => {
 
     // console.log("  Hashed Password (first 20 chars):", hashedPassword.substring(0, 20) + "...")
 
-    const adminUser = await User.create({
+    const adminUser = await User.create({      
       email: "admin@org.com",
       password: hashedPassword,
       companyName: "Digital Compliance Corp",

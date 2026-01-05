@@ -1,39 +1,92 @@
-import { Users, LayoutGrid, LogOut, ShieldCheck } from "lucide-react"
+import { Users, FolderKanban, LogOut, Shield, ChevronLeft, ChevronRight, BarChart3 } from "lucide-react"
 import styles from "../styles/Dashboard.module.css"
 
-const Sidebar = ({ activeTab, setActiveTab, onLogout }) => {
-  const navItems = [
-    { id: "auditors", label: "Auditor Management", icon: Users },
-    { id: "projects", label: "Projects", icon: LayoutGrid },
-  ]
+const Sidebar = ({ activeTab, setActiveTab, onLogout, isCollapsed, setIsCollapsed }) => {
+  const user = JSON.parse(localStorage.getItem("user") || "{}")
 
   return (
-    <aside className={styles.sidebar}>
-      <div className={styles.sidebarHeader}>
-        <ShieldCheck className={styles.logoIcon} />
-        <h2 className={styles.sidebarTitle}>Admin Panel</h2>
+    <div className={`${styles.sidebar} ${isCollapsed ? styles.sidebarCollapsed : ''}`}>
+      {/* Toggle Button */}
+      <button 
+        className={styles.toggleBtn} 
+        onClick={() => setIsCollapsed(!isCollapsed)}
+        title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+      >
+        {isCollapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
+      </button>
+
+      {/* Logo Section */}
+      <div className={styles.sidebarLogo}>
+        <div className={styles.logoText}>
+          <div className={styles.logoIcon}>
+            <Shield size={20} color="#ffffff" />
+          </div>
+          {!isCollapsed && <span>Compliance Hub</span>}
+        </div>
       </div>
 
+      {/* Navigation */}
       <nav className={styles.sidebarNav}>
-        {navItems.map((item) => (
-          <button
-            key={item.id}
-            className={`${styles.navItem} ${activeTab === item.id ? styles.navActive : ""}`}
-            onClick={() => setActiveTab(item.id)}
-          >
-            <item.icon size={20} />
-            <span>{item.label}</span>
-          </button>
-        ))}
+        <button
+          className={`${styles.navItem} ${activeTab === "dashboard" ? styles.navItemActive : ""}`}
+          onClick={() => setActiveTab("dashboard")}
+          title="Dashboard"
+        >
+          <BarChart3 size={20} className={styles.navIcon} />
+          {!isCollapsed && <span>Dashboard</span>}
+        </button>
+
+        <button
+          className={`${styles.navItem} ${activeTab === "auditors" ? styles.navItemActive : ""}`}
+          onClick={() => setActiveTab("auditors")}
+          title="Auditor Management"
+        >
+          <Users size={20} className={styles.navIcon} />
+          {!isCollapsed && <span>Auditor Management</span>}
+        </button>
+
+        <button
+          className={`${styles.navItem} ${activeTab === "projects" ? styles.navItemActive : ""}`}
+          onClick={() => setActiveTab("projects")}
+          title="Project Management"
+        >
+          <FolderKanban size={20} className={styles.navIcon} />
+          {!isCollapsed && <span>Project Management</span>}
+        </button>
       </nav>
 
+      {/* User Profile & Logout */}
       <div className={styles.sidebarFooter}>
-        <button className={styles.logoutBtn} onClick={onLogout}>
-          <LogOut size={20} />
-          <span>Logout</span>
+        {!isCollapsed && (
+          <div className={styles.userProfile}>
+            <div className={styles.userAvatar}>
+              {(user.email || "A").charAt(0).toUpperCase()}
+            </div>
+            <div className={styles.userInfo}>
+              <div className={styles.userName}>
+                {user.email?.split("@")[0] || "Admin"}
+              </div>
+              <div className={styles.userRole}>Administrator</div>
+            </div>
+          </div>
+        )}
+
+        {isCollapsed && (
+          <div className={styles.userAvatarCollapsed}>
+            {(user.email || "A").charAt(0).toUpperCase()}
+          </div>
+        )}
+
+        <button 
+          className={styles.logoutBtn} 
+          onClick={onLogout}
+          title="Logout"
+        >
+          <LogOut size={18} />
+          {!isCollapsed && <span>Logout</span>}
         </button>
       </div>
-    </aside>
+    </div>
   )
 }
 

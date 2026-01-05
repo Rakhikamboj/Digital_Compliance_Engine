@@ -30,6 +30,7 @@ export const authMiddleware = async (req, res, next) => {
       email: user.email,
       role: user.role || "AUDITOR",
       companyName: user.companyName || "Organization",
+      auditorName: user.auditorName || "Auditor",
     }
     next()
   } catch (error) {

@@ -1,102 +1,48 @@
-import { useState, useEffect } from "react"
-import { Leaf, ChevronDown, LogOut, LayoutDashboard, Settings } from "lucide-react"
-import styles from "../styles/Header.module.css"
-const API_URL = import.meta.env.VITE_API_KEY 
-const Header = ({ onLogout }) => {
-  const [dropdownOpen, setDropdownOpen] = useState(false)
-  const [companyName, setCompanyName] = useState("Organization")
-  const [loading, setLoading] = useState(true)
+import { LogOut } from "lucide-react"
+import styles from "../styles/Dashboard.module.css"
 
-  useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const token = localStorage.getItem("token")
+const Header = ({ user, onLogout }) => {
+  const getCurrentDate = () => {
+    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }
+    return new Date().toLocaleDateString('en-US', options)
+  }
 
-        console.log(" Header: Checking session token...")
-
-        if (!token || token === "undefined" || token === "null") {
-          console.log(" Header: No valid session token found")
-          setLoading(false)
-          return
-        }
-
-        const response = await fetch(`${API_URL}/api/auth/me`, {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        })
-
-        if (response.ok) {
-          const data = await response.json()
-          console.log(" Header: User profile retrieved for", data.companyName)
-          setCompanyName(data.companyName || "Organization")
-        } else {
-          console.error(" Header: Profile fetch failed", response.status)
-
-          if (response.status === 401) {
-            console.log(" Header: Session expired or invalid, logging out")
-            localStorage.removeItem("token")
-            onLogout()
-          }
-        }
-      } catch (error) {
-        console.error(" Header: Network error during profile fetch", error)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchUserData()
-  }, [onLogout])
+  const getGreeting = () => {
+    const hour = new Date().getHours()
+    if (hour < 12) return "Good morning"
+    if (hour < 18) return "Good afternoon"
+    return "Good evening"
+  }
 
   return (
     <header className={styles.header}>
-      <div className={styles.container}>
-        <div className={styles.logoSection}>
-          <div className={styles.logoWrapper}>
-            <Leaf size={24} className={styles.logoIcon} />
-          </div>
-          <div className={styles.titleWrapper}>
-            <h1 className={styles.title}>Digital Compliance Engine</h1>
-            <span className={styles.badge}>ESG Verified</span>
-          </div>
+      <div>
+        <div className={styles.headerTitle}>
+          {getGreeting()}, {user?.email?.split("@")[0] || "User"} 👋
         </div>
-
-        <div className={styles.userSection}>
-          <div className={styles.profileTrigger} onClick={() => setDropdownOpen(!dropdownOpen)}>
-            <div className={styles.userInfo}>
-              <span className={styles.userName}>{loading ? "Loading..." : companyName}</span>
-              <span className={styles.userRole}>System Administrator</span>
-            </div>
-            <ChevronDown size={16} className={`${styles.chevron} ${dropdownOpen ? styles.rotated : ""}`} />
-          </div>
-
-          {dropdownOpen && (
-            <div className={styles.dropdown}>
-              <button className={styles.dropdownItem} onClick={() => setDropdownOpen(false)}>
-                <LayoutDashboard size={16} />
-                Dashboard
-              </button>
-              <button className={styles.dropdownItem} onClick={() => setDropdownOpen(false)}>
-                <Settings size={16} />
-                Settings
-              </button>
-              <div className={styles.divider} />
-              <button
-                className={`${styles.dropdownItem} ${styles.logout}`}
-                onClick={() => {
-                  setDropdownOpen(false)
-                  onLogout()
-                }}
-              >
-                <LogOut size={16} />
-                Logout
-              </button>
-            </div>
-          )}
+        <div style={{ fontSize: '13px', color: '#6b7280', marginTop: '4px', fontWeight: '400' }}>
+          {getCurrentDate()}
         </div>
+      </div>
+
+      <div className={styles.headerActions}>
+        
+        {onLogout && (
+          <button 
+            className={styles.logoutBtn} 
+            onClick={onLogout}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '10px 20px',
+              marginLeft: '8px'
+            }}
+          >
+            <LogOut size={16} />
+            <span>Logout</span>
+          </button>
+        )}
       </div>
     </header>
   )

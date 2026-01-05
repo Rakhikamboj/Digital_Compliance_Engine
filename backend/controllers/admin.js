@@ -2,30 +2,38 @@ import bcrypt from "bcryptjs"
 import User from "../models/User.js"
 import Project from "../models/Project.js"
 
-// Create Auditor
 export const createAuditor = async (req, res) => {
   try {
+    if (req.user.role !== "ADMIN") {
+      return res.status(403).json({ message: "Only admin can create auditors" })
+    }
+
     const { email, password, companyName, auditorName, phoneNumber, isActive } = req.body
+
+    if (!auditorName) {
+      return res.status(400).json({ message: "Auditor name is required" })
+    }
 
     const existing = await User.findOne({ email })
     if (existing) return res.status(400).json({ message: "User already exists" })
 
-    // Auditor is created with default password or provided one
     const hashedPassword = await bcrypt.hash(password || "Auditor@123", 10)
 
     const auditor = await User.create({
+      auditorName,
       email,
       password: hashedPassword,
-      companyName: companyName || req.user.companyName,
+      companyName,
       role: "AUDITOR",
       phoneNumber,
-      isActive: isActive !== undefined ? isActive : true,
+      isActive: isActive ?? true,
     })
 
     res.status(201).json({
       message: "Auditor created successfully",
       auditor: {
         id: auditor._id,
+        auditorName: auditor.auditorName,
         email: auditor.email,
         role: auditor.role,
         isActive: auditor.isActive,
@@ -35,6 +43,7 @@ export const createAuditor = async (req, res) => {
     res.status(500).json({ message: "Server error", error: error.message })
   }
 }
+
 
 // Get all auditors (for project assignment)
 export const getAuditors = async (req, res) => {

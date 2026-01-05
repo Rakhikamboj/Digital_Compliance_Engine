@@ -9,7 +9,7 @@ const ProjectSchema = new mongoose.Schema(
     clientNumber: { type: String, required: true },
     companyName: { type: String, required: true },
     industry: { type: String, required: true },
-    reportingPeriod: { type: String, required: true },
+    reportingPeriod: { type: Object, required: true },
     assignedAuditor: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
     status: {
       type: String,
