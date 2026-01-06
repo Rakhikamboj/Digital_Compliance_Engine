@@ -271,6 +271,7 @@ const ProjectManagement = () => {
       width: '100%',
       maxWidth: '100%',
       overflow: 'hidden',
+      marginTop: '60px',
       padding: '20px'
     },
     header: {
@@ -282,8 +283,8 @@ const ProjectManagement = () => {
       flexWrap: 'wrap'
     },
     title: {
-      fontSize: '32px',
-      fontWeight: '700',
+      fontSize: '1.5rem',
+      fontWeight: '600',
       color: '#194d2a',
       marginBottom: '6px',
       letterSpacing: '-0.5px'
@@ -308,19 +309,21 @@ const ProjectManagement = () => {
       boxShadow: '0 4px 16px rgba(25, 77, 42, 0.25)',
       transition: 'all 0.3s ease'
     },
-    filtersContainer: {
-      background: '#ffffff',
-      borderRadius: '16px',
-      padding: '24px',
-      marginBottom: '24px',
-      boxShadow: '0 2px 12px rgba(25, 77, 42, 0.08)',
-      border: '1px solid rgba(25, 77, 42, 0.06)'
-    },
+    // filtersContainer: {
+    //   background: '#ffffff',
+    //   borderRadius: '16px',
+      
+    //   padding: '20px',
+    //   marginBottom: '2rem',
+    //   boxShadow: '0 2px 12px rgba(25, 77, 42, 0.08)',
+    //   border: '1px solid rgba(25, 77, 42, 0.06)'
+    // },
     filtersRow: {
       display: 'grid',
       gridTemplateColumns: '2fr 1fr 1fr 1fr',
       gap: '16px',
-      marginBottom: '16px'
+      marginTop: '32px',
+      marginBottom: '16px',
     },
     filterGroup: {
       display: 'flex',
@@ -467,7 +470,7 @@ const ProjectManagement = () => {
     table: {
       width: '100%',
       borderCollapse: 'collapse',
-      minWidth: '1100px'
+      minWidth: '1200px'
     },
     thead: {
       background: 'linear-gradient(135deg, #194d2a 0%, #0d3618 100%)'
@@ -757,7 +760,7 @@ const ProjectManagement = () => {
 
       <div style={styles.header}>
         <div>
-          <h2 style={styles.title}>Project Management</h2>
+          <h4 style={styles.title}>Project Management</h4>
           <p style={styles.subtitle}>Monitor and manage all compliance projects</p>
         </div>
         <button style={styles.primaryBtn} onClick={() => setIsModalOpen(true)}>

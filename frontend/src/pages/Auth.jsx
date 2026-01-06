@@ -77,9 +77,9 @@ const Auth = ({ onLogin }) => {
           </button>
         </form>
         <p className={styles.switchText}>
-          {isLogin ? "Don't have an account? " : "Already have an account? "}
+          {/* {isLogin ? "Don't have an account? " : "Already have an account? "} */}
           <span className={styles.link} onClick={() => setIsLogin(!isLogin)}>
-            {isLogin ? "Sign Up" : "Sign In"}
+            {isLogin == "Sign In"}
           </span>
         </p>
       </div>

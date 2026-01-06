@@ -111,6 +111,7 @@ const AuditorManagement = () => {
   const styles = {
     container: {
       animation: 'fadeInUp 0.5s ease',
+      marginTop: '60px',
       width: '100%',
       maxWidth: '100%',
       overflow: 'hidden',
@@ -222,26 +223,27 @@ const AuditorManagement = () => {
     },
     thCenter: {
       textAlign: 'center',
-      padding: '20px 24px',
+      padding: '10px 24px',
       fontSize: '13px',
-      fontWeight: '700',
+      fontWeight: '500',
       color: '#ffffff',
       textTransform: 'uppercase',
       letterSpacing: '1px'
     },
     tr: {
       borderBottom: '1px solid #f5f8ee',
+      
       transition: 'all 0.3s ease'
     },
     td: {
-      padding: '24px 24px',
+      padding: '20px 24px',
       fontSize: '15px',
       color: '#374151',
       fontWeight: '500',
       verticalAlign: 'middle'
     },
     tdCenter: {
-      padding: '24px 24px',
+      padding: '10px 20px',
       textAlign: 'center'
     },
     userNameCell: {
@@ -571,7 +573,7 @@ const AuditorManagement = () => {
                 </div>
               </div>
               <div style={styles.formRow}>
-                <div style={styles.formGroup}>
+                {/* <div style={styles.formGroup}>
                   <label style={styles.label}>Company Name *</label>
                   <input
                     type="text"
@@ -581,7 +583,7 @@ const AuditorManagement = () => {
                     onChange={(e) => setFormData({ ...formData, companyName: e.target.value })}
                     style={styles.input}
                   />
-                </div>
+                </div> */}
                 <div style={styles.formGroup}>
                   <label style={styles.label}>Status *</label>
                   <select

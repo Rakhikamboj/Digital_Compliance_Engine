@@ -1,5 +1,5 @@
-import { Users, FolderKanban, LogOut, Shield, ChevronLeft, ChevronRight, BarChart3 } from "lucide-react"
-import styles from "../styles/Dashboard.module.css"
+import { Users, FolderKanban, LogOut, ChevronLeft, ChevronRight, BarChart3 } from "lucide-react"
+import styles from "../styles/Layout.module.css"
 
 const Sidebar = ({ activeTab, setActiveTab, onLogout, isCollapsed, setIsCollapsed }) => {
   const user = JSON.parse(localStorage.getItem("user") || "{}")
@@ -16,12 +16,9 @@ const Sidebar = ({ activeTab, setActiveTab, onLogout, isCollapsed, setIsCollapse
       </button>
 
       {/* Logo Section */}
-      <div className={styles.sidebarLogo}>
-        <div className={styles.logoText}>
-          <div className={styles.logoIcon}>
-            <Shield size={20} color="#ffffff" />
-          </div>
-          {!isCollapsed && <span>Compliance Hub</span>}
+     <div>
+        <div className={styles.logoText}>         
+          {!isCollapsed }
         </div>
       </div>
 

@@ -12,7 +12,7 @@ import {
   ResponsiveContainer,
   Legend,
 } from "recharts";
-import styles from "../styles/Dashboard.module.css"
+import styles from "../styles/AuditorDashboard.module.css"
 import { Leaf, Trash2, AlertCircle, Download, FileText, X } from "lucide-react";
 
 const API_URL = import.meta.env.VITE_API_KEY + "/api/waste-entries";
@@ -50,6 +50,7 @@ const CircularProgress = ({ percentage, size = 160, primaryColor = "#194d2a" }) 
     </div>
   );
 };
+
 
 const ComplianceDashboard = ({ reportingPeriodId, reportingPeriod = { periodType: "financial", year: "2024-25" } }) => {
   const [wasteEntries, setWasteEntries] = useState([]);

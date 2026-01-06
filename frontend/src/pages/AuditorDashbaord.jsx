@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"
 import { Briefcase, Play, Eye, RefreshCw, ArrowLeft, Plus, Trash2, BarChart3, FileText, ChevronDown, LogOut, User } from "lucide-react"
-
+import ComplianceDashboard from "./Dashboard"
 const API_URL = "http://localhost:5000"
 
 const AuditorDashboard = ({ user, onLogout }) => {
@@ -10,7 +10,7 @@ const AuditorDashboard = ({ user, onLogout }) => {
   const [ setError] = useState(null)
   const [showComplianceDashboard, setShowComplianceDashboard] = useState(false)
   const [showUserDropdown, setShowUserDropdown] = useState(false)
-
+  const [selectedUnit, setSelectedUnit] = useState("kg")  
   // Waste Entry State
   const [wasteEntries, setWasteEntries] = useState([])
   const [entryLoading, setEntryLoading] = useState(false)
@@ -110,6 +110,7 @@ const AuditorDashboard = ({ user, onLogout }) => {
       wasteHandler: currentEntry.wasteHandler || null,
       modeOfDisposal: currentEntry.modeOfDisposal || null,
       inputDate: currentEntry.inputDate || null,
+      unit: currentEntry.unit || "kg",
       includeHazardous: activeTab === "hazardous",
       includeNonHazardous: activeTab === "nonHazardous",
       hazardousData: activeTab === "hazardous" ? currentEntry.hazardousData : null,
@@ -136,6 +137,7 @@ const AuditorDashboard = ({ user, onLogout }) => {
           wasteHandler: "",
           modeOfDisposal: "",
           inputDate: "",
+          unit: { selectedUnit },
           hazardousData: { total: "", reuse: "", recycle: "", composting: "", incinerationWithHeat: "", incinerationWithoutHeat: "", landfill: "", exemption: "" },
           nonHazardousData: { total: "", reuse: "", recycle: "", composting: "", incinerationWithHeat: "", incinerationWithoutHeat: "", landfill: "", exemption: "" }
         })
@@ -202,7 +204,7 @@ const AuditorDashboard = ({ user, onLogout }) => {
           {Object.keys(data).map(key => (
             <div key={key} style={s.formGroup}>
               <label style={s.label}>
-                {getFieldLabel(key)} (kg) {key === "total" && "*"}
+                {getFieldLabel(key)}  {key === "total" && "*"}
               </label>
               <input 
                 type="number" 
@@ -222,134 +224,7 @@ const AuditorDashboard = ({ user, onLogout }) => {
     )
   }
 
-  const ComplianceDashboard = () => {
-    const projectsWithEntries = projects.map(p => ({
-      ...p,
-      entryCount: Math.floor(Math.random() * 15) + 1
-    }))
-
-    const totalEntries = projectsWithEntries.reduce((sum, p) => sum + p.entryCount, 0)
-    const completedProjects = projects.filter(p => p.status === "Completed").length
-    const inProgressProjects = projects.filter(p => p.status === "In Progress" || p.status === "Started").length
-
-    return (
-      <div style={s.container}>
-        <div style={{ marginBottom: '32px' }}>
-          <button style={s.backBtn} onClick={() => setShowComplianceDashboard(false)}>
-            <ArrowLeft size={18} /> Back to Projects
-          </button>
-        </div>
-
-        <div style={{ marginBottom: '32px' }}>
-          <h1 style={s.dashboardTitle}>Compliance Dashboard</h1>
-          <p style={s.subtitle}>Overview of all project waste data and compliance metrics</p>
-        </div>
-
-        <div style={s.statsGrid}>
-          <div style={s.statCard}>
-            <div style={s.statIcon}>
-              <Briefcase size={28} />
-            </div>
-            <div>
-              <div style={s.statValue}>{projects.length}</div>
-              <div style={s.statLabel}>Total Projects</div>
-            </div>
-          </div>
-          <div style={s.statCard}>
-            <div style={{ ...s.statIcon, background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)' }}>
-              <RefreshCw size={28} />
-            </div>
-            <div>
-              <div style={s.statValue}>{inProgressProjects}</div>
-              <div style={s.statLabel}>In Progress</div>
-            </div>
-          </div>
-          <div style={s.statCard}>
-            <div style={{ ...s.statIcon, background: 'linear-gradient(135deg, #16a34a 0%, #15803d 100%)' }}>
-              <FileText size={28} />
-            </div>
-            <div>
-              <div style={s.statValue}>{completedProjects}</div>
-              <div style={s.statLabel}>Completed</div>
-            </div>
-          </div>
-          <div style={s.statCard}>
-            <div style={{ ...s.statIcon, background: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)' }}>
-              <BarChart3 size={28} />
-            </div>
-            <div>
-              <div style={s.statValue}>{totalEntries}</div>
-              <div style={s.statLabel}>Total Entries</div>
-            </div>
-          </div>
-        </div>
-
-        <div style={s.card}>
-          <h2 style={s.heading}>Project Waste Data Summary</h2>
-          <div style={{ overflowX: 'auto' }}>
-            <table style={s.table}>
-              <thead>
-                <tr>
-                  <th style={s.th}>Project Name</th>
-                  <th style={s.th}>Client</th>
-                  <th style={s.th}>Industry</th>
-                  <th style={s.th}>Status</th>
-                  <th style={s.th}>Waste Entries</th>
-                  <th style={{ ...s.th, textAlign: 'center' }}>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {projectsWithEntries.length === 0 ? (
-                  <tr>
-                    <td colSpan="6" style={{ ...s.td, textAlign: 'center', color: '#6b7280', padding: '48px' }}>
-                      No project data available yet
-                    </td>
-                  </tr>
-                ) : (
-                  projectsWithEntries.map(p => {
-                    const statusColor = p.status === "Completed" ? { bg: 'rgba(34,197,94,0.15)', color: '#16a34a' } :
-                      (p.status === "In Progress" || p.status === "Started") ? { bg: 'rgba(245,158,11,0.15)', color: '#f59e0b' } :
-                      { bg: 'rgba(59,130,246,0.15)', color: '#3b82f6' }
-                    
-                    return (
-                      <tr key={p._id} style={{ transition: 'all 0.2s ease' }}>
-                        <td style={s.td}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                            <div style={{ width: '42px', height: '42px', borderRadius: '12px', background: 'linear-gradient(135deg, #194d2a 0%, #0d3618 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '16px', fontWeight: '600', color: '#fff', boxShadow: '0 4px 12px rgba(25,77,42,0.25)' }}>
-                              {p.projectName.charAt(0).toUpperCase()}
-                            </div>
-                            <span style={{ fontWeight: '600', color: '#194d2a' }}>{p.projectName}</span>
-                          </div>
-                        </td>
-                        <td style={s.td}>{p.clientName}</td>
-                        <td style={s.td}>{p.industry}</td>
-                        <td style={s.td}>
-                          <span style={{ ...s.badge, background: statusColor.bg, color: statusColor.color }}>
-                            {p.status}
-                          </span>
-                        </td>
-                        <td style={s.td}>
-                          <span style={{ fontWeight: '700', color: '#194d2a', fontSize: '16px' }}>
-                            {p.entryCount}
-                          </span>
-                          <span style={{ color: '#6b7280', fontSize: '14px', marginLeft: '4px' }}>entries</span>
-                        </td>
-                        <td style={{ ...s.td, textAlign: 'center' }}>
-                          <button style={s.btn} onClick={() => { setSelectedProject(p); setShowComplianceDashboard(false) }}>
-                            <Eye size={16} /> View Details
-                          </button>
-                        </td>
-                      </tr>
-                    )
-                  })
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    )
-  }
+  
 
   const Header = () => (
     <div style={s.header}>
@@ -397,7 +272,7 @@ const AuditorDashboard = ({ user, onLogout }) => {
 
   const s = {
     container: { padding: '20px', minHeight: '100vh', background: 'linear-gradient(135deg, #fefffa 0%, #f5f8ee 100%)' },
-    header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 32px', background: '#fff', borderRadius: '20px', marginBottom: '32px', boxShadow: '0 4px 24px rgba(25,77,42,0.1)', position: 'relative' },
+    header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 32px', background: '#fff', borderRadius: '20px', boxShadow: '0 4px 24px rgba(25,77,42,0.1)', position: 'relative' },
     logoContainer: { display: 'flex', alignItems: 'center', gap: '16px' },
     logoIcon: { width: '56px', height: '56px', borderRadius: '16px', background: 'linear-gradient(135deg, #194d2a 0%, #0d3618 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', boxShadow: '0 4px 16px rgba(25,77,42,0.3)' },
     logoText: { fontSize: '20px', fontWeight: '700', color: '#194d2a', letterSpacing: '-0.5px' },
@@ -448,7 +323,7 @@ const AuditorDashboard = ({ user, onLogout }) => {
   if (selectedProject) {
     return (
       <>
-        <Header />
+       <Header />
         <div style={s.container}>
           <div style={{ marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '16px' }}>
             <button style={s.backBtn} onClick={() => { setSelectedProject(null); fetchMyProjects() }}>
@@ -498,6 +373,18 @@ const AuditorDashboard = ({ user, onLogout }) => {
                   onChange={(e) => setCurrentEntry({ ...currentEntry, inputDate: e.target.value })} 
                 />
               </div>
+              <div style={s.formGroup}>
+                <label style={s.label}>Unit *</label>
+                <select 
+                  value={selectedUnit} 
+                  onChange={(e) => setSelectedUnit(e.target.value)}
+                  style={s.input}
+                >
+                  <option value="kg">Kilograms (kg)</option>
+                  <option value="tonnes">Tonnes</option>
+                  <option value="metric_tonnes">Metric Tonnes (MT)</option>
+                </select>
+              </div>
             </div>
 
             <div style={s.tabContainer}>
@@ -532,7 +419,8 @@ const AuditorDashboard = ({ user, onLogout }) => {
                       <th style={s.th}>Material</th>
                       <th style={s.th}>Handler</th>
                       <th style={s.th}>Type</th>
-                      <th style={s.th}>Total (kg)</th>
+                      <th style={s.th}>Total</th>
+                      <th style={s.th}>Unit</th>
                       <th style={{ ...s.th, textAlign: 'center' }}>Action</th>
                     </tr>
                   </thead>
@@ -554,6 +442,7 @@ const AuditorDashboard = ({ user, onLogout }) => {
                               <span style={{ ...s.badge, background: 'rgba(239, 68, 68, 0.15)', color: '#dc2626' }}>Hazardous</span>
                             </td>
                             <td style={s.td}>{entry.hazardousData?.total || "—"}</td>
+                            <td style={s.td}>{entry.unit || "kg"}</td>
                             <td style={{ ...s.td, textAlign: 'center' }}>
                               <button 
                                 style={{ padding: '8px 12px', background: 'rgba(239,68,68,0.1)', color: '#dc2626', border: 'none', borderRadius: '8px', cursor: 'pointer', transition: 'all 0.2s ease' }} 
@@ -579,6 +468,7 @@ const AuditorDashboard = ({ user, onLogout }) => {
                               <span style={{ ...s.badge, background: 'rgba(34, 197, 94, 0.15)', color: '#16a34a' }}>Non-Hazardous</span>
                             </td>
                             <td style={s.td}>{entry.nonHazardousData?.total || "—"}</td>
+                            <td style={s.td}>{entry.unit || "kg"}</td>
                             <td style={{ ...s.td, textAlign: 'center' }}>
                               <button 
                                 style={{ padding: '8px 12px', background: 'rgba(239,68,68,0.1)', color: '#dc2626', border: 'none', borderRadius: '8px', cursor: 'pointer', transition: 'all 0.2s ease' }} 

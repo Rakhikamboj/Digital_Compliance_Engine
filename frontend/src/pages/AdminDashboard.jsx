@@ -4,7 +4,7 @@ import Header from "../components/Header"
 import AuditorManagement from "./AuditorManagement"
 import ProjectManagement from "./ProjectManagement"
 import AdminComplianceDashboard from "./AdminComplianceDashboard"
-import styles from "../styles/Dashboard.module.css"
+import styles from "../styles/Layout.module.css"
 
 const AdminDashboard = ({ user, onLogout }) => {
   const [activeTab, setActiveTab] = useState("dashboard")
@@ -28,6 +28,7 @@ const AdminDashboard = ({ user, onLogout }) => {
         
         {/* Main Content Area */}
         <div className={`${styles.mainContent} ${isCollapsed ? styles.collapsed : ''}`}>
+          
           <div className={styles.contentBody}>
             {activeTab === "dashboard" && <AdminComplianceDashboard />}
             {activeTab === "auditors" && <AuditorManagement />}

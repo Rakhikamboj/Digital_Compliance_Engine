@@ -16,6 +16,11 @@ const wasteDataSchema = new mongoose.Schema(
 
 const wasteEntrySchema = new mongoose.Schema(
   {
+    projectId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Project",
+      required: true,
+    },
     userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
     reportingPeriod: {
       periodType: { type: String, enum: ["financial", "calendar"], required: true },
@@ -25,6 +30,7 @@ const wasteEntrySchema = new mongoose.Schema(
     wasteHandler: { type: String },
     modeOfDisposal: { type: String },
     inputDate: { type: Date },
+    unit: { type: String, enum: ["Kilograms(kg)", "Tonnes", "Metric Tonnes(MT)"], default: "kg" },
     includeHazardous: { type: Boolean, default: false },
     includeNonHazardous: { type: Boolean, default: false },
     hazardousData: wasteDataSchema,

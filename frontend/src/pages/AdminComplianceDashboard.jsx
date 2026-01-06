@@ -1,10 +1,21 @@
 import { useState, useEffect } from "react"
 import { Briefcase, RefreshCw, FileText, BarChart3, Eye, Users, FolderKanban } from "lucide-react"
-import styles from "../styles/Dashboard.module.css"
+import styles from "../styles/Layout.module.css"
 
 const API_URL = import.meta.env.VITE_API_KEY
 
-const AdminComplianceDashboard = () => {
+  const getCurrentDate = () => {
+    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }
+    return new Date().toLocaleDateString('en-US', options)
+  }
+
+  const getGreeting = () => {
+    const hour = new Date().getHours()
+    if (hour < 12) return "Good morning"
+    if (hour < 18) return "Good afternoon"
+    return "Good evening"
+  }
+const AdminComplianceDashboard = ( user) => {
   const [projects, setProjects] = useState([])
   const [auditors, setAuditors] = useState([])
   const [loading, setLoading] = useState(true)
@@ -56,6 +67,7 @@ const AdminComplianceDashboard = () => {
   if (loading) {
     return (
       <div className={styles.sectionContainer}>
+        
         <div className={styles.emptyState}>
           <div className={styles.loadingSpinner}></div>
           <p style={{ marginTop: '16px', color: '#6b7280' }}>Loading dashboard...</p>
@@ -66,7 +78,13 @@ const AdminComplianceDashboard = () => {
 
   return (
     <div className={styles.sectionContainer}>
-      <div className={styles.sectionHeader}>
+      <div className={styles.greeting} style={{ marginTop: '4.5rem', fontSize: '18px', fontWeight: '600', color: '#111827' }}>
+          {getGreeting()}, {user?.name || "Adm"} 👋
+        </div>
+        <div style={{ fontSize: '13px', color: '#6b7280', marginTop: '4px', fontWeight: '400' }}>
+          {getCurrentDate()}
+        </div>
+      <div className={styles.sectionHeaderLeft}>
         <div>
           <h2 className={styles.sectionTitle}>Compliance Dashboard</h2>
           <p className={styles.sectionSubtitle}>Overview of all projects, auditors, and compliance metrics</p>
@@ -146,7 +164,7 @@ const s = {
     display: 'grid',
     gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
     gap: '24px',
-    marginBottom: '32px'
+    marginTop: '24px'
   },
   statCard: {
     background: '#fff',
