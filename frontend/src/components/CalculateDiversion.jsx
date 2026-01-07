@@ -1,5 +1,3 @@
-"use client"
-
 import React, { useState, useEffect } from "react"
 import { Plus, Trash2, BarChart3 } from "lucide-react"
 import styles from "../styles/WasteDataEntry.module.css"
