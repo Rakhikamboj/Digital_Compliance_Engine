@@ -1,5 +1,3 @@
-"use client"
-
 import { useState, useEffect } from "react"
 import { Briefcase, Eye, RefreshCw, ArrowLeft, BarChart3, ChevronDown, LogOut } from "lucide-react"
 import WasteDataEntry from "../components/CalculateDiversion"

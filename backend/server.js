@@ -4,7 +4,7 @@
   import dotenv from "dotenv";
   dotenv.config();
   import authRoutes from "./routes/auth.js"
-  import reportingPeriod from "./routes/reporting.js"
+
   import wasteEntry from "./routes/waste.js"
   import adminRoutes from "./routes/admin.js"
   import auditorRoutes from "./routes/auditor.js"
@@ -19,7 +19,6 @@
   app.use("/api/auth", authRoutes)
   app.use("/api/admin", adminRoutes)
   app.use("/api/auditor", auditorRoutes)
-  app.use("/api/reporting-period", reportingPeriod)
   app.use("/api/waste-entries", wasteEntry)
   // Database Connection
   mongoose.connect(MONGODB_URI)
