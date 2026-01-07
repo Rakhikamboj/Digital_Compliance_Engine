@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react"
-import { FolderPlus, Search, X, Calendar } from "lucide-react"
+import { FolderPlus, Calendar } from "lucide-react"
 import { CheckCircle, Clock, AlertCircle, Briefcase, XCircle } from "lucide-react"
 import styles from "../styles/ProjectManagement.module.css"
 import Pagination from "../common/Pagination"
+import SearchBar from "../common/Searchbar"
 
 const API_URL = import.meta.env.VITE_API_KEY
 
@@ -289,21 +290,11 @@ const ProjectManagement = () => {
       <div className={styles.filtersRow}>
         <div className={styles.filterGroup}>
           <label className={styles.filterLabel}>Search Projects</label>
-          <div className={styles.searchBox}>
-            <Search size={16} color="#194d2a" />
-            <input
-              type="text"
-              placeholder="Search by name, client, company..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className={styles.searchInput}
-            />
-            {searchQuery && (
-              <button onClick={() => setSearchQuery("")} className={styles.clearSearchBtn}>
-                <X size={16} />
-              </button>
-            )}
-          </div>
+          <SearchBar
+            value={searchQuery}
+            onChange={setSearchQuery}
+            placeholder="Search by name, client, company, industry..."
+          />
         </div>
 
         <div className={styles.filterGroup}>

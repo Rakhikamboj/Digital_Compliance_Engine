@@ -1,21 +1,21 @@
 import { useState, useEffect } from "react"
-import { Briefcase, RefreshCw, FileText, BarChart3, Eye, Users, FolderKanban } from "lucide-react"
-import styles from "../styles/Layout.module.css"
+import { Briefcase, RefreshCw, FileText, Users, FolderKanban, TrendingUp } from "lucide-react"
 
 const API_URL = import.meta.env.VITE_API_KEY
 
-  const getCurrentDate = () => {
-    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }
-    return new Date().toLocaleDateString('en-US', options)
-  }
+const getCurrentDate = () => {
+  const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }
+  return new Date().toLocaleDateString('en-US', options)
+}
 
-  const getGreeting = () => {
-    const hour = new Date().getHours()
-    if (hour < 12) return "Good morning"
-    if (hour < 18) return "Good afternoon"
-    return "Good evening"
-  }
-const AdminComplianceDashboard = ( user) => {
+const getGreeting = () => {
+  const hour = new Date().getHours()
+  if (hour < 12) return "Good morning"
+  if (hour < 18) return "Good afternoon"
+  return "Good evening"
+}
+
+const AdminComplianceDashboard = ({ user }) => {
   const [projects, setProjects] = useState([])
   const [auditors, setAuditors] = useState([])
   const [loading, setLoading] = useState(true)
@@ -54,160 +54,233 @@ const AdminComplianceDashboard = ( user) => {
     }
   }
 
-  // const projectsWithEntries = projects.map(p => ({
-  //   ...p,
-  //   entryCount: Math.floor(Math.random() * 15) + 1
-  // }))
-
-  // const totalEntries = projectsWithEntries.reduce((sum, p) => sum + p.entryCount, 0)
   const completedProjects = projects.filter(p => p.status === "Completed").length
   const inProgressProjects = projects.filter(p => p.status === "In Progress" || p.status === "Started").length
   const activeAuditors = auditors.filter(a => a.isActive).length
+  const unassignedProjects = projects.filter(p => !p.assignedAuditor).length
+  const completionRate = projects.length > 0 ? Math.round((completedProjects / projects.length) * 100) : 0
 
   if (loading) {
     return (
-      <div className={styles.sectionContainer}>
-        
-        <div className={styles.emptyState}>
-          <div className={styles.loadingSpinner}></div>
-          <p style={{ marginTop: '16px', color: '#6b7280' }}>Loading dashboard...</p>
+      <div style={styles.container}>
+        <div style={styles.loadingContainer}>
+          <div style={styles.spinner}></div>
+          <p style={styles.loadingText}>Loading dashboard...</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className={styles.sectionContainer}>
-      <div className={styles.greeting} style={{ marginTop: '4.5rem', fontSize: '18px', fontWeight: '600', color: '#111827' }}>
-          {getGreeting()}, {user?.name || "Adm"} 👋
-        </div>
-        <div style={{ fontSize: '13px', color: '#6b7280', marginTop: '4px', fontWeight: '400' }}>
-          {getCurrentDate()}
-        </div>
-      <div className={styles.sectionHeaderLeft}>
+    <div style={styles.container}>
+      {/* Header Section */}
+      <div style={styles.header}>
         <div>
-          <h2 className={styles.sectionTitle}>Compliance Dashboard</h2>
-          <p className={styles.sectionSubtitle}>Overview of all projects, auditors, and compliance metrics</p>
+          <h1 style={styles.greeting}>
+            {getGreeting()}, {user?.name || "Administrator"}
+          </h1>
+          <p style={styles.date}>{getCurrentDate()}</p>
         </div>
+      </div>
+
+      {/* Title Section */}
+      <div style={styles.titleSection}>
+        <h2 style={styles.title}>Compliance Dashboard</h2>
+        <p style={styles.subtitle}>Overview of all projects, auditors, and compliance metrics</p>
       </div>
 
       {/* Stats Grid */}
-      <div style={s.statsGrid}>
-        <div style={s.statCard}>
-          <div style={s.statIcon}>
-            <Briefcase size={28} />
-          </div>
-          <div>
-            <div style={s.statValue}>{projects.length}</div>
-            <div style={s.statLabel}>Total Projects</div>
-          </div>
-        </div>
-
-        <div style={s.statCard}>
-          <div style={{ ...s.statIcon, background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)' }}>
-            <RefreshCw size={28} />
-          </div>
-          <div>
-            <div style={s.statValue}>{inProgressProjects}</div>
-            <div style={s.statLabel}>In Progress</div>
-          </div>
-        </div>
-
-        <div style={s.statCard}>
-          <div style={{ ...s.statIcon, background: 'linear-gradient(135deg, #16a34a 0%, #15803d 100%)' }}>
-            <FileText size={28} />
-          </div>
-          <div>
-            <div style={s.statValue}>{completedProjects}</div>
-            <div style={s.statLabel}>Completed</div>
-          </div>
-        </div>
-
-        {/* <div style={s.statCard}>
-          <div style={{ ...s.statIcon, background: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)' }}>
-            <BarChart3 size={28} />
-          </div>
-          <div>
-            <div style={s.statValue}>{totalEntries}</div>
-            <div style={s.statLabel}>Total Entries</div>
-          </div>
-        </div> */}
-
-        <div style={s.statCard}>
-          <div style={{ ...s.statIcon, background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)' }}>
-            <Users size={28} />
-          </div>
-          <div>
-            <div style={s.statValue}>{activeAuditors}</div>
-            <div style={s.statLabel}>Active Auditors</div>
-          </div>
-        </div>
-
-        <div style={s.statCard}>
-          <div style={{ ...s.statIcon, background: 'linear-gradient(135deg, #ec4899 0%, #db2777 100%)' }}>
-            <FolderKanban size={28} />
-          </div>
-          <div>
-            <div style={s.statValue}>{projects.filter(p => !p.assignedAuditor).length}</div>
-            <div style={s.statLabel}>Unassigned</div>
-          </div>
-        </div>
+      <div style={styles.statsGrid}>
+        <StatCard
+          icon={<Briefcase size={24} />}
+          value={projects.length}
+          label="Total Projects"
+          trend={null}
+        />
+        
+        <StatCard
+          icon={<RefreshCw size={24} />}
+          value={inProgressProjects}
+          label="In Progress"
+          trend={null}
+        />
+        
+        <StatCard
+          icon={<FileText size={24} />}
+          value={completedProjects}
+          label="Completed"
+          trend={`${completionRate}% completion rate`}
+        />
+        
+        <StatCard
+          icon={<Users size={24} />}
+          value={activeAuditors}
+          label="Active Auditors"
+          trend={null}
+        />
+        
+        <StatCard
+          icon={<FolderKanban size={24} />}
+          value={unassignedProjects}
+          label="Unassigned Projects"
+          trend={unassignedProjects > 0 ? "Requires attention" : null}
+        />
+        
+        <StatCard
+          icon={<TrendingUp size={24} />}
+          value={`${completionRate}%`}
+          label="Success Rate"
+          trend={null}
+        />
       </div>
-
-
     </div>
   )
 }
 
-const s = {
+const StatCard = ({ icon, value, label, trend }) => {
+  return (
+    <div style={styles.statCard}>
+      <div style={styles.statCardHeader}>
+        <div style={styles.iconWrapper}>
+          {icon}
+        </div>
+      </div>
+      <div style={styles.statCardBody}>
+        <div style={styles.statValue}>{value}</div>
+        <div style={styles.statLabel}>{label}</div>
+        {trend && <div style={styles.statTrend}>{trend}</div>}
+      </div>
+    </div>
+  )
+}
+
+const styles = {
+  container: {
+    padding: '40px',
+    maxWidth: '1400px',
+    margin: '0 auto',
+    backgroundColor: '#f8f9fa',
+    minHeight: '100vh',
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
+  },
+  header: {
+    marginBottom: '32px',
+    paddingBottom: '24px',
+    borderBottom: '1px solid #e5e7eb'
+  },
+  greeting: {
+    fontSize: '28px',
+    fontWeight: '600',
+    color: '#1f2937',
+    marginBottom: '4px',
+    letterSpacing: '-0.025em'
+  },
+  date: {
+    fontSize: '14px',
+    color: '#6b7280',
+    fontWeight: '400'
+  },
+  titleSection: {
+    marginBottom: '32px'
+  },
+  title: {
+    fontSize: '20px',
+    fontWeight: '600',
+    color: '#1f2937',
+    marginBottom: '4px',
+    letterSpacing: '-0.0125em'
+  },
+  subtitle: {
+    fontSize: '14px',
+    color: '#6b7280',
+    fontWeight: '400'
+  },
   statsGrid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
-    gap: '24px',
-    marginTop: '24px'
+    gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+    gap: '20px'
   },
   statCard: {
-    background: '#fff',
-    borderRadius: '20px',
-    padding: '28px',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '20px',
-    boxShadow: '0 4px 24px rgba(25,77,42,0.1)',
-    border: '1px solid rgba(25,77,42,0.06)',
-    transition: 'all 0.3s ease'
+    backgroundColor: '#ffffff',
+    borderRadius: '12px',
+    padding: '24px',
+    border: '1px solid #e5e7eb',
+    transition: 'all 0.2s ease',
+    cursor: 'default',
+    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)'
   },
-  statIcon: {
-    width: '64px',
-    height: '64px',
-    borderRadius: '16px',
-    background: 'linear-gradient(135deg, #194d2a 0%, #0d3618 100%)',
+  statCardHeader: {
+    marginBottom: '16px'
+  },
+  iconWrapper: {
+    width: '48px',
+    height: '48px',
+    borderRadius: '10px',
+    backgroundColor: '#f3f4f6',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    color: '#fff',
-    boxShadow: '0 4px 16px rgba(25,77,42,0.25)',
-    flexShrink: 0
+    color: '#4b5563'
+  },
+  statCardBody: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '4px'
   },
   statValue: {
-    fontSize: '36px',
+    fontSize: '32px',
     fontWeight: '700',
-    color: '#194d2a',
-    marginBottom: '4px',
-    lineHeight: 1
+    color: '#1f2937',
+    lineHeight: '1',
+    letterSpacing: '-0.025em'
   },
   statLabel: {
     fontSize: '14px',
     color: '#6b7280',
-    fontWeight: '600'
+    fontWeight: '500',
+    marginTop: '4px'
   },
-  badge: {
-    padding: '6px 14px',
-    borderRadius: '8px',
-    fontSize: '13px',
-    fontWeight: '600',
-    display: 'inline-block'
+  statTrend: {
+    fontSize: '12px',
+    color: '#9ca3af',
+    fontWeight: '400',
+    marginTop: '4px'
+  },
+  loadingContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: '400px'
+  },
+  spinner: {
+    width: '40px',
+    height: '40px',
+    border: '3px solid #e5e7eb',
+    borderTop: '3px solid #4b5563',
+    borderRadius: '50%',
+    animation: 'spin 1s linear infinite'
+  },
+  loadingText: {
+    marginTop: '16px',
+    color: '#6b7280',
+    fontSize: '14px'
   }
 }
+
+// Add keyframes for spinner animation
+const styleSheet = document.createElement("style")
+styleSheet.textContent = `
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  
+  [style*="statCard"]:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transform: translateY(-2px);
+  }
+`
+document.head.appendChild(styleSheet)
 
 export default AdminComplianceDashboard

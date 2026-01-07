@@ -135,9 +135,9 @@ html, body {
 .sidebar {
   position: fixed;
   left: 0;
-  top: 75px;
+  top: 70px;
   width: 280px;
-  height: calc(100vh - 75px);
+  height: calc(100vh - 70px);
   background: linear-gradient(180deg, #194d2a 0%, #0d3618 100%);
   padding: 24px 0;
   display: flex;
