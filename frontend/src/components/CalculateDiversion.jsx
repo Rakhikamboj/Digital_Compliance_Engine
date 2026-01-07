@@ -1,22 +1,28 @@
-import React, { useState, useEffect } from "react";
-import { Plus, Trash2 } from "lucide-react";
-import styles from "../styles/WasteDataEntry.module.css";
+"use client"
 
-const API_URL = import.meta.env.VITE_API_KEY + "/api/waste-entries";
+import React, { useState, useEffect } from "react"
+import { Plus, Trash2, BarChart3 } from "lucide-react"
+import styles from "../styles/WasteDataEntry.module.css"
+import ComplianceDashboard from "../pages/Dashboard"
 
-const WasteDataEntry = ({ onNext, reportingPeriodId }) => {
-  const [wasteEntries, setWasteEntries] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [fetchLoading, setFetchLoading] = useState(true);
+const API_URL = "http://localhost:5000"
+
+const WasteDataEntry = ({ onNext, projectInfo }) => {
+  const [showDashboard, setShowDashboard] = useState(false)
+
+  const [wasteEntries, setWasteEntries] = useState([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState("")
+  const [fetchLoading, setFetchLoading] = useState(true)
+  const [activeTab, setActiveTab] = useState("hazardous")
+  const [selectedUnit, setSelectedUnit] = useState("kg")
+  const [fieldErrors, setFieldErrors] = useState({}) // New state for field-specific errors
 
   const [currentEntry, setCurrentEntry] = useState({
     wasteMaterial: "",
     wasteHandler: "",
     modeOfDisposal: "",
     inputDate: "",
-    includeHazardous: false,
-    includeNonHazardous: false,
     hazardousData: {
       total: "",
       reuse: "",
@@ -37,187 +43,266 @@ const WasteDataEntry = ({ onNext, reportingPeriodId }) => {
       landfill: "",
       exemption: "",
     },
-  });
+  })
 
-  const [errors, setErrors] = useState({});
+  const [errors, setErrors] = useState({})
 
-  // Get auth token from localStorage
-  const getAuthToken = () => {
-    return localStorage.getItem("token");
-  };
-
-  // Get user ID from token
-  const getUserIdFromToken = () => {
-    const token = getAuthToken();
-    if (!token) return null;
-    try {
-      const payload = JSON.parse(atob(token.split(".")[1]));
-      return payload.id;
-    } catch (error) {
-      console.error("Error decoding token:", error);
-      return null;
+  /**
+   * Get start and end date from reporting period
+   */
+  const getReportingPeriodRange = (reportingPeriod) => {
+    if (!reportingPeriod || !reportingPeriod.periodType || !reportingPeriod.year) {
+      return null
     }
-  };
+
+    const { periodType, year } = reportingPeriod
+    let startDate, endDate
+
+    const yearNum = Number.parseInt(year, 10)
+    if (isNaN(yearNum) || yearNum < 1900 || yearNum > 2100) {
+      return null
+    }
+
+    const normalizedPeriodType = periodType === "financial" ? "FY" : periodType
+
+    if (normalizedPeriodType === "FY") {
+      // Financial Year: April 1 to March 31
+      startDate = new Date(yearNum, 3, 1) // April 1
+      endDate = new Date(yearNum + 1, 2, 31) // March 31 next year
+    } else if (normalizedPeriodType === "CY") {
+      // Calendar Year: January 1 to December 31
+      startDate = new Date(yearNum, 0, 1) // January 1
+      endDate = new Date(yearNum, 11, 31) // December 31
+    } else {
+      return null
+    }
+
+    return { startDate, endDate }
+  }
+
+  const getAuthToken = () => {
+    return localStorage.getItem("token")
+  }
+
+  const getUserIdFromToken = () => {
+    const token = getAuthToken()
+    if (!token) return null
+    try {
+      const payload = JSON.parse(atob(token.split(".")[1]))
+      return payload.id
+    } catch (error) {
+      console.error("Error decoding token:", error)
+      return null
+    }
+  }
 
   useEffect(() => {
-    fetchWasteEntries();
-  }, [reportingPeriodId]);
+    fetchWasteEntries()
+  }, [projectInfo?._id])
 
   const fetchWasteEntries = async () => {
     try {
-      setFetchLoading(true);
-      const token = getAuthToken();
-      const userId = getUserIdFromToken();
+      setFetchLoading(true)
+      const token = getAuthToken()
+      const userId = getUserIdFromToken()
+      const projectId = projectInfo?._id
 
       if (!token || !userId) {
-        setError("Please log in to view waste entries");
-        return;
+        setError("Please log in to view waste entries")
+        setFetchLoading(false)
+        return
       }
 
-      const params = new URLSearchParams();
-      params.append("userId", userId);
-      if (reportingPeriodId) {
-        params.append("reportingPeriodId", reportingPeriodId);
+      const params = new URLSearchParams()
+      params.append("userId", userId)
+      if (projectId) {
+        params.append("projectId", projectId)
       }
 
-      const response = await fetch(`${API_URL}?${params.toString()}`, {
+      const response = await fetch(`${API_URL}/api/waste-entries?${params.toString()}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
-      });
+      })
 
-      const result = await response.json();
+      const result = await response.json()
 
       if (!response.ok) {
-        throw new Error(result.message || "Failed to fetch entries");
+        throw new Error(result.message || "Failed to fetch entries")
       }
 
-      setWasteEntries(result.data || []);
+      setWasteEntries(result.data || [])
     } catch (err) {
-      console.error("Fetch error:", err);
-      setError(err.message || "Failed to load waste entries");
+      console.error("Fetch error:", err)
+      setError(err.message || "Failed to load waste entries")
     } finally {
-      setFetchLoading(false);
+      setFetchLoading(false)
     }
-  };
+  }
 
-  /* ---------------- Validation ---------------- */
   const validateEntry = () => {
-    const newErrors = {};
+    const newErrors = {}
 
+    // Validate waste material
     if (!currentEntry.wasteMaterial.trim()) {
-      newErrors.wasteMaterial = "Waste material is required";
+      newErrors.wasteMaterial = "Waste material is required"
     }
 
-    if (!currentEntry.includeHazardous && !currentEntry.includeNonHazardous) {
-      newErrors.wasteType = "Please select at least one waste type";
+    // Validate input date
+    if (!currentEntry.inputDate) {
+      newErrors.inputDate = "Input date is required"
+    } else {
+      const dateRange = getReportingPeriodRange(projectInfo?.reportingPeriod)
+
+      if (dateRange) {
+        const { startDate, endDate } = dateRange
+        const inputDate = new Date(currentEntry.inputDate)
+
+        // Reset time for accurate date-only comparison
+        inputDate.setHours(0, 0, 0, 0)
+        const compareStartDate = new Date(startDate)
+        compareStartDate.setHours(0, 0, 0, 0)
+        const compareEndDate = new Date(endDate)
+        compareEndDate.setHours(23, 59, 59, 999)
+
+        if (inputDate < compareStartDate || inputDate > compareEndDate) {
+          const formatDate = (date) => {
+            return date.toLocaleDateString("en-US", {
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            })
+          }
+
+          newErrors.inputDate = `Date must be between ${formatDate(startDate)} and ${formatDate(endDate)}`
+        }
+      }
     }
 
-    if (currentEntry.includeHazardous && !currentEntry.hazardousData.total) {
-      newErrors.hazardousTotal = "Hazardous waste total is required";
+    // Validate waste data based on active tab
+    const currentData = activeTab === "hazardous" ? currentEntry.hazardousData : currentEntry.nonHazardousData
+
+    if (!currentData.total || Number.parseFloat(currentData.total) <= 0) {
+      newErrors.total = "Total waste must be greater than 0"
     }
 
-    if (
-      currentEntry.includeNonHazardous &&
-      !currentEntry.nonHazardousData.total
-    ) {
-      newErrors.nonHazardousTotal = "Non-hazardous waste total is required";
-    }
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
 
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  /* ---------------- Diversion Calculation ---------------- */
   const calculateDiversion = (data) => {
-    const total = parseFloat(data.total) || 0;
+    const total = Number.parseFloat(data.total) || 0
 
     const diversion =
-      (parseFloat(data.reuse) || 0) +
-      (parseFloat(data.recycle) || 0) +
-      (parseFloat(data.composting) || 0) +
-      (parseFloat(data.incinerationWithHeat) || 0) +
-      (parseFloat(data.incinerationWithoutHeat) || 0);
+      (Number.parseFloat(data.reuse) || 0) +
+      (Number.parseFloat(data.recycle) || 0) +
+      (Number.parseFloat(data.composting) || 0) +
+      (Number.parseFloat(data.incinerationWithHeat) || 0) +
+      (Number.parseFloat(data.incinerationWithoutHeat) || 0)
 
     return {
       diversion: diversion.toFixed(2),
-      diversionPercent:
-        total > 0 ? ((diversion / total) * 100).toFixed(2) : "0.00",
-    };
-  };
+      diversionPercent: total > 0 ? ((diversion / total) * 100).toFixed(2) : "0.00",
+    }
+  }
 
-  /* ---------------- Add Entry (API) ---------------- */
   const handleAddEntry = async () => {
-    if (!validateEntry()) return;
+    if (!validateEntry()) return
 
-    setLoading(true);
-    setError("");
+    setLoading(true)
+    setError("")
+    setFieldErrors({})
 
-    const token = getAuthToken();
-    const userId = getUserIdFromToken();
+    const token = getAuthToken()
+    const userId = getUserIdFromToken()
+    const projectId = projectInfo?._id
 
     if (!token || !userId) {
-      setError("Please log in to add waste entries");
-      setLoading(false);
-      return;
+      setError("Please log in to add waste entries")
+      setLoading(false)
+      return
     }
+
+    const reportingPeriod = projectInfo?.reportingPeriod
+    const normalizedReportingPeriod = {
+      ...reportingPeriod,
+      periodType: reportingPeriod?.periodType === "financial" ? "FY" : reportingPeriod?.periodType,
+    }
+
+    const inputDateObj = new Date(currentEntry.inputDate)
+    const isoInputDate = inputDateObj.toISOString().split("T")[0]
 
     const newEntry = {
       userId,
-      reportingPeriodId: reportingPeriodId || null,
+      projectId,
+      reportingPeriod: normalizedReportingPeriod,
       wasteMaterial: currentEntry.wasteMaterial,
       wasteHandler: currentEntry.wasteHandler || null,
       modeOfDisposal: currentEntry.modeOfDisposal || null,
-      inputDate: currentEntry.inputDate || null,
-      includeHazardous: currentEntry.includeHazardous,
-      includeNonHazardous: currentEntry.includeNonHazardous,
-      hazardousData: currentEntry.includeHazardous
-        ? currentEntry.hazardousData
-        : null,
-      nonHazardousData: currentEntry.includeNonHazardous
-        ? currentEntry.nonHazardousData
-        : null,
-    };
-
-    if (currentEntry.includeHazardous) {
-      const haz = calculateDiversion(currentEntry.hazardousData);
-      newEntry.hazardousDiversion = haz.diversion;
-      newEntry.hazardousDiversionPercent = haz.diversionPercent;
+      inputDate: isoInputDate, // Send as ISO string (YYYY-MM-DD)
+      unit: selectedUnit,
+      includeHazardous: activeTab === "hazardous",
+      includeNonHazardous: activeTab === "nonHazardous",
+      hazardousData: activeTab === "hazardous" ? currentEntry.hazardousData : null,
+      nonHazardousData: activeTab === "nonHazardous" ? currentEntry.nonHazardousData : null,
     }
 
-    if (currentEntry.includeNonHazardous) {
-      const nonHaz = calculateDiversion(currentEntry.nonHazardousData);
-      newEntry.nonHazardousDiversion = nonHaz.diversion;
-      newEntry.nonHazardousDiversionPercent = nonHaz.diversionPercent;
+    if (activeTab === "hazardous") {
+      const haz = calculateDiversion(currentEntry.hazardousData)
+      newEntry.hazardousDiversion = haz.diversion
+      newEntry.hazardousDiversionPercent = haz.diversionPercent
+    }
+
+    if (activeTab === "nonHazardous") {
+      const nonHaz = calculateDiversion(currentEntry.nonHazardousData)
+      newEntry.nonHazardousDiversion = nonHaz.diversion
+      newEntry.nonHazardousDiversionPercent = nonHaz.diversionPercent
     }
 
     try {
-      const response = await fetch(API_URL, {
+      const response = await fetch(`${API_URL}/api/waste-entries`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(newEntry),
-      });
+      })
 
-      const result = await response.json();
+      const result = await response.json()
 
       if (!response.ok) {
-        throw new Error(result.message || "Failed to save entry");
+        if (result.message && result.message.includes("date")) {
+          setFieldErrors({ inputDate: result.message })
+        } else {
+          setError(result.message || "Failed to save entry")
+        }
+        throw new Error(result.message || "Failed to save entry")
       }
 
-      // Add the returned entry to state
-      setWasteEntries((prev) => [...prev, result.data]);
+      if (projectId) {
+        try {
+          await fetch(`${API_URL}/api/auditor/projects/${projectId}/status`, {
+            method: "PATCH",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ status: "Draft" }),
+          })
+        } catch (statusError) {
+          console.error("Error updating project status:", statusError)
+        }
+      }
 
-      /* Reset form */
+      setWasteEntries((prev) => [...prev, result.data])
+
+      // Reset form
       setCurrentEntry({
         wasteMaterial: "",
         wasteHandler: "",
         modeOfDisposal: "",
         inputDate: "",
-        includeHazardous: false,
-        includeNonHazardous: false,
         hazardousData: {
           total: "",
           reuse: "",
@@ -238,51 +323,83 @@ const WasteDataEntry = ({ onNext, reportingPeriodId }) => {
           landfill: "",
           exemption: "",
         },
-      });
+      })
 
-      setErrors({});
+      setErrors({})
     } catch (err) {
-      console.error("Add entry error:", err);
-      setError(err.message || "Failed to save waste entry");
+      console.error("Add entry error:", err)
+      setError(err.message || "Failed to save waste entry")
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
-  /* ---------------- Delete Entry (API) ---------------- */
-  const handleDeleteEntry = async (id) => {
-    const token = getAuthToken();
+  const handleSubmitEntries = async () => {
+    const token = getAuthToken()
+    const projectId = projectInfo?._id
 
-    if (!token) {
-      setError("Please log in to delete entries");
-      return;
+    if (!token || !projectId) {
+      setError("Please log in to submit entries")
+      return
+    }
+
+    if (wasteEntries.length === 0) {
+      setError("Please add at least one waste entry before submitting")
+      return
     }
 
     try {
-      const response = await fetch(`${API_URL}/${id}`, {
+      await fetch(`${API_URL}/api/auditor/projects/${projectId}/status`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ status: "Completed" }),
+      })
+
+      // Call parent callback to complete the submission flow
+      if (onNext) {
+        onNext(wasteEntries)
+      }
+    } catch (err) {
+      console.error("Submit error:", err)
+      setError(err.message || "Failed to submit entries")
+    }
+  }
+
+  const handleDeleteEntry = async (id) => {
+    const token = getAuthToken()
+
+    if (!token) {
+      setError("Please log in to delete entries")
+      return
+    }
+
+    try {
+      const response = await fetch(`${API_URL}/api/waste-entries/${id}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,
         },
-      });
+      })
 
-      const result = await response.json();
+      const result = await response.json()
 
       if (!response.ok) {
-        throw new Error(result.message || "Failed to delete entry");
+        throw new Error(result.message || "Failed to delete entry")
       }
 
-      setWasteEntries((prev) => prev.filter((e) => e._id !== id));
+      setWasteEntries((prev) => prev.filter((e) => e._id !== id))
     } catch (err) {
-      console.error("Delete error:", err);
-      setError(err.message || "Failed to delete entry");
+      console.error("Delete error:", err)
+      setError(err.message || "Failed to delete entry")
     }
-  };
+  }
 
-  /* ---------------- Field Labels ---------------- */
   const getFieldLabel = (key) => {
     const labels = {
-      total: "Total",
+      total: "Total Waste",
       reuse: "Reuse",
       recycle: "Recycle",
       composting: "Composting",
@@ -290,35 +407,29 @@ const WasteDataEntry = ({ onNext, reportingPeriodId }) => {
       incinerationWithoutHeat: "Incineration without Heat Recovery",
       landfill: "Landfill",
       exemption: "Other Exemption",
-    };
-    return labels[key] || key;
-  };
+    }
+    return labels[key] || key
+  }
 
-  /* ---------------- Disposal Inputs ---------------- */
-  const renderDisposalInputs = (type) => {
-    const isHaz = type === "hazardous";
-    const data = isHaz
-      ? currentEntry.hazardousData
-      : currentEntry.nonHazardousData;
+  const renderDisposalInputs = () => {
+    const data = activeTab === "hazardous" ? currentEntry.hazardousData : currentEntry.nonHazardousData
 
     const setData = (newData) =>
       setCurrentEntry({
         ...currentEntry,
-        [isHaz ? "hazardousData" : "nonHazardousData"]: newData,
-      });
+        [activeTab === "hazardous" ? "hazardousData" : "nonHazardousData"]: newData,
+      })
 
     return (
-      <div className={styles.disposalBox}>
-        <h3 className={styles.subHeading}>
-          {isHaz ? "Hazardous" : "Non-Hazardous"} Waste Data
+      <div className={styles.wasteDataSection}>
+        <h3 className={styles.sectionTitle}>
+          {activeTab === "hazardous" ? "Hazardous" : "Non-Hazardous"} Waste Disposal Data
         </h3>
-
-        <div className={styles.grid}>
+        <div className={styles.formGrid}>
           {Object.keys(data).map((key) => (
-            <div key={key}>
+            <div key={key} className={styles.formGroup}>
               <label className={styles.label}>
-                {getFieldLabel(key)} (kg)
-                {key === "total" && " *"}
+                {getFieldLabel(key)} {key === "total" && "*"}
               </label>
               <input
                 type="number"
@@ -328,234 +439,274 @@ const WasteDataEntry = ({ onNext, reportingPeriodId }) => {
                 value={data[key]}
                 onChange={(e) => setData({ ...data, [key]: e.target.value })}
               />
-              {key === "total" && isHaz && errors.hazardousTotal && (
-                <span className={styles.errorText}>
-                  {errors.hazardousTotal}
-                </span>
-              )}
-              {key === "total" && !isHaz && errors.nonHazardousTotal && (
-                <span className={styles.errorText}>
-                  {errors.nonHazardousTotal}
-                </span>
-              )}
+              {key === "total" && errors.total && <span className={styles.errorText}>{errors.total}</span>}
             </div>
           ))}
         </div>
       </div>
-    );
-  };
+    )
+  }
 
-  /* ---------------- JSX ---------------- */
-  return (
-    <div className={styles.page}>
+  // Get date range for input restrictions
+  const dateRange = getReportingPeriodRange(projectInfo?.reportingPeriod)
+  const minDate = dateRange?.startDate ? dateRange.startDate.toISOString().split("T")[0] : ""
+  const maxDate = dateRange?.endDate ? dateRange.endDate.toISOString().split("T")[0] : ""
+
+  if (showDashboard) {
+    return (
       <div className={styles.container}>
-        {/* ADD FORM */}
-        <div className={styles.card}>
-          <h2 className={styles.heading}>Add Waste Entry</h2>
+        <button
+          onClick={() => setShowDashboard(false)}
+          style={{
+            marginBottom: "16px",
+            padding: "8px 16px",
+            backgroundColor: "#f3f4f6",
+            border: "1px solid #d1d5db",
+            borderRadius: "6px",
+            cursor: "pointer",
+            fontSize: "14px",
+          }}
+        >
+          ← Back to Waste Entry
+        </button>
+        <ComplianceDashboard projectSelected={projectInfo} reportingPeriod={projectInfo?.reportingPeriod} />
+      </div>
+    )
+  }
 
-          {error && <div className={styles.errorText}>{error}</div>}
+  return (
+    <div className={styles.container}>
+      <div style={{ marginBottom: "32px" }}>
+        <h1 className={styles.title}>Waste Data Entry</h1>
+        <p className={styles.subtitle}>Add and manage waste disposal entries</p>
+      </div>
 
-          <div className={styles.grid}>
-            <div>
-              <label className={styles.label}>Waste Material *</label>
-              <input
-                placeholder="e.g., Plastic, Paper, Metal, E-waste"
-                className={`${styles.input} ${
-                  errors.wasteMaterial ? styles.inputError : ""
-                }`}
-                value={currentEntry.wasteMaterial}
-                onChange={(e) =>
-                  setCurrentEntry({
-                    ...currentEntry,
-                    wasteMaterial: e.target.value,
-                  })
-                }
-              />
-              {errors.wasteMaterial && (
-                <span className={styles.errorText}>
-                  {errors.wasteMaterial}
-                </span>
-              )}
-            </div>
-
-            <div>
-              <label className={styles.label}>Waste Handler</label>
-              <input
-                placeholder="Handler or vendor name"
-                className={styles.input}
-                value={currentEntry.wasteHandler}
-                onChange={(e) =>
-                  setCurrentEntry({
-                    ...currentEntry,
-                    wasteHandler: e.target.value,
-                  })
-                }
-              />
-            </div>
-
-            <div>
-              <label className={styles.label}>Mode of Disposal</label>
-              <input
-                placeholder="e.g., Recycling center, Landfill"
-                className={styles.input}
-                value={currentEntry.modeOfDisposal}
-                onChange={(e) =>
-                  setCurrentEntry({
-                    ...currentEntry,
-                    modeOfDisposal: e.target.value,
-                  })
-                }
-              />
-            </div>
-
-            <div>
-              <label className={styles.label}>Input Date</label>
-              <input
-                type="date"
-                className={styles.input}
-                value={currentEntry.inputDate}
-                onChange={(e) =>
-                  setCurrentEntry({
-                    ...currentEntry,
-                    inputDate: e.target.value,
-                  })
-                }
-              />
-            </div>
-          </div>
-
-          <div className={styles.checkboxGroup}>
-            <label className={styles.checkboxLabel}>
-              <input
-                type="checkbox"
-                checked={currentEntry.includeHazardous}
-                onChange={(e) =>
-                  setCurrentEntry({
-                    ...currentEntry,
-                    includeHazardous: e.target.checked,
-                  })
-                }
-              />
-              Include Hazardous Waste Data
-            </label>
-
-            <label className={styles.checkboxLabel}>
-              <input
-                type="checkbox"
-                checked={currentEntry.includeNonHazardous}
-                onChange={(e) =>
-                  setCurrentEntry({
-                    ...currentEntry,
-                    includeNonHazardous: e.target.checked,
-                  })
-                }
-              />
-              Include Non-Hazardous Waste Data
-            </label>
-          </div>
-
-          {errors.wasteType && (
-            <span className={styles.errorText}>{errors.wasteType}</span>
-          )}
-
-          {currentEntry.includeHazardous && renderDisposalInputs("hazardous")}
-          {currentEntry.includeNonHazardous &&
-            renderDisposalInputs("nonHazardous")}
-
-          <button
-            className={styles.primaryBtn}
-            onClick={handleAddEntry}
-            disabled={loading}
-          >
-            <Plus size={16} />
-            {loading ? "Saving..." : "Add Entry"}
-          </button>
-        </div>
-
-        {/* TABLE */}
-        {fetchLoading ? (
-          <div className={styles.card}>
-            <p>Loading entries...</p>
-          </div>
-        ) : wasteEntries.length > 0 ? (
-          <div className={styles.card}>
-            <h3 className={styles.heading}>
-              Entered Waste Data ({wasteEntries.length})
-            </h3>
-
-              <div className={styles.tableWrapper}>
-                <table className={styles.table}>
-                  <thead>
-                    <tr>
-                      <th className={styles.alignHeading}>Material</th>
-                      <th className={styles.alignHeading}>Handler</th>
-                      <th className={styles.alignHeading}>Type</th>
-                      <th className={styles.alignHeading}>Total (kg)</th>
-                      <th className={styles.alignHeading}>Diversion %</th>
-                      <th className={styles.alignHeading}>Action</th>
-                    </tr>
-                  </thead>
-                <tbody>
-                  {wasteEntries.map((entry) => (
-                    <React.Fragment key={entry._id}>
-                      {entry.includeHazardous && (
-                        <tr>
-                          <td>{entry.wasteMaterial}</td>
-                          <td>{entry.wasteHandler || "—"}</td>
-                          <td>Hazardous</td>
-                          <td>{entry.hazardousData?.total || "—"}</td>
-                          <td>{entry.hazardousDiversionPercent || "0"}%</td>
-                          <td>
-                            <button
-                              className={styles.deleteBtn}
-                              onClick={() => handleDeleteEntry(entry._id)}
-                            >
-                              <Trash2 size={16} />
-                            </button>
-                          </td>
-                        </tr>
-                      )}
-
-                      {entry.includeNonHazardous && (
-                        <tr>
-                          <td>{entry.wasteMaterial}</td>
-                          <td>{entry.wasteHandler || "—"}</td>
-                          <td>Non-Hazardous</td>
-                          <td>{entry.nonHazardousData?.total || "—"}</td>
-                          <td>{entry.nonHazardousDiversionPercent || "0"}%</td>
-                          <td>
-                            <button
-                              className={styles.deleteBtn}
-                              onClick={() => handleDeleteEntry(entry._id)}
-                            >
-                              <Trash2 size={16} />
-                            </button>
-                          </td>
-                        </tr>
-                      )}
-                    </React.Fragment>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
+      {projectInfo && (
+        <div className={styles.projectInfo}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
+            <h3 className={styles.projectTitle}>Project Information</h3>
             <button
-              className={styles.primaryBtn}
-              onClick={() => onNext(wasteEntries)}
+              onClick={() => setShowDashboard(true)}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                padding: "8px 16px",
+                backgroundColor: "#194d2a",
+                color: "white",
+                border: "none",
+                borderRadius: "6px",
+                cursor: "pointer",
+                fontSize: "14px",
+                fontWeight: "500",
+              }}
             >
+              <BarChart3 size={16} />
               View Compliance Dashboard
             </button>
           </div>
-        ) : (
-          <div className={styles.card}>
-            <p style={{ textAlign: "center", color: "#7f8c8d" }}>
-              No waste entries yet. Add your first entry above.
-            </p>
+          <div className={styles.projectDetails}>
+            <div className={styles.projectDetail}>
+              <div className={styles.projectDetailLabel}>Project Name</div>
+              <div>{projectInfo.projectName}</div>
+            </div>
+            <div className={styles.projectDetail}>
+              <div className={styles.projectDetailLabel}>Reporting Period</div>
+              <div>
+                {projectInfo.reportingPeriod?.periodType} - {projectInfo.reportingPeriod?.year}
+                {dateRange && (
+                  <div style={{ fontSize: "0.875rem", color: "#666", marginTop: "4px" }}>
+                    ({dateRange.startDate.toLocaleDateString()} to {dateRange.endDate.toLocaleDateString()})
+                  </div>
+                )}
+              </div>
+            </div>
+            <div className={styles.projectDetail}>
+              <div className={styles.projectDetailLabel}>Client</div>
+              <div>{projectInfo.clientName}</div>
+            </div>
+            <div className={styles.projectDetail}>
+              <div className={styles.projectDetailLabel}>Industry</div>
+              <div>{projectInfo.industry}</div>
+            </div>
+            <div className={styles.projectDetail}>
+              <div className={styles.projectDetailLabel}>Status</div>
+              <div>{projectInfo.status}</div>
+            </div>
           </div>
-        )}
-      </div>
-    </div>
-  );
-};
+        </div>
+      )}
 
-export default WasteDataEntry;
+      <div className={styles.card}>
+        <h2 className={styles.heading}>Add Waste Entry</h2>
+
+        {error && <div className={styles.errorText}>{error}</div>}
+
+        <div className={styles.formGrid}>
+          <div className={styles.formGroup}>
+            <label className={styles.label}>Waste Material *</label>
+            <input
+              placeholder="e.g., Plastic, Paper, Metal"
+              className={styles.input}
+              value={currentEntry.wasteMaterial}
+              onChange={(e) => setCurrentEntry({ ...currentEntry, wasteMaterial: e.target.value })}
+            />
+            {errors.wasteMaterial && <span className={styles.errorText}>{errors.wasteMaterial}</span>}
+          </div>
+          <div className={styles.formGroup}>
+            <label className={styles.label}>Waste Handler</label>
+            <input
+              placeholder="Handler or vendor name"
+              className={styles.input}
+              value={currentEntry.wasteHandler}
+              onChange={(e) => setCurrentEntry({ ...currentEntry, wasteHandler: e.target.value })}
+            />
+          </div>
+          <div className={styles.formGroup}>
+            <label className={styles.label}>Mode of Disposal</label>
+            <input
+              placeholder="e.g., Recycling center, Landfill"
+              className={styles.input}
+              value={currentEntry.modeOfDisposal}
+              onChange={(e) => setCurrentEntry({ ...currentEntry, modeOfDisposal: e.target.value })}
+            />
+          </div>
+          <div className={styles.formGroup}>
+            <label className={styles.label}>Input Date *</label>
+            <input
+              type="date"
+              className={styles.input}
+              value={currentEntry.inputDate}
+              min={minDate}
+              max={maxDate}
+              onChange={(e) => setCurrentEntry({ ...currentEntry, inputDate: e.target.value })}
+            />
+            {errors.inputDate && <span className={styles.errorText}>{errors.inputDate}</span>}
+            {fieldErrors.inputDate && <span className={styles.errorText}>{fieldErrors.inputDate}</span>}
+          </div>
+          <div className={styles.formGroup}>
+            <label className={styles.label}>Unit *</label>
+            <select value={selectedUnit} onChange={(e) => setSelectedUnit(e.target.value)} className={styles.input}>
+              <option value="kg">Kilograms (kg)</option>
+              <option value="tonnes">Tonnes</option>
+              <option value="metric_tonnes">Metric Tonnes (MT)</option>
+            </select>
+          </div>
+        </div>
+
+        <div className={styles.tabContainer}>
+          <button
+            className={activeTab === "hazardous" ? styles.tabActive : styles.tab}
+            onClick={() => setActiveTab("hazardous")}
+          >
+            Hazardous Waste
+          </button>
+          <button
+            className={activeTab === "nonHazardous" ? styles.tabActive : styles.tab}
+            onClick={() => setActiveTab("nonHazardous")}
+          >
+            Non-Hazardous Waste
+          </button>
+        </div>
+
+        {renderDisposalInputs()}
+
+        <button className={styles.btn} onClick={handleAddEntry} disabled={loading}>
+          <Plus size={16} /> {loading ? "Saving..." : "Add Entry"}
+        </button>
+      </div>
+
+      {fetchLoading ? (
+        <div className={styles.card}>
+          <p className={styles.loadingState}>Loading entries...</p>
+        </div>
+      ) : wasteEntries.length > 0 ? (
+        <div className={styles.card}>
+          <h3 className={styles.heading}>Entered Waste Data ({wasteEntries.length})</h3>
+          <div className={styles.tableWrapper}>
+            <table className={styles.table}>
+              <thead>
+                <tr>
+                  <th className={styles.th}>Material</th>
+                  <th className={styles.th}>Handler</th>
+                  <th className={styles.th}>Type</th>
+                  <th className={styles.th}>Total</th>
+                  <th className={styles.th}>Unit</th>
+                  <th className={styles.thCenter}>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {wasteEntries.map((entry) => (
+                  <React.Fragment key={entry._id}>
+                    {entry.includeHazardous && (
+                      <tr>
+                        <td className={styles.td}>
+                          <div className={styles.materialCell}>
+                            <div className={styles.materialIcon}>{entry.wasteMaterial.charAt(0).toUpperCase()}</div>
+                            <span className={styles.materialName}>{entry.wasteMaterial}</span>
+                          </div>
+                        </td>
+                        <td className={styles.td}>{entry.wasteHandler || "—"}</td>
+                        <td className={styles.td}>
+                          <span className={`${styles.badge} ${styles.badgeHazardous}`}>Hazardous</span>
+                        </td>
+                        <td className={styles.td}>{entry.hazardousData?.total || "—"}</td>
+                        <td className={styles.td}>{entry.unit || "kg"}</td>
+                        <td className={styles.tdCenter}>
+                          <button className={styles.deleteBtn} onClick={() => handleDeleteEntry(entry._id)}>
+                            <Trash2 size={16} />
+                          </button>
+                        </td>
+                      </tr>
+                    )}
+                    {entry.includeNonHazardous && (
+                      <tr>
+                        <td className={styles.td}>
+                          <div className={styles.materialCell}>
+                            <div className={styles.materialIcon}>{entry.wasteMaterial.charAt(0).toUpperCase()}</div>
+                            <span className={styles.materialName}>{entry.wasteMaterial}</span>
+                          </div>
+                        </td>
+                        <td className={styles.td}>{entry.wasteHandler || "—"}</td>
+                        <td className={styles.td}>
+                          <span className={`${styles.badge} ${styles.badgeNonHazardous}`}>Non-Hazardous</span>
+                        </td>
+                        <td className={styles.td}>{entry.nonHazardousData?.total || "—"}</td>
+                        <td className={styles.td}>{entry.unit || "kg"}</td>
+                        <td className={styles.tdCenter}>
+                          <button className={styles.deleteBtn} onClick={() => handleDeleteEntry(entry._id)}>
+                            <Trash2 size={16} />
+                          </button>
+                        </td>
+                      </tr>
+                    )}
+                  </React.Fragment>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <div style={{ marginTop: "24px" }}>
+            <button className={styles.btn} onClick={handleSubmitEntries} style={{ backgroundColor: "#16a34a" }}>
+              Submit Entries
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div
+          style={{
+            marginTop: "24px",
+            padding: "24px",
+            backgroundColor: "#f5f8ee",
+            borderRadius: "12px",
+            textAlign: "center",
+          }}
+        >
+          <p style={{ color: "#6b7280" }}>No waste entries added yet. Add an entry to get started.</p>
+        </div>
+      )}
+    </div>
+  )
+}
+
+export default WasteDataEntry
