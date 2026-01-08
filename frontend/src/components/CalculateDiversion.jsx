@@ -1,20 +1,20 @@
 import React, { useState, useEffect } from "react"
-import { Plus, Trash2, BarChart3 } from "lucide-react"
+import { Plus, Trash2, BarChart3, ChevronDown, ChevronRight } from "lucide-react"
 import styles from "../styles/WasteDataEntry.module.css"
 import ComplianceDashboard from "../pages/Dashboard"
 
-const API_URL = "http://localhost:5000"
+const API_URL = import.meta.env.VITE_API_KEY
 
 const WasteDataEntry = ({ onNext, projectInfo }) => {
   const [showDashboard, setShowDashboard] = useState(false)
-
   const [wasteEntries, setWasteEntries] = useState([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
   const [fetchLoading, setFetchLoading] = useState(true)
   const [activeTab, setActiveTab] = useState("hazardous")
   const [selectedUnit, setSelectedUnit] = useState("kg")
-  const [fieldErrors, setFieldErrors] = useState({}) // New state for field-specific errors
+  const [fieldErrors, setFieldErrors] = useState({})
+  const [expandedMonths, setExpandedMonths] = useState({})
 
   const [currentEntry, setCurrentEntry] = useState({
     wasteMaterial: "",
@@ -45,9 +45,6 @@ const WasteDataEntry = ({ onNext, projectInfo }) => {
 
   const [errors, setErrors] = useState({})
 
-  /**
-   * Get start and end date from reporting period
-   */
   const getReportingPeriodRange = (reportingPeriod) => {
     if (!reportingPeriod || !reportingPeriod.periodType || !reportingPeriod.year) {
       return null
@@ -64,13 +61,11 @@ const WasteDataEntry = ({ onNext, projectInfo }) => {
     const normalizedPeriodType = periodType === "financial" ? "FY" : periodType
 
     if (normalizedPeriodType === "FY") {
-      // Financial Year: April 1 to March 31
-      startDate = new Date(yearNum, 3, 1) // April 1
-      endDate = new Date(yearNum + 1, 2, 31) // March 31 next year
+      startDate = new Date(yearNum, 3, 1)
+      endDate = new Date(yearNum + 1, 2, 31)
     } else if (normalizedPeriodType === "CY") {
-      // Calendar Year: January 1 to December 31
-      startDate = new Date(yearNum, 0, 1) // January 1
-      endDate = new Date(yearNum, 11, 31) // December 31
+      startDate = new Date(yearNum, 0, 1)
+      endDate = new Date(yearNum, 11, 31)
     } else {
       return null
     }
@@ -141,12 +136,10 @@ const WasteDataEntry = ({ onNext, projectInfo }) => {
   const validateEntry = () => {
     const newErrors = {}
 
-    // Validate waste material
     if (!currentEntry.wasteMaterial.trim()) {
       newErrors.wasteMaterial = "Waste material is required"
     }
 
-    // Validate input date
     if (!currentEntry.inputDate) {
       newErrors.inputDate = "Input date is required"
     } else {
@@ -156,7 +149,6 @@ const WasteDataEntry = ({ onNext, projectInfo }) => {
         const { startDate, endDate } = dateRange
         const inputDate = new Date(currentEntry.inputDate)
 
-        // Reset time for accurate date-only comparison
         inputDate.setHours(0, 0, 0, 0)
         const compareStartDate = new Date(startDate)
         compareStartDate.setHours(0, 0, 0, 0)
@@ -177,7 +169,6 @@ const WasteDataEntry = ({ onNext, projectInfo }) => {
       }
     }
 
-    // Validate waste data based on active tab
     const currentData = activeTab === "hazardous" ? currentEntry.hazardousData : currentEntry.nonHazardousData
 
     if (!currentData.total || Number.parseFloat(currentData.total) <= 0) {
@@ -237,7 +228,7 @@ const WasteDataEntry = ({ onNext, projectInfo }) => {
       wasteMaterial: currentEntry.wasteMaterial,
       wasteHandler: currentEntry.wasteHandler || null,
       modeOfDisposal: currentEntry.modeOfDisposal || null,
-      inputDate: isoInputDate, // Send as ISO string (YYYY-MM-DD)
+      inputDate: isoInputDate,
       unit: selectedUnit,
       includeHazardous: activeTab === "hazardous",
       includeNonHazardous: activeTab === "nonHazardous",
@@ -286,7 +277,7 @@ const WasteDataEntry = ({ onNext, projectInfo }) => {
               "Content-Type": "application/json",
               Authorization: `Bearer ${token}`,
             },
-            body: JSON.stringify({ status: "Draft" }),
+            body: JSON.stringify({ status: "In-Progress" }),
           })
         } catch (statusError) {
           console.error("Error updating project status:", statusError)
@@ -295,7 +286,6 @@ const WasteDataEntry = ({ onNext, projectInfo }) => {
 
       setWasteEntries((prev) => [...prev, result.data])
 
-      // Reset form
       setCurrentEntry({
         wasteMaterial: "",
         wasteHandler: "",
@@ -356,7 +346,6 @@ const WasteDataEntry = ({ onNext, projectInfo }) => {
         body: JSON.stringify({ status: "Completed" }),
       })
 
-      // Call parent callback to complete the submission flow
       if (onNext) {
         onNext(wasteEntries)
       }
@@ -445,7 +434,30 @@ const WasteDataEntry = ({ onNext, projectInfo }) => {
     )
   }
 
-  // Get date range for input restrictions
+  // Group entries by month
+  const groupEntriesByMonth = () => {
+    const grouped = {}
+    
+    wasteEntries.forEach(entry => {
+      const date = new Date(entry.inputDate)
+      const monthKey = `${date.toLocaleString('en-US', { month: 'long' })} ${date.getFullYear()}`
+      
+      if (!grouped[monthKey]) {
+        grouped[monthKey] = []
+      }
+      grouped[monthKey].push(entry)
+    })
+    
+    return grouped
+  }
+
+  const toggleMonth = (monthKey) => {
+    setExpandedMonths(prev => ({
+      ...prev,
+      [monthKey]: !prev[monthKey]
+    }))
+  }
+
   const dateRange = getReportingPeriodRange(projectInfo?.reportingPeriod)
   const minDate = dateRange?.startDate ? dateRange.startDate.toISOString().split("T")[0] : ""
   const maxDate = dateRange?.endDate ? dateRange.endDate.toISOString().split("T")[0] : ""
@@ -472,237 +484,270 @@ const WasteDataEntry = ({ onNext, projectInfo }) => {
     )
   }
 
-  return (
-    <div className={styles.container}>
-      <div style={{ marginBottom: "32px" }}>
-        <h1 className={styles.title}>Waste Data Entry</h1>
-        <p className={styles.subtitle}>Add and manage waste disposal entries</p>
-      </div>
+  const groupedEntries = groupEntriesByMonth()
 
-      {projectInfo && (
-        <div className={styles.projectInfo}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
-            <h3 className={styles.projectTitle}>Project Information</h3>
-            <button
-              onClick={() => setShowDashboard(true)}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-                padding: "8px 16px",
-                backgroundColor: "#194d2a",
-                color: "white",
-                border: "none",
-                borderRadius: "6px",
-                cursor: "pointer",
-                fontSize: "14px",
-                fontWeight: "500",
-              }}
-            >
-              <BarChart3 size={16} />
-              View Compliance Dashboard
-            </button>
-          </div>
-          <div className={styles.projectDetails}>
-            <div className={styles.projectDetail}>
-              <div className={styles.projectDetailLabel}>Project Name</div>
-              <div>{projectInfo.projectName}</div>
-            </div>
-            <div className={styles.projectDetail}>
-              <div className={styles.projectDetailLabel}>Reporting Period</div>
-              <div>
-                {projectInfo.reportingPeriod?.periodType} - {projectInfo.reportingPeriod?.year}
-                {dateRange && (
-                  <div style={{ fontSize: "0.875rem", color: "#666", marginTop: "4px" }}>
-                    ({dateRange.startDate.toLocaleDateString()} to {dateRange.endDate.toLocaleDateString()})
+  return (
+    <div className={styles.containerWithSidebar}>
+      {/* Sidebar */}
+      <div className={styles.sidebar}>
+        <div className={styles.sidebarHeader}>
+          <h3 className={styles.sidebarTitle}>All Entries</h3>
+        </div>
+        
+        {fetchLoading ? (
+          <div className={styles.sidebarLoading}>Loading entries...</div>
+        ) : wasteEntries.length === 0 ? (
+          <div className={styles.sidebarEmpty}>No entries yet</div>
+        ) : (
+          <div className={styles.entriesList}>
+            {Object.entries(groupedEntries).map(([monthKey, entries]) => (
+              <div key={monthKey} className={styles.monthGroup}>
+                <div 
+                  className={styles.monthHeader}
+                  onClick={() => toggleMonth(monthKey)}
+                >
+                  <div className={styles.monthInfo}>
+                    <span className={styles.monthName}>{monthKey}</span>
+                    <span className={styles.entryCount}>({entries.length})</span>
+                  </div>
+                  {expandedMonths[monthKey] ? <ChevronDown size={20} /> : <ChevronRight size={20} />}
+                </div>
+                
+                {expandedMonths[monthKey] && (
+                  <div className={styles.monthEntries}>
+                    <div className={styles.tableWrapper}>
+                      <table className={styles.sidebarTable}>
+                        <thead>
+                          <tr>
+                            <th>Date</th>
+                            <th>Material</th>
+                            <th>Handler</th>
+                            <th>Type</th>
+                            <th>Total</th>
+                            <th>Unit</th>
+                            <th>Disposal</th>
+                            <th>Action</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {entries.map((entry) => (
+                            <React.Fragment key={entry._id}>
+                              {entry.includeHazardous && (
+                                <tr>
+                                  <td>{new Date(entry.inputDate).toLocaleDateString()}</td>
+                                  <td>
+                                    <div className={styles.materialCell}>
+                                      <div className={styles.materialIconSmall}>
+                                        {entry.wasteMaterial.charAt(0).toUpperCase()}
+                                      </div>
+                                      <span>{entry.wasteMaterial}</span>
+                                    </div>
+                                  </td>
+                                  <td>{entry.wasteHandler || "—"}</td>
+                                  <td>
+                                    <span className={`${styles.badge} ${styles.badgeHazardous}`}>
+                                      Hazardous
+                                    </span>
+                                  </td>
+                                  <td>{entry.hazardousData?.total || "—"}</td>
+                                  <td>{entry.unit || "kg"}</td>
+                                  <td>{entry.modeOfDisposal || "—"}</td>
+                                  <td>
+                                    <button 
+                                      className={styles.deleteBtn}
+                                      onClick={() => handleDeleteEntry(entry._id)}
+                                    >
+                                      <Trash2 size={14} />
+                                    </button>
+                                  </td>
+                                </tr>
+                              )}
+                              {entry.includeNonHazardous && (
+                                <tr>
+                                  <td>{new Date(entry.inputDate).toLocaleDateString()}</td>
+                                  <td>
+                                    <div className={styles.materialCell}>
+                                      <div className={styles.materialIconSmall}>
+                                        {entry.wasteMaterial.charAt(0).toUpperCase()}
+                                      </div>
+                                      <span>{entry.wasteMaterial}</span>
+                                    </div>
+                                  </td>
+                                  <td>{entry.wasteHandler || "—"}</td>
+                                  <td>
+                                    <span className={`${styles.badge} ${styles.badgeNonHazardous}`}>
+                                      Non-Hazardous
+                                    </span>
+                                  </td>
+                                  <td>{entry.nonHazardousData?.total || "—"}</td>
+                                  <td>{entry.unit || "kg"}</td>
+                                  <td>{entry.modeOfDisposal || "—"}</td>
+                                  <td>
+                                    <button 
+                                      className={styles.deleteBtn}
+                                      onClick={() => handleDeleteEntry(entry._id)}
+                                    >
+                                      <Trash2 size={14} />
+                                    </button>
+                                  </td>
+                                </tr>
+                              )}
+                            </React.Fragment>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
                 )}
               </div>
-            </div>
-            <div className={styles.projectDetail}>
-              <div className={styles.projectDetailLabel}>Client</div>
-              <div>{projectInfo.clientName}</div>
-            </div>
-            <div className={styles.projectDetail}>
-              <div className={styles.projectDetailLabel}>Industry</div>
-              <div>{projectInfo.industry}</div>
-            </div>
-            <div className={styles.projectDetail}>
-              <div className={styles.projectDetailLabel}>Status</div>
-              <div>{projectInfo.status}</div>
-            </div>
+            ))}
           </div>
-        </div>
-      )}
-
-      <div className={styles.card}>
-        <h2 className={styles.heading}>Add Waste Entry</h2>
-
-        {error && <div className={styles.errorText}>{error}</div>}
-
-        <div className={styles.formGrid}>
-          <div className={styles.formGroup}>
-            <label className={styles.label}>Waste Material *</label>
-            <input
-              placeholder="e.g., Plastic, Paper, Metal"
-              className={styles.input}
-              value={currentEntry.wasteMaterial}
-              onChange={(e) => setCurrentEntry({ ...currentEntry, wasteMaterial: e.target.value })}
-            />
-            {errors.wasteMaterial && <span className={styles.errorText}>{errors.wasteMaterial}</span>}
-          </div>
-          <div className={styles.formGroup}>
-            <label className={styles.label}>Waste Handler</label>
-            <input
-              placeholder="Handler or vendor name"
-              className={styles.input}
-              value={currentEntry.wasteHandler}
-              onChange={(e) => setCurrentEntry({ ...currentEntry, wasteHandler: e.target.value })}
-            />
-          </div>
-          <div className={styles.formGroup}>
-            <label className={styles.label}>Mode of Disposal</label>
-            <input
-              placeholder="e.g., Recycling center, Landfill"
-              className={styles.input}
-              value={currentEntry.modeOfDisposal}
-              onChange={(e) => setCurrentEntry({ ...currentEntry, modeOfDisposal: e.target.value })}
-            />
-          </div>
-          <div className={styles.formGroup}>
-            <label className={styles.label}>Input Date *</label>
-            <input
-              type="date"
-              className={styles.input}
-              value={currentEntry.inputDate}
-              min={minDate}
-              max={maxDate}
-              onChange={(e) => setCurrentEntry({ ...currentEntry, inputDate: e.target.value })}
-            />
-            {errors.inputDate && <span className={styles.errorText}>{errors.inputDate}</span>}
-            {fieldErrors.inputDate && <span className={styles.errorText}>{fieldErrors.inputDate}</span>}
-          </div>
-          <div className={styles.formGroup}>
-            <label className={styles.label}>Unit *</label>
-            <select value={selectedUnit} onChange={(e) => setSelectedUnit(e.target.value)} className={styles.input}>
-              <option value="kg">Kilograms (kg)</option>
-              <option value="tonnes">Tonnes</option>
-              <option value="metric_tonnes">Metric Tonnes (MT)</option>
-            </select>
-          </div>
-        </div>
-
-        <div className={styles.tabContainer}>
-          <button
-            className={activeTab === "hazardous" ? styles.tabActive : styles.tab}
-            onClick={() => setActiveTab("hazardous")}
-          >
-            Hazardous Waste
-          </button>
-          <button
-            className={activeTab === "nonHazardous" ? styles.tabActive : styles.tab}
-            onClick={() => setActiveTab("nonHazardous")}
-          >
-            Non-Hazardous Waste
-          </button>
-        </div>
-
-        {renderDisposalInputs()}
-
-        <button className={styles.btn} onClick={handleAddEntry} disabled={loading}>
-          <Plus size={16} /> {loading ? "Saving..." : "Add Entry"}
-        </button>
-      </div>
-
-      {fetchLoading ? (
-        <div className={styles.card}>
-          <p className={styles.loadingState}>Loading entries...</p>
-        </div>
-      ) : wasteEntries.length > 0 ? (
-        <div className={styles.card}>
-          <h3 className={styles.heading}>Entered Waste Data ({wasteEntries.length})</h3>
-          <div className={styles.tableWrapper}>
-            <table className={styles.table}>
-              <thead>
-                <tr>
-                  <th className={styles.th}>Material</th>
-                  <th className={styles.th}>Handler</th>
-                  <th className={styles.th}>Type</th>
-                  <th className={styles.th}>Total</th>
-                  <th className={styles.th}>Unit</th>
-                  <th className={styles.thCenter}>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {wasteEntries.map((entry) => (
-                  <React.Fragment key={entry._id}>
-                    {entry.includeHazardous && (
-                      <tr>
-                        <td className={styles.td}>
-                          <div className={styles.materialCell}>
-                            <div className={styles.materialIcon}>{entry.wasteMaterial.charAt(0).toUpperCase()}</div>
-                            <span className={styles.materialName}>{entry.wasteMaterial}</span>
-                          </div>
-                        </td>
-                        <td className={styles.td}>{entry.wasteHandler || "—"}</td>
-                        <td className={styles.td}>
-                          <span className={`${styles.badge} ${styles.badgeHazardous}`}>Hazardous</span>
-                        </td>
-                        <td className={styles.td}>{entry.hazardousData?.total || "—"}</td>
-                        <td className={styles.td}>{entry.unit || "kg"}</td>
-                        <td className={styles.tdCenter}>
-                          <button className={styles.deleteBtn} onClick={() => handleDeleteEntry(entry._id)}>
-                            <Trash2 size={16} />
-                          </button>
-                        </td>
-                      </tr>
-                    )}
-                    {entry.includeNonHazardous && (
-                      <tr>
-                        <td className={styles.td}>
-                          <div className={styles.materialCell}>
-                            <div className={styles.materialIcon}>{entry.wasteMaterial.charAt(0).toUpperCase()}</div>
-                            <span className={styles.materialName}>{entry.wasteMaterial}</span>
-                          </div>
-                        </td>
-                        <td className={styles.td}>{entry.wasteHandler || "—"}</td>
-                        <td className={styles.td}>
-                          <span className={`${styles.badge} ${styles.badgeNonHazardous}`}>Non-Hazardous</span>
-                        </td>
-                        <td className={styles.td}>{entry.nonHazardousData?.total || "—"}</td>
-                        <td className={styles.td}>{entry.unit || "kg"}</td>
-                        <td className={styles.tdCenter}>
-                          <button className={styles.deleteBtn} onClick={() => handleDeleteEntry(entry._id)}>
-                            <Trash2 size={16} />
-                          </button>
-                        </td>
-                      </tr>
-                    )}
-                  </React.Fragment>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          <div style={{ marginTop: "24px" }}>
-            <button className={styles.btn} onClick={handleSubmitEntries} style={{ backgroundColor: "#16a34a" }}>
-              Submit Entries
+        )}
+        
+        {wasteEntries.length > 0 && (
+          <div className={styles.sidebarFooter}>
+            <button className={styles.submitBtn} onClick={handleSubmitEntries}>
+              Submit All Entries
             </button>
           </div>
+        )}
+      </div>
+
+      {/* Main Content */}
+      <div className={styles.mainContent}>
+        <div style={{ marginBottom: "32px" }}>
+          <h1 className={styles.title}>Waste Data Entry</h1>
+          <p className={styles.subtitle}>Add and manage waste disposal entries</p>
         </div>
-      ) : (
-        <div
-          style={{
-            marginTop: "24px",
-            padding: "24px",
-            backgroundColor: "#f5f8ee",
-            borderRadius: "12px",
-            textAlign: "center",
-          }}
-        >
-          <p style={{ color: "#6b7280" }}>No waste entries added yet. Add an entry to get started.</p>
+
+        {projectInfo && (
+          <div className={styles.projectInfo}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
+              <h3 className={styles.projectTitle}>Project Information</h3>
+              <button
+                onClick={() => setShowDashboard(true)}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  padding: "8px 16px",
+                  backgroundColor: "#194d2a",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "6px",
+                  cursor: "pointer",
+                  fontSize: "14px",
+                  fontWeight: "500",
+                }}
+              >
+                <BarChart3 size={16} />
+                View Compliance Dashboard
+              </button>
+            </div>
+            <div className={styles.projectDetails}>
+              <div className={styles.projectDetail}>
+                <div className={styles.projectDetailLabel}>Project Name</div>
+                <div>{projectInfo.projectName}</div>
+              </div>
+              <div className={styles.projectDetail}>
+                <div className={styles.projectDetailLabel}>Reporting Period</div>
+                <div>
+                  {projectInfo.reportingPeriod?.periodType} - {projectInfo.reportingPeriod?.year}
+                  {dateRange && (
+                    <div style={{ fontSize: "0.875rem", color: "#666", marginTop: "4px" }}>
+                     
+                    </div>
+                  )}
+                </div>
+              </div>
+              <div className={styles.projectDetail}>
+                <div className={styles.projectDetailLabel}>Client</div>
+                <div>{projectInfo.clientName}</div>
+              </div>
+             
+            </div>
+          </div>
+        )}
+
+        <div className={styles.card}>
+          <h2 className={styles.heading}>Add Waste Entry</h2>
+
+          {error && <div className={styles.errorText}>{error}</div>}
+
+          <div className={styles.formGrid}>
+            <div className={styles.formGroup}>
+              <label className={styles.label}>Waste Material *</label>
+              <input
+                placeholder="e.g., Plastic, Paper, Metal"
+                className={styles.input}
+                value={currentEntry.wasteMaterial}
+                onChange={(e) => setCurrentEntry({ ...currentEntry, wasteMaterial: e.target.value })}
+              />
+              {errors.wasteMaterial && <span className={styles.errorText}>{errors.wasteMaterial}</span>}
+            </div>
+            <div className={styles.formGroup}>
+              <label className={styles.label}>Waste Handler</label>
+              <input
+                placeholder="Handler or vendor name"
+                className={styles.input}
+                value={currentEntry.wasteHandler}
+                onChange={(e) => setCurrentEntry({ ...currentEntry, wasteHandler: e.target.value })}
+              />
+            </div>
+            <div className={styles.formGroup}>
+              <label className={styles.label}>Mode of Disposal</label>
+              <input
+                placeholder="e.g., Recycling center, Landfill"
+                className={styles.input}
+                value={currentEntry.modeOfDisposal}
+                onChange={(e) => setCurrentEntry({ ...currentEntry, modeOfDisposal: e.target.value })}
+              />
+            </div>
+            <div className={styles.formGroup}>
+              <label className={styles.label}>Input Date *</label>
+              <input
+                type="date"
+                className={styles.input}
+                value={currentEntry.inputDate}
+                min={minDate}
+                max={maxDate}
+                onChange={(e) => setCurrentEntry({ ...currentEntry, inputDate: e.target.value })}
+              />
+              {errors.inputDate && <span className={styles.errorText}>{errors.inputDate}</span>}
+              {fieldErrors.inputDate && <span className={styles.errorText}>{fieldErrors.inputDate}</span>}
+            </div>
+            <div className={styles.formGroup}>
+              <label className={styles.label}>Unit *</label>
+              <select value={selectedUnit} onChange={(e) => setSelectedUnit(e.target.value)} className={styles.input}>
+                <option value="kg">Kilograms (kg)</option>
+                <option value="tonnes">Tonnes</option>
+                <option value="metric_tonnes">Metric Tonnes (MT)</option>
+              </select>
+            </div>
+          </div>
+
+          <div className={styles.tabContainer}>
+            <button
+              className={activeTab === "hazardous" ? styles.tabActive : styles.tab}
+              onClick={() => setActiveTab("hazardous")}
+            >
+              Hazardous Waste
+            </button>
+            <button
+              className={activeTab === "nonHazardous" ? styles.tabActive : styles.tab}
+              onClick={() => setActiveTab("nonHazardous")}
+            >
+              Non-Hazardous Waste
+            </button>
+          </div>
+
+          {renderDisposalInputs()}
+
+          <button className={styles.btn} onClick={handleAddEntry} disabled={loading}>
+            <Plus size={16} /> {loading ? "Saving..." : "Add Entry"}
+          </button>
         </div>
-      )}
+      </div>
     </div>
   )
 }

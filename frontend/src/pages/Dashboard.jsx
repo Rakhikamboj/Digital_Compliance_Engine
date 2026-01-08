@@ -12,7 +12,7 @@ import {
   ResponsiveContainer,
   Legend,
 } from "recharts"
-import styles from "../styles/AuditorDashboard.module.css"
+import styles from "../styles/Dashboard.module.css"
 import { Leaf, Trash2, AlertCircle, Download, FileText, X } from "lucide-react"
 
 const API_URL = import.meta.env.VITE_API_KEY + "/api/waste-entries"

@@ -1,3 +1,181 @@
+.containerWithSidebar {
+  display: flex;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #fefffa 0%, #f5f8ee 100%);
+}
+
+.sidebar {
+  width: 320px;
+  min-width: 320px;
+  background: #fff;
+  border-right: 1px solid #e5e7eb;
+  display: flex;
+  flex-direction: column;
+  max-height: 100vh;
+  position: sticky;
+  top: 0;
+}
+
+.sidebarHeader {
+  padding: 24px 20px;
+  border-bottom: 1px solid #e5e7eb;
+  background: linear-gradient(135deg, #194d2a 0%, #0d3618 100%);
+}
+
+.sidebarTitle {
+  font-size: 18px;
+  font-weight: 700;
+  color: #fff;
+  margin: 0;
+}
+
+.sidebarLoading,
+.sidebarEmpty {
+  padding: 40px 20px;
+  text-align: center;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.entriesList {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px 0;
+}
+
+.monthGroup {
+  margin-bottom: 8px;
+}
+
+.monthHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  background: #fafafa;
+  border-top: 1px solid #e5e7eb;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.monthHeader:hover {
+  background: #f3f4f6;
+}
+
+.monthInfo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.monthName {
+  font-size: 15px;
+  font-weight: 600;
+  color: #194d2a;
+}
+
+.entryCount {
+  font-size: 13px;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.monthEntries {
+  background: #fff;
+  animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    max-height: 0;
+  }
+  to {
+    opacity: 1;
+    max-height: 2000px;
+  }
+}
+
+.sidebarTable {
+  width: 100%;
+  font-size: 12px;
+}
+
+.sidebarTable thead {
+  position: sticky;
+  top: 0;
+  background: #f9fafb;
+  z-index: 10;
+}
+
+.sidebarTable th {
+  text-align: left;
+  padding: 10px 8px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #194d2a;
+  text-transform: uppercase;
+  border-bottom: 2px solid #e5e7eb;
+  white-space: nowrap;
+}
+
+.sidebarTable td {
+  padding: 12px 8px;
+  font-size: 12px;
+  color: #374151;
+  border-bottom: 1px solid #f3f4f6;
+  font-weight: 500;
+}
+
+.sidebarTable tbody tr:hover {
+  background: #fafafa;
+}
+
+.materialIconSmall {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #194d2a 0%, #0d3618 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.sidebarFooter {
+  padding: 16px 20px;
+  border-top: 1px solid #e5e7eb;
+  background: #fafafa;
+}
+
+.submitBtn {
+  width: 100%;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.submitBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3);
+}
+
+.mainContent {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+}
+
 .container {
   padding: 20px;
   min-height: 100vh;
@@ -305,4 +483,40 @@
 
 .tableWrapper {
   overflow-x: auto;
+}
+
+/* Responsive design */
+@media (max-width: 1024px) {
+  .containerWithSidebar {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    max-height: 400px;
+    position: relative;
+  }
+
+  .mainContent {
+    width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .formGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .projectDetails {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebarTable {
+    font-size: 11px;
+  }
+
+  .sidebarTable th,
+  .sidebarTable td {
+    padding: 8px 6px;
+  }
 }

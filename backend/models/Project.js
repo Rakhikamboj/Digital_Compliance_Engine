@@ -13,7 +13,7 @@ const ProjectSchema = new mongoose.Schema(
     assignedAuditor: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
     status: {
       type: String,
-      enum: ["Not Assigned", "Assigned", "Started", "Draft", "Completed"],
+      enum: ["Not Assigned", "Assigned", "Started", "In Progress", "Completed"],
       default: "Not Assigned",
     },
     formData: {

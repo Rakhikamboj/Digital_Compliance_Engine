@@ -3,7 +3,7 @@ import { UserPlus, MoreVertical, X, Users, Search } from "lucide-react"
 import styles from "../styles/AuditorManagement.module.css"
 import Pagination from "../common/Pagination"
 
-const API_URL = "http://localhost:5000"
+const API_URL = import.meta.env.VITE_API_KEY
 
 const AuditorManagement = () => {
   const [auditors, setAuditors] = useState([])
