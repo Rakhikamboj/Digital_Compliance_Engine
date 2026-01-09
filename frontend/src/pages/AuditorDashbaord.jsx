@@ -1,6 +1,5 @@
-"use client"
-
 import { useState, useEffect } from "react"
+import { useNavigate } from "react-router-dom"
 import { Briefcase, Eye, RefreshCw } from "lucide-react"
 import WasteDataEntry from "../components/CalculateDiversion"
 import Pagination from "../common/Pagination"
@@ -9,20 +8,26 @@ import AuditorHeader from "../components/AuditorHeader"
 
 const API_URL = import.meta.env.VITE_API_KEY
 
-const AuditorDashboard = () => {
+const AuditorDashboard = (user, onLogout) => {
   const [projects, setProjects] = useState([])
   const [selectedProject, setSelectedProject] = useState(null)
   const [loading, setLoading] = useState(true)
+
   const [setError] = useState(null)
-
   const [showWasteEntry, setShowWasteEntry] = useState(false)
-
+  const navigate= useNavigate() 
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 5
 
   useEffect(() => {
     fetchMyProjects()
   }, [])
+const handleLogout = () => {
+  localStorage.removeItem("token");
+
+
+  navigate("/login", { replace: true });
+}
 
   const fetchMyProjects = async () => {
     try {
@@ -93,7 +98,7 @@ const AuditorDashboard = () => {
   if (showWasteEntry && selectedProject) {
     return (
       <>
-        <AuditorHeader />
+        <AuditorHeader user={user} onLogout={onLogout}/>
         <WasteDataEntry
           onNext={handleWasteEntryComplete}
           projectInfo={selectedProject}
@@ -109,7 +114,7 @@ const AuditorDashboard = () => {
 
   return (
     <>
-      <AuditorHeader />
+       <AuditorHeader user={user} onLogout={handleLogout}/>
       <div className={styles.container}>
         <div className={styles.contentWrapper}>
           <h1 className={styles.title}>My Projects</h1>

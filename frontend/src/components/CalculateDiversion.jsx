@@ -587,7 +587,7 @@ const WasteDataEntry = ({ onNext, projectInfo, onBackToProjects }) => {
               </span>
             </div>
             <div className={styles.metaRow}>
-              <span className={styles.metaLabel}>Client : </span>
+              <span className={styles.metaLabel}>Client :</span>
               <span className={styles.metaValue}>
                 {projectInfo?.clientName || "Client Name"}
               </span>
