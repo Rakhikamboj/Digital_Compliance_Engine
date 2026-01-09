@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"
 import { FolderPlus, Calendar } from "lucide-react"
-import { CheckCircle, Clock, AlertCircle, Briefcase, XCircle } from "lucide-react"
+import { Clock, AlertCircle, XCircle } from "lucide-react"
 import styles from "../styles/ProjectManagement.module.css"
 import Pagination from "../common/Pagination"
 import SearchBar from "../common/Searchbar"
@@ -59,7 +59,7 @@ const ProjectManagement = () => {
       filtered = filtered.filter(p =>
         p.projectName?.toLowerCase().includes(query) ||
         p.clientName?.toLowerCase().includes(query) ||
-        p.companyName?.toLowerCase().includes(query) ||
+        
         p.industry?.toLowerCase().includes(query) ||
         p.assignedAuditor?.email?.toLowerCase().includes(query)
       )
@@ -209,15 +209,15 @@ const ProjectManagement = () => {
   const getStatusIcon = (status) => {
     switch (status) {
       case "Completed":
-        return <CheckCircle size={16} />
+        return 
       case "In Progress":
-      case "Started":
+     
         return <Clock size={16} />
       case "Not Started":
       case "Assigned":
-        return <AlertCircle size={16} />
+        return
       default:
-        return <Briefcase size={16} />
+        
     }
   }
 
@@ -227,8 +227,7 @@ const ProjectManagement = () => {
         return { bg: 'rgba(34,197,94,0.15)', color: '#16a34a' }
       case "In Progress":
         return { bg: 'rgba(245,158,11,0.15)', color: '#f59e0b' }
-      case "Started":
-        return { bg: 'rgba(168,85,247,0.15)', color: '#a855f7' }
+  
       case "Assigned":
         return { bg: 'rgba(59,130,246,0.15)', color: '#3b82f6' }
       case "Not Started":
@@ -302,7 +301,7 @@ const ProjectManagement = () => {
           <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className={styles.select}>
             <option value="all">All Statuses ({projects.length})</option>
             <option value="Assigned">Assigned ({getFilteredCount("Assigned")})</option>
-            <option value="Started">Started ({getFilteredCount("Started")})</option>
+       
             <option value="In Progress">In Progress ({getFilteredCount("In Progress")})</option>
             <option value="Completed">Completed ({getFilteredCount("Completed")})</option>
             <option value="Not Started">Not Started ({getFilteredCount("Not Started")})</option>
@@ -379,7 +378,7 @@ const ProjectManagement = () => {
       ) : filteredProjects.length === 0 ? (
         <div className={styles.emptyState}>
           <div className={styles.emptyIcon}>
-            <Briefcase size={40} />
+           
           </div>
           <h3>{projects.length === 0 ? "No projects created yet" : "No projects match your filters"}</h3>
           <p>{projects.length === 0 ? "Get started by creating your first compliance project." : "Try adjusting your search criteria or clear filters to see all projects."}</p>
@@ -401,11 +400,12 @@ const ProjectManagement = () => {
                 <tr>
                   <th className={styles.th}>Project Name</th>
                   <th className={styles.th}>Client Name</th>
+                  <th className={styles.th}>Industry</th>
                   <th className={styles.th}>Auditor Assigned</th>
                   <th className={styles.thCenter}>Reporting Period</th>
                   <th className={styles.thCenter}>Created Date</th>
                   <th className={styles.thCenter}>Status</th>
-                  <th className={styles.thCenter}>Actions</th>
+                 
                 </tr>
               </thead>
               <tbody>
@@ -415,42 +415,39 @@ const ProjectManagement = () => {
                     <tr key={project._id} className={styles.tr}>
                       <td className={styles.td}>
                         <div className={styles.projectNameCell}>
-                          <div className={styles.avatar}>
-                            {project.projectName.charAt(0).toUpperCase()}
-                          </div>
+                         
                           <div className={styles.projectInfo}>
                             <div className={styles.projectName}>{project.projectName}</div>
-                            <div className={styles.projectIndustry}>{project.industry}</div>
+                            {/* <div className={styles.projectIndustry}>{project.industry}</div> */}
                           </div>
                         </div>
                       </td>
                       <td className={styles.td}>
                         <div className={styles.clientInfo}>
                           <div className={styles.clientName}>{project.clientName}</div>
-                          <div className={styles.companyName}>{project.companyName}</div>
+                          {/* <div className={styles.companyName}>{project.companyName}</div> */}
                         </div>
                       </td>
+                      <td className={styles.td}>{project.industry || "—"}</td>
                       <td className={styles.td}>
                         {project.assignedAuditor?.email ? (
                           <div className={styles.assignedUser}>
-                            <div className={styles.avatarMini}>
-                              {project.assignedAuditor.email.charAt(0).toUpperCase()}
-                            </div>
+                            
                             <span className={styles.auditorName}>{project.assignedAuditor.email.split('@')[0]}</span>
                           </div>
                         ) : (
                           <span className={styles.unassigned}>Unassigned</span>
                         )}
                       </td>
-                      <td className={styles.tdCenter}>
+                      <td className={styles.td}>
                         {project.reportingPeriod ? (
-                          <div className={styles.periodInfo}>
+                          <div className={styles.td}>
                             <div className={styles.periodYear}>
                               {project.reportingPeriod.periodType === "financial" ? "FY" : "CY"} {project.reportingPeriod.year}
                             </div>
-                            <div className={styles.periodType}>
+                            {/* <div className={styles.periodType}>
                               {project.reportingPeriod.periodType === "financial" ? "Financial Year" : "Calendar Year"}
-                            </div>
+                            </div> */}
                           </div>
                         ) : (
                           <span className={styles.unassigned}>Not set</span>
@@ -465,9 +462,7 @@ const ProjectManagement = () => {
                           {project.status}
                         </span>
                       </td>
-                      <td className={styles.tdCenter}>
-                        <button className={styles.textLink}>View Details</button>
-                      </td>
+                     
                     </tr>
                   )
                 })}
@@ -698,7 +693,7 @@ const ProjectManagement = () => {
                 </button>
               ) : (
                 <button className={styles.primaryBtn} onClick={handleCreateProject}>
-                  Finalize & Create
+                  Create
                 </button>
               )}
             </div>

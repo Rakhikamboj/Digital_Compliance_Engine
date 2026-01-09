@@ -55,7 +55,7 @@ const AdminComplianceDashboard = ({ user }) => {
   }
 
   const completedProjects = projects.filter(p => p.status === "Completed").length
-  const inProgressProjects = projects.filter(p => p.status === "In Progress" || p.status === "Started").length
+  const inProgressProjects = projects.filter(p => p.status === "In Progress").length
   const activeAuditors = auditors.filter(a => a.isActive).length
   const unassignedProjects = projects.filter(p => !p.assignedAuditor).length
   const completionRate = projects.length > 0 ? Math.round((completedProjects / projects.length) * 100) : 0

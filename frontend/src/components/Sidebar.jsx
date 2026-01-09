@@ -2,7 +2,7 @@ import { Users, FolderKanban, LogOut, ChevronLeft, ChevronRight, BarChart3 } fro
 import styles from "../styles/Layout.module.css"
 
 const Sidebar = ({ activeTab, setActiveTab, onLogout, isCollapsed, setIsCollapsed }) => {
-  const user = JSON.parse(localStorage.getItem("user") || "{}")
+
 
   return (
     <div className={`${styles.sidebar} ${isCollapsed ? styles.sidebarCollapsed : ''}`}>
@@ -54,25 +54,10 @@ const Sidebar = ({ activeTab, setActiveTab, onLogout, isCollapsed, setIsCollapse
 
       {/* User Profile & Logout */}
       <div className={styles.sidebarFooter}>
-        {!isCollapsed && (
-          <div className={styles.userProfile}>
-            <div className={styles.userAvatar}>
-              {(user.email || "A").charAt(0).toUpperCase()}
-            </div>
-            <div className={styles.userInfo}>
-              <div className={styles.userName}>
-                {user.email?.split("@")[0] || "Admin"}
-              </div>
-              <div className={styles.userRole}>Administrator</div>
-            </div>
-          </div>
-        )}
+       
 
-        {isCollapsed && (
-          <div className={styles.userAvatarCollapsed}>
-            {(user.email || "A").charAt(0).toUpperCase()}
-          </div>
-        )}
+        
+        
 
         <button 
           className={styles.logoutBtn} 
