@@ -7,11 +7,11 @@ import { useToast } from "../common/ToastContext";
 
 const API_URL = import.meta.env.VITE_API_KEY;
 
-const WasteDataEntry = ({  projectInfo, onBackToProjects }) => {
+const WasteDataEntry = ({ projectInfo, onBackToProjects }) => {
   const [showDashboard, setShowDashboard] = useState(false);
   const [wasteEntries, setWasteEntries] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [error ] = useState("");
+  const [error] = useState("");
   const { showToast } = useToast();
   const [fetchLoading, setFetchLoading] = useState(true);
   const [editingCell, setEditingCell] = useState(null);
@@ -169,12 +169,16 @@ const WasteDataEntry = ({  projectInfo, onBackToProjects }) => {
   // Transform entries for grid display
   const gridData = wasteEntries.map((entry) => {
     const data = entry.includeHazardous ? entry.hazardousData : entry.nonHazardousData;
+    // Format date to YYYY-MM-DD only
+    const dateObj = new Date(entry.inputDate);
+    const formattedDate = dateObj.toISOString().split('T')[0];
+    
     return {
       _id: entry._id,
       wasteMaterial: entry.wasteMaterial,
       wasteHandler: entry.wasteHandler || "",
       modeOfDisposal: entry.modeOfDisposal || "",
-      inputDate: entry.inputDate,
+      inputDate: formattedDate,
       type: entry.includeHazardous ? "hazardous" : "nonHazardous",
       unit: entry.unit,
       total: data?.total || "",
@@ -322,7 +326,7 @@ const WasteDataEntry = ({  projectInfo, onBackToProjects }) => {
       } else {
         showToast(result.message || "Failed to add entry", "error");
       }
-    } catch {
+    } catch  {
       showToast("Failed to add entry", "error");
     } finally {
       setLoading(false);
@@ -342,7 +346,7 @@ const WasteDataEntry = ({  projectInfo, onBackToProjects }) => {
         setWasteEntries((prev) => prev.filter((e) => e._id !== id));
         showToast("Entry deleted successfully", "success");
       }
-    } catch {
+    } catch  {
       showToast("Failed to delete entry", "error");
     }
   };
