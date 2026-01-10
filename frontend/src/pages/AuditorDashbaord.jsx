@@ -5,15 +5,17 @@ import WasteDataEntry from "../components/CalculateDiversion"
 import Pagination from "../common/Pagination"
 import styles from "../styles/AuditorDashboard.module.css"
 import AuditorHeader from "../components/AuditorHeader"
+import { useToast } from "../common/ToastContext";
 
 const API_URL = import.meta.env.VITE_API_KEY
 
 const AuditorDashboard = (user, onLogout) => {
   const [projects, setProjects] = useState([])
+  const { showToast } = useToast();
   const [selectedProject, setSelectedProject] = useState(null)
   const [loading, setLoading] = useState(true)
 
-  const [setError] = useState(null)
+ 
   const [showWasteEntry, setShowWasteEntry] = useState(false)
   const navigate= useNavigate() 
   const [currentPage, setCurrentPage] = useState(1)
@@ -45,7 +47,7 @@ const handleLogout = () => {
       }
     } catch (error) {
       console.error("Fetch error:", error)
-      setError("Failed to load projects")
+      showToast("Failed to load projects", "error")
     } finally {
       setLoading(false)
     }
@@ -69,7 +71,7 @@ const handleLogout = () => {
   const handleWasteEntryComplete = async (wasteEntries) => {
     if (wasteEntries.length > 0) {
       await updateProjectStatus("Completed")
-      alert("Project completed successfully!")
+      showToast("Project completed successfully!", "success")
     }
     setShowWasteEntry(false)
     setSelectedProject(null)

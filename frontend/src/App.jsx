@@ -6,10 +6,15 @@ import Dashboard from "./pages/Dashboard";
 import AdminDashboard from "./pages/AdminDashboard";
 import AuditorDashboard from "./pages/AuditorDashbaord";
 
+import Toast from "./common/Toast";
+import { ToastProvider, useToast } from "./common/ToastContext"
+
 const API_URL = import.meta.env.VITE_API_KEY;
 
-const App = () => {
-  const navigate = useNavigate(); // ✅ REQUIRED
+const AppContent = () => {
+  const navigate = useNavigate();
+  const { toast, closeToast } = useToast(); // ✅ GLOBAL TOAST ACCESS
+
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -34,7 +39,7 @@ const App = () => {
         } else {
           localStorage.removeItem("token");
           setUser(null);
-          navigate("/login", { replace: true }); // ✅ WORKS
+          navigate("/login", { replace: true });
         }
       } catch (error) {
         console.error("Auth verify error:", error);
@@ -48,14 +53,13 @@ const App = () => {
 
   const handleLogin = (userData) => {
     setUser(userData);
-    navigate("/", { replace: true }); // ✅ redirect after login
+    navigate("/", { replace: true });
   };
 
   const handleLogout = () => {
-    console.log("LOGOUT CLICKED"); // debug proof
     localStorage.removeItem("token");
     setUser(null);
-    navigate("/login", { replace: true }); // ✅ THIS FIXES EVERYTHING
+    navigate("/login", { replace: true });
   };
 
   if (loading) {
@@ -67,31 +71,50 @@ const App = () => {
   }
 
   return (
-    <Routes>
-      {/* LOGIN ROUTE (PUBLIC) */}
-      <Route path="/login" element={<Auth onLogin={handleLogin} />} />
+    <>
 
-      {/* PROTECTED ROOT */}
-      <Route
-        path="/"
-        element={
-          user ? (
-            user.role === "ADMIN" ? (
-              <AdminDashboard user={user} onLogout={handleLogout} />
-            ) : user.role === "AUDITOR" ? (
-              <AuditorDashboard user={user} onLogout={handleLogout} />
-            ) : (
-              <Dashboard user={user} onLogout={handleLogout} />
-            )
-          ) : (
-            <Navigate to="/login" replace />
-          )
-        }
+      <Toast
+        open={toast.open}
+        message={toast.message}
+        type={toast.type}
+        onClose={closeToast}
       />
 
-      {/* FALLBACK */}
-      <Route path="*" element={<Navigate to="/login" replace />} />
-    </Routes>
+      <Routes>
+        {/* PUBLIC LOGIN */}
+        <Route path="/login" element={<Auth onLogin={handleLogin} />} />
+
+        {/* PROTECTED ROOT */}
+        <Route
+          path="/"
+          element={
+            user ? (
+              user.role === "ADMIN" ? (
+                <AdminDashboard user={user} onLogout={handleLogout} />
+              ) : user.role === "AUDITOR" ? (
+                <AuditorDashboard user={user} onLogout={handleLogout} />
+              ) : (
+                <Dashboard user={user} onLogout={handleLogout} />
+              )
+            ) : (
+              <Navigate to="/login" replace />
+            )
+          }
+        />
+
+        {/* FALLBACK */}
+        <Route path="*" element={<Navigate to="/login" replace />} />
+      </Routes>
+    </>
+  );
+};
+
+
+const App = () => {
+  return (
+    <ToastProvider>
+      <AppContent />
+    </ToastProvider>
   );
 };
 

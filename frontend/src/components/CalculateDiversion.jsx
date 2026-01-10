@@ -1,78 +1,68 @@
-import { useState, useEffect } from "react";
-import {
-  Plus,
-  Trash2,
-  BarChart3,
-  ChevronsRight,
-  ChevronsLeft,
-  Filter,
-  ArrowLeft,
-} from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { Plus, BarChart3, Download, Info, X } from "lucide-react";
 import styles from "../styles/WasteDataEntry.module.css";
 import ComplianceDashboard from "../pages/Dashboard";
+import WasteEntrySidebar from "./WasteEntrySidebar";
+import { useToast } from "../common/ToastContext";
 
 const API_URL = import.meta.env.VITE_API_KEY;
 
-const WasteDataEntry = ({ onNext, projectInfo, onBackToProjects }) => {
-  const [sidebarExpanded, setSidebarExpanded] = useState(false);
+const WasteDataEntry = ({  projectInfo, onBackToProjects }) => {
   const [showDashboard, setShowDashboard] = useState(false);
   const [wasteEntries, setWasteEntries] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [error ] = useState("");
+  const { showToast } = useToast();
   const [fetchLoading, setFetchLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState("hazardous");
-  const [selectedUnit, setSelectedUnit] = useState("kg");
-  const [fieldErrors, setFieldErrors] = useState({});
-  const [sortBy, setSortBy] = useState("date");
-  const [filterMaterial, setFilterMaterial] = useState("all");
+  const [editingCell, setEditingCell] = useState(null);
+  const [selectedCell, setSelectedCell] = useState(null);
+  const [expandedMonths, setExpandedMonths] = useState({});
+  const [showCopyIndicator, setShowCopyIndicator] = useState(false);
+  const tableRef = useRef(null);
 
-  const [currentEntry, setCurrentEntry] = useState({
+  // New entry row state
+  const [newRow, setNewRow] = useState({
     wasteMaterial: "",
     wasteHandler: "",
     modeOfDisposal: "",
-    inputDate: "",
-    hazardousData: {
-      total: "",
-      reuse: "",
-      recycle: "",
-      composting: "",
-      incinerationWithHeat: "",
-      incinerationWithoutHeat: "",
-      landfill: "",
-      exemption: "",
-    },
-    nonHazardousData: {
-      total: "",
-      reuse: "",
-      recycle: "",
-      composting: "",
-      incinerationWithHeat: "",
-      incinerationWithoutHeat: "",
-      landfill: "",
-      exemption: "",
-    },
+    inputDate: new Date().toISOString().split("T")[0],
+    type: "hazardous",
+    unit: "kg",
+    total: "",
+    reuse: "",
+    recycle: "",
+    composting: "",
+    incinerationWithHeat: "",
+    incinerationWithoutHeat: "",
+    landfill: "",
+    exemption: "",
   });
 
-  const [errors, setErrors] = useState({});
+  // Helper functions
+  const getAuthToken = () => localStorage.getItem("token");
+  
+  const getUserIdFromToken = () => {
+    const token = getAuthToken();
+    if (!token) return null;
+    try {
+      const payload = JSON.parse(atob(token.split(".")[1]));
+      return payload.id;
+    } catch (error) {
+      console.error("Error decoding token:", error);
+      return null;
+    }
+  };
 
   const getReportingPeriodRange = (reportingPeriod) => {
-    if (
-      !reportingPeriod ||
-      !reportingPeriod.periodType ||
-      !reportingPeriod.year
-    ) {
-      return null;
-    }
+    if (!reportingPeriod?.periodType || !reportingPeriod?.year) return null;
 
     const { periodType, year } = reportingPeriod;
-    let startDate, endDate;
-
-    const yearNum = Number.parseInt(year, 10);
-    if (isNaN(yearNum) || yearNum < 1900 || yearNum > 2100) {
-      return null;
-    }
+    const yearNum = parseInt(year, 10);
+    
+    if (isNaN(yearNum) || yearNum < 1900 || yearNum > 2100) return null;
 
     const normalizedPeriodType = periodType === "financial" ? "FY" : periodType;
+    let startDate, endDate;
 
     if (normalizedPeriodType === "FY") {
       startDate = new Date(yearNum, 3, 1);
@@ -87,25 +77,61 @@ const WasteDataEntry = ({ onNext, projectInfo, onBackToProjects }) => {
     return { startDate, endDate };
   };
 
-  const getAuthToken = () => {
-    return localStorage.getItem("token");
-  };
-
-  const getUserIdFromToken = () => {
-    const token = getAuthToken();
-    if (!token) return null;
-    try {
-      const payload = JSON.parse(atob(token.split(".")[1]));
-      return payload.id;
-    } catch (error) {
-      console.error("Error decoding token:", error);
-      return null;
-    }
-  };
-
+  // Fetch entries
   useEffect(() => {
     fetchWasteEntries();
   }, [projectInfo?._id]);
+
+  // Initialize expanded months
+  useEffect(() => {
+    const grouped = groupByMonth(gridData);
+    const initialExpanded = {};
+    Object.keys(grouped).forEach(key => {
+      initialExpanded[key] = true;
+    });
+    setExpandedMonths(initialExpanded);
+  }, [wasteEntries]);
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      // Ctrl+C or Cmd+C - Copy
+      if ((e.ctrlKey || e.metaKey) && e.key === 'c' && selectedCell) {
+        e.preventDefault();
+        handleCopy();
+      }
+      
+      // Ctrl+V or Cmd+V - Paste
+      if ((e.ctrlKey || e.metaKey) && e.key === 'v' && selectedCell) {
+        e.preventDefault();
+        handlePaste();
+      }
+
+      // Tab - Move to next cell
+      if (e.key === 'Tab' && editingCell) {
+        e.preventDefault();
+        moveToNextCell();
+      }
+
+      // Enter - Confirm edit or start editing
+      if (e.key === 'Enter' && !e.shiftKey) {
+        if (editingCell) {
+          setEditingCell(null);
+        } else if (selectedCell) {
+          setEditingCell(selectedCell);
+        }
+      }
+
+      // Escape - Cancel edit
+      if (e.key === 'Escape') {
+        setEditingCell(null);
+        setSelectedCell(null);
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [selectedCell, editingCell]);
 
   const fetchWasteEntries = async () => {
     try {
@@ -115,166 +141,150 @@ const WasteDataEntry = ({ onNext, projectInfo, onBackToProjects }) => {
       const projectId = projectInfo?._id;
 
       if (!token || !userId) {
-        setError("Please log in to view waste entries");
-        setFetchLoading(false);
+        showToast("Please log in to view waste entries", "error");
         return;
       }
 
       const params = new URLSearchParams();
       params.append("userId", userId);
-      if (projectId) {
-        params.append("projectId", projectId);
-      }
+      if (projectId) params.append("projectId", projectId);
 
       const response = await fetch(
         `${API_URL}/api/waste-entries?${params.toString()}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
 
       const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.message || "Failed to fetch entries");
+      if (response.ok) {
+        setWasteEntries(result.data || []);
       }
-
-      setWasteEntries(result.data || []);
     } catch (err) {
       console.error("Fetch error:", err);
-      setError(err.message || "Failed to load waste entries");
+      showToast("Failed to fetch waste entries", "error");
     } finally {
       setFetchLoading(false);
     }
   };
 
-  const validateEntry = () => {
-    const newErrors = {};
-
-    if (!currentEntry.wasteMaterial.trim()) {
-      newErrors.wasteMaterial = "Waste material is required";
-    }
-
-    if (!currentEntry.inputDate) {
-      newErrors.inputDate = "Input date is required";
-    } else {
-      const dateRange = getReportingPeriodRange(projectInfo?.reportingPeriod);
-
-      if (dateRange) {
-        const { startDate, endDate } = dateRange;
-        const inputDate = new Date(currentEntry.inputDate);
-
-        inputDate.setHours(0, 0, 0, 0);
-        const compareStartDate = new Date(startDate);
-        compareStartDate.setHours(0, 0, 0, 0);
-        const compareEndDate = new Date(endDate);
-        compareEndDate.setHours(23, 59, 59, 999);
-
-        if (inputDate < compareStartDate || inputDate > compareEndDate) {
-          const formatDate = (date) => {
-            return date.toLocaleDateString("en-US", {
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            });
-          };
-
-          newErrors.inputDate = `Date must be between ${formatDate(
-            startDate
-          )} and ${formatDate(endDate)}`;
-        }
-      }
-    }
-
-    const currentData =
-      activeTab === "hazardous"
-        ? currentEntry.hazardousData
-        : currentEntry.nonHazardousData;
-
-    if (!currentData.total || Number.parseFloat(currentData.total) <= 0) {
-      newErrors.total = "Total waste must be greater than 0";
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const calculateDiversion = (data) => {
-    const total = Number.parseFloat(data.total) || 0;
-
-    const diversion =
-      (Number.parseFloat(data.reuse) || 0) +
-      (Number.parseFloat(data.recycle) || 0) +
-      (Number.parseFloat(data.composting) || 0) +
-      (Number.parseFloat(data.incinerationWithHeat) || 0) +
-      (Number.parseFloat(data.incinerationWithoutHeat) || 0);
-
+  // Transform entries for grid display
+  const gridData = wasteEntries.map((entry) => {
+    const data = entry.includeHazardous ? entry.hazardousData : entry.nonHazardousData;
     return {
-      diversion: diversion.toFixed(2),
-      diversionPercent:
-        total > 0 ? ((diversion / total) * 100).toFixed(2) : "0.00",
+      _id: entry._id,
+      wasteMaterial: entry.wasteMaterial,
+      wasteHandler: entry.wasteHandler || "",
+      modeOfDisposal: entry.modeOfDisposal || "",
+      inputDate: entry.inputDate,
+      type: entry.includeHazardous ? "hazardous" : "nonHazardous",
+      unit: entry.unit,
+      total: data?.total || "",
+      reuse: data?.reuse || "",
+      recycle: data?.recycle || "",
+      composting: data?.composting || "",
+      incinerationWithHeat: data?.incinerationWithHeat || "",
+      incinerationWithoutHeat: data?.incinerationWithoutHeat || "",
+      landfill: data?.landfill || "",
+      exemption: data?.exemption || "",
     };
+  });
+
+  // Group by month
+  const groupByMonth = (entries) => {
+    const grouped = {};
+    entries.forEach((entry) => {
+      const date = new Date(entry.inputDate);
+      const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+      if (!grouped[monthKey]) grouped[monthKey] = [];
+      grouped[monthKey].push(entry);
+    });
+    return grouped;
   };
 
-  const handleAddEntry = async () => {
-    if (!validateEntry()) return;
+  const groupedData = groupByMonth(gridData);
+  const sortedMonths = Object.keys(groupedData).sort().reverse();
+
+  const formatMonth = (monthKey) => {
+    const [year, month] = monthKey.split("-");
+    const date = new Date(year, parseInt(month) - 1);
+    return date.toLocaleString("default", { month: "long", year: "numeric" });
+  };
+
+  // Copy/Paste functionality
+  const handleCopy = () => {
+    if (!selectedCell) return;
+    
+    const { rowId, field } = selectedCell;
+    const entry = gridData.find(e => e._id === rowId);
+    if (entry && entry[field] !== undefined) {
+      navigator.clipboard.writeText(String(entry[field]));
+      setShowCopyIndicator(true);
+      setTimeout(() => setShowCopyIndicator(false), 2000);
+      showToast("Copied to clipboard", "success");
+    }
+  };
+
+  const handlePaste = async () => {
+    if (!selectedCell) return;
+    
+    try {
+      const text = await navigator.clipboard.readText();
+      const { rowId, field } = selectedCell;
+      handleCellEdit(rowId, field, text);
+      showToast("Pasted from clipboard", "success");
+    } catch (err) {
+      console.error("Paste error:", err);
+    }
+  };
+
+  const moveToNextCell = () => {
+    // Logic to move to next editable cell
+    setEditingCell(null);
+  };
+
+  // Add new entry
+  const handleAddRow = async () => {
+    if (!newRow.wasteMaterial || !newRow.total) {
+      showToast("Please fill in waste material and total amount", "error");
+      return;
+    }
 
     setLoading(true);
-    setError("");
-    setFieldErrors({});
-
     const token = getAuthToken();
     const userId = getUserIdFromToken();
     const projectId = projectInfo?._id;
 
-    if (!token || !userId) {
-      setError("Please log in to add waste entries");
-      setLoading(false);
-      return;
-    }
-
-    const reportingPeriod = projectInfo?.reportingPeriod;
-    const normalizedReportingPeriod = {
-      ...reportingPeriod,
-      periodType:
-        reportingPeriod?.periodType === "financial"
-          ? "FY"
-          : reportingPeriod?.periodType,
+    const reportingPeriod = {
+      ...projectInfo?.reportingPeriod,
+      periodType: projectInfo?.reportingPeriod?.periodType === "financial" 
+        ? "FY" 
+        : projectInfo?.reportingPeriod?.periodType,
     };
 
-    const inputDateObj = new Date(currentEntry.inputDate);
-    const isoInputDate = inputDateObj.toISOString().split("T")[0];
+    const disposalData = {
+      total: newRow.total,
+      reuse: newRow.reuse,
+      recycle: newRow.recycle,
+      composting: newRow.composting,
+      incinerationWithHeat: newRow.incinerationWithHeat,
+      incinerationWithoutHeat: newRow.incinerationWithoutHeat,
+      landfill: newRow.landfill,
+      exemption: newRow.exemption,
+    };
 
     const newEntry = {
       userId,
       projectId,
-      reportingPeriod: normalizedReportingPeriod,
-      wasteMaterial: currentEntry.wasteMaterial,
-      wasteHandler: currentEntry.wasteHandler || null,
-      modeOfDisposal: currentEntry.modeOfDisposal || null,
-      inputDate: isoInputDate,
-      unit: selectedUnit,
-      includeHazardous: activeTab === "hazardous",
-      includeNonHazardous: activeTab === "nonHazardous",
-      hazardousData:
-        activeTab === "hazardous" ? currentEntry.hazardousData : null,
-      nonHazardousData:
-        activeTab === "nonHazardous" ? currentEntry.nonHazardousData : null,
+      reportingPeriod,
+      wasteMaterial: newRow.wasteMaterial,
+      wasteHandler: newRow.wasteHandler || null,
+      modeOfDisposal: newRow.modeOfDisposal || null,
+      inputDate: newRow.inputDate,
+      unit: newRow.unit,
+      includeHazardous: newRow.type === "hazardous",
+      includeNonHazardous: newRow.type === "nonHazardous",
+      hazardousData: newRow.type === "hazardous" ? disposalData : null,
+      nonHazardousData: newRow.type === "nonHazardous" ? disposalData : null,
     };
-
-    if (activeTab === "hazardous") {
-      const haz = calculateDiversion(currentEntry.hazardousData);
-      newEntry.hazardousDiversion = haz.diversion;
-      newEntry.hazardousDiversionPercent = haz.diversionPercent;
-    }
-
-    if (activeTab === "nonHazardous") {
-      const nonHaz = calculateDiversion(currentEntry.nonHazardousData);
-      newEntry.nonHazardousDiversion = nonHaz.diversion;
-      newEntry.nonHazardousDiversionPercent = nonHaz.diversionPercent;
-    }
 
     try {
       const response = await fetch(`${API_URL}/api/waste-entries`, {
@@ -287,39 +297,19 @@ const WasteDataEntry = ({ onNext, projectInfo, onBackToProjects }) => {
       });
 
       const result = await response.json();
-
-      if (!response.ok) {
-        if (result.message && result.message.includes("date")) {
-          setFieldErrors({ inputDate: result.message });
-        } else {
-          setError(result.message || "Failed to save entry");
-        }
-        throw new Error(result.message || "Failed to save entry");
-      }
-
-      if (projectId) {
-        try {
-          await fetch(`${API_URL}/api/auditor/projects/${projectId}/status`, {
-            method: "PATCH",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify({ status: "In-Progress" }),
-          });
-        } catch (statusError) {
-          console.error("Error updating project status:", statusError);
-        }
-      }
-
-      setWasteEntries((prev) => [...prev, result.data]);
-
-      setCurrentEntry({
-        wasteMaterial: "",
-        wasteHandler: "",
-        modeOfDisposal: "",
-        inputDate: "",
-        hazardousData: {
+      
+      if (response.ok) {
+        setWasteEntries((prev) => [...prev, result.data]);
+        showToast("Entry added successfully", "success");
+        
+        // Reset new row
+        setNewRow({
+          wasteMaterial: "",
+          wasteHandler: "",
+          modeOfDisposal: "",
+          inputDate: new Date().toISOString().split("T")[0],
+          type: "hazardous",
+          unit: "kg",
           total: "",
           reuse: "",
           recycle: "",
@@ -328,224 +318,109 @@ const WasteDataEntry = ({ onNext, projectInfo, onBackToProjects }) => {
           incinerationWithoutHeat: "",
           landfill: "",
           exemption: "",
-        },
-        nonHazardousData: {
-          total: "",
-          reuse: "",
-          recycle: "",
-          composting: "",
-          incinerationWithHeat: "",
-          incinerationWithoutHeat: "",
-          landfill: "",
-          exemption: "",
-        },
-      });
-
-      setErrors({});
-    } catch (err) {
-      console.error("Add entry error:", err);
-      setError(err.message || "Failed to save waste entry");
+        });
+      } else {
+        showToast(result.message || "Failed to add entry", "error");
+      }
+    } catch {
+      showToast("Failed to add entry", "error");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSubmitEntries = async () => {
-    const token = getAuthToken();
-    const projectId = projectInfo?._id;
-
-    if (!token || !projectId) {
-      setError("Please log in to submit entries");
-      return;
-    }
-
-    if (wasteEntries.length === 0) {
-      setError("Please add at least one waste entry before submitting");
-      return;
-    }
-
-    try {
-      await fetch(`${API_URL}/api/auditor/projects/${projectId}/status`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ status: "Completed" }),
-      });
-
-      if (onNext) {
-        onNext(wasteEntries);
-      }
-    } catch (err) {
-      console.error("Submit error:", err);
-      setError(err.message || "Failed to submit entries");
-    }
-  };
-
+  // Delete entry
   const handleDeleteEntry = async (id) => {
     const token = getAuthToken();
-
-    if (!token) {
-      setError("Please log in to delete entries");
-      return;
-    }
-
     try {
       const response = await fetch(`${API_URL}/api/waste-entries/${id}`, {
         method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
 
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.message || "Failed to delete entry");
+      if (response.ok) {
+        setWasteEntries((prev) => prev.filter((e) => e._id !== id));
+        showToast("Entry deleted successfully", "success");
       }
-
-      setWasteEntries((prev) => prev.filter((e) => e._id !== id));
-    } catch (err) {
-      console.error("Delete error:", err);
-      setError(err.message || "Failed to delete entry");
+    } catch {
+      showToast("Failed to delete entry", "error");
     }
   };
 
-  const getFieldLabel = (key) => {
-    const labels = {
-      total: "Total Waste",
-      reuse: "Reuse",
-      recycle: "Recycle",
-      composting: "Composting",
-      incinerationWithHeat: "Incineration with Heat Recovery",
-      incinerationWithoutHeat: "Incineration without Heat Recovery",
-      landfill: "Landfill",
-      exemption: "Other Exemption",
-    };
-    return labels[key] || key;
-  };
-
-  const renderDisposalInputs = () => {
-    const data =
-      activeTab === "hazardous"
-        ? currentEntry.hazardousData
-        : currentEntry.nonHazardousData;
-
-    const setData = (newData) =>
-      setCurrentEntry({
-        ...currentEntry,
-        [activeTab === "hazardous" ? "hazardousData" : "nonHazardousData"]:
-          newData,
-      });
-
-    return (
-      <div className={styles.wasteDataSection}>
-        <h3 className={styles.sectionTitle}>
-          {activeTab === "hazardous" ? "Hazardous" : "Non-Hazardous"} Waste
-          Disposal Data
-        </h3>
-        <div className={styles.disposalGrid}>
-          {Object.keys(data).map((key) => (
-            <div key={key} className={styles.formGroup}>
-              <label className={styles.label}>
-                {getFieldLabel(key)} {key === "total" && "*"}
-              </label>
-              <input
-                type="number"
-                step="0.01"
-                placeholder="0.00"
-                className={styles.input}
-                value={data[key]}
-                onChange={(e) => setData({ ...data, [key]: e.target.value })}
-              />
-              {key === "total" && errors.total && (
-                <span className={styles.errorText}>{errors.total}</span>
-              )}
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  };
-
-  const groupEntriesByMonth = () => {
-    const grouped = {};
-
-    wasteEntries.forEach((entry) => {
-      const date = new Date(entry.inputDate);
-      const monthKey = `${date.toLocaleString("en-US", {
-        month: "long",
-      })} ${date.getFullYear()}`;
-
-      if (!grouped[monthKey]) {
-        grouped[monthKey] = [];
+  // Cell editing
+  const handleCellEdit = (rowId, field, value) => {
+    const updatedEntries = wasteEntries.map(entry => {
+      if (entry._id === rowId) {
+        if (['total', 'reuse', 'recycle', 'composting', 'incinerationWithHeat', 'incinerationWithoutHeat', 'landfill', 'exemption'].includes(field)) {
+          const dataKey = entry.includeHazardous ? 'hazardousData' : 'nonHazardousData';
+          return {
+            ...entry,
+            [dataKey]: {
+              ...entry[dataKey],
+              [field]: value
+            }
+          };
+        }
+        return { ...entry, [field]: value };
       }
-      grouped[monthKey].push(entry);
+      return entry;
     });
-
-    return grouped;
+    
+    setWasteEntries(updatedEntries);
   };
 
-  const getSortedEntries = () => {
-    let sorted = [...wasteEntries];
+  // Export to CSV
+  const handleExport = () => {
+    const headers = [
+      "Material", "Handler", "Disposal Mode", "Date", "Type", "Unit",
+      "Total", "Reuse", "Recycle", "Composting", "Incineration (Heat)",
+      "Incineration (No Heat)", "Landfill", "Exemption"
+    ];
 
-    switch (sortBy) {
-      case "date":
-        sorted.sort((a, b) => new Date(b.inputDate) - new Date(a.inputDate));
-        break;
-      case "material":
-        sorted.sort((a, b) => a.wasteMaterial.localeCompare(b.wasteMaterial));
-        break;
-      case "quantity":
-        sorted.sort((a, b) => {
-          const totalA = Number.parseFloat(
-            a.hazardousData?.total || a.nonHazardousData?.total || 0
-          );
-          const totalB = Number.parseFloat(
-            b.hazardousData?.total || b.nonHazardousData?.total || 0
-          );
-          return totalB - totalA;
-        });
-        break;
-      default:
-        break;
-    }
+    const rows = gridData.map(entry => [
+      entry.wasteMaterial,
+      entry.wasteHandler,
+      entry.modeOfDisposal,
+      entry.inputDate,
+      entry.type === "hazardous" ? "Hazardous" : "Non-Hazardous",
+      entry.unit,
+      entry.total,
+      entry.reuse,
+      entry.recycle,
+      entry.composting,
+      entry.incinerationWithHeat,
+      entry.incinerationWithoutHeat,
+      entry.landfill,
+      entry.exemption,
+    ]);
 
-    if (filterMaterial !== "all") {
-      sorted = sorted.filter((entry) =>
-        entry.wasteMaterial.toLowerCase().includes(filterMaterial.toLowerCase())
-      );
-    }
+    const csv = [
+      headers.join(","),
+      ...rows.map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(","))
+    ].join("\n");
 
-    return sorted;
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `waste_entries_${projectInfo?.projectName}_${new Date().toISOString().split('T')[0]}.csv`;
+    link.click();
+    window.URL.revokeObjectURL(url);
   };
 
-  const getUniqueMaterials = () => {
-    const materials = new Set(wasteEntries.map((entry) => entry.wasteMaterial));
-    return Array.from(materials);
+  const toggleMonth = (monthKey) => {
+    setExpandedMonths(prev => ({
+      ...prev,
+      [monthKey]: !prev[monthKey]
+    }));
   };
 
   const dateRange = getReportingPeriodRange(projectInfo?.reportingPeriod);
-  const minDate = dateRange?.startDate
-    ? dateRange.startDate.toISOString().split("T")[0]
-    : "";
-  const maxDate = dateRange?.endDate
-    ? dateRange.endDate.toISOString().split("T")[0]
-    : "";
-
-  const sortedEntries = getSortedEntries();
-  const groupedEntries = groupEntriesByMonth();
-  const recentEntries = sortedEntries.slice(0, 3);
-  const uniqueMaterials = getUniqueMaterials();
 
   if (showDashboard) {
     return (
       <div className={styles.dashboardContainer}>
-        <button
-          onClick={() => setShowDashboard(false)}
-          className={styles.backButton}
-        >
+        <button onClick={() => setShowDashboard(false)} className={styles.backButton}>
           ← Back to Waste Entry
         </button>
         <ComplianceDashboard
@@ -558,442 +433,215 @@ const WasteDataEntry = ({ onNext, projectInfo, onBackToProjects }) => {
 
   return (
     <div className={styles.containerWithSidebar}>
-      <div
-        className={`${styles.sidebar} ${
-          sidebarExpanded ? styles.sidebarExpanded : ""
-        }`}
-      >
-        {/* Project Info Header */}
-        <div className={styles.sidebarHeader}>
-          <div className={styles.headerTopRow}>
-            <button
-              onClick={onBackToProjects}
-              className={styles.backToProjectsBtn}
-              aria-label="Back to projects"
-              title="Back to Projects"
-            >
-              <ArrowLeft size={18} />
-            </button>
-            <h3 className={styles.projectName}>
-              {projectInfo?.projectName || "Project Name"}
-            </h3>
-          </div>
-          <div className={styles.projectMeta}>
-            <div className={styles.metaRow}>
-              <span className={styles.metaLabel}>Period : </span>
-              <span className={styles.metaValue}>
-                {projectInfo?.reportingPeriod?.periodType || "FY"} -{" "}
-                {projectInfo?.reportingPeriod?.year || "2024"}
-              </span>
-            </div>
-            <div className={styles.metaRow}>
-              <span className={styles.metaLabel}>Client :</span>
-              <span className={styles.metaValue}>
-                {projectInfo?.clientName || "Client Name"}
-              </span>
-            </div>
-          </div>
-        </div>
+      <WasteEntrySidebar
+        projectInfo={projectInfo}
+        wasteEntries={wasteEntries}
+        fetchLoading={fetchLoading}
+        onBackToProjects={onBackToProjects}
+        onDeleteEntry={handleDeleteEntry}
+        onSubmitEntries={() => {}}
+      />
 
-        {/* Toggle Button */}
-        <div
-          onClick={() => setSidebarExpanded(!sidebarExpanded)}
-          className={styles.toggleButton}
-          aria-label={sidebarExpanded ? "Collapse sidebar" : "Expand sidebar"}
-        >
-          {sidebarExpanded ? (
-            <ChevronsLeft size={22} />
-          ) : (
-            <ChevronsRight size={22} />
-          )}
-        </div>
-
-        {!sidebarExpanded ? (
-          <>
-            {/* Recent Entries */}
-            <div className={styles.sidebarSection}>
-              <h4 className={styles.sectionHeading}>Recent Entries</h4>
-              {fetchLoading ? (
-                <div className={styles.loadingState}>Loading...</div>
-              ) : recentEntries.length === 0 ? (
-                <div className={styles.emptyState}>No entries yet</div>
-              ) : (
-                <div className={styles.recentEntriesList}>
-                  {recentEntries.map((entry) => (
-                    <div key={entry._id} className={styles.recentEntryCard}>
-                      <div className={styles.recentEntryHeader}>
-                        <span className={styles.recentEntryDate}>
-                          {new Date(entry.inputDate).toLocaleDateString(
-                            "en-US",
-                            {
-                              month: "short",
-                              day: "numeric",
-                              year: "numeric",
-                            }
-                          )}{" "}
-                          - {entry.wasteMaterial}
-                        </span>
-                        <span
-                          className={`${styles.badge} ${
-                            entry.includeHazardous
-                              ? styles.badgeHazardous
-                              : styles.badgeNonHazardous
-                          }`}
-                        >
-                          {entry.includeHazardous
-                            ? "Hazardous"
-                            : "Non-Hazardous"}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Sort By */}
-            <div className={styles.sidebarSection}>
-              <div className={styles.sectionHeadingWithIcon}>
-                <Filter size={15} />
-                <h4 className={styles.sectionHeading}>Sort By</h4>
-              </div>
-              <div className={styles.sortButtons}>
-                <button
-                  className={`${styles.sortButton} ${
-                    sortBy === "date" ? styles.sortButtonActive : ""
-                  }`}
-                  onClick={() => setSortBy("date")}
-                >
-                  Date
-                </button>
-                <button
-                  className={`${styles.sortButton} ${
-                    sortBy === "material" ? styles.sortButtonActive : ""
-                  }`}
-                  onClick={() => setSortBy("material")}
-                >
-                  Material
-                </button>
-              </div>
-            </div>
-
-            {/* All Entries Summary */}
-            <div className={styles.allEntriesSection}>
-              <h4 className={styles.sectionHeading}>All Entries</h4>
-              {fetchLoading ? (
-                <div className={styles.loadingState}>Loading...</div>
-              ) : Object.keys(groupedEntries).length === 0 ? (
-                <div className={styles.emptyState}>No entries yet</div>
-              ) : (
-                <div className={styles.monthGroupsList}>
-                  {Object.entries(groupedEntries).map(([monthKey, entries]) => (
-                    <div key={monthKey} className={styles.monthGroupCompact}>
-                      <div className={styles.monthHeaderCompact}>
-                        {monthKey} ({entries.length})
-                      </div>
-                      <div className={styles.monthEntriesCompact}>
-                        {entries.map((entry) => (
-                          <div key={entry._id} className={styles.compactEntry}>
-                            <span className={styles.compactEntryText}>
-                              {new Date(entry.inputDate).toLocaleDateString(
-                                "en-US",
-                                {
-                                  month: "short",
-                                  day: "numeric",
-                                }
-                              )}{" "}
-                              - {entry.wasteMaterial}
-                            </span>
-                            <span
-                              className={`${styles.badgeSmall} ${
-                                entry.includeHazardous
-                                  ? styles.badgeHazardous
-                                  : styles.badgeNonHazardous
-                              }`}
-                            >
-                              {entry.includeHazardous ? "H" : "NH"}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </>
-        ) : (
-          <>
-            {/* Sort Filters - Expanded */}
-            <div className={styles.sortFiltersExpanded}>
-              <div className={styles.filterGroup}>
-                <Filter size={16} />
-                <span className={styles.filterLabel}>Sort By</span>
-                <select
-                  className={styles.filterSelect}
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value)}
-                >
-                  <option value="date">Date</option>
-                  <option value="material">Material</option>
-                </select>
-                <select
-                  className={styles.filterSelect}
-                  value={filterMaterial}
-                  onChange={(e) => setFilterMaterial(e.target.value)}
-                >
-                  <option value="all">All Materials</option>
-                  {uniqueMaterials.map((material) => (
-                    <option key={material} value={material}>
-                      {material}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            {/* Expanded Table View */}
-            <div className={styles.expandedTableContainer}>
-              <h4 className={styles.sectionHeading}>All Entries</h4>
-              {fetchLoading ? (
-                <div className={styles.loadingState}>Loading entries...</div>
-              ) : Object.keys(groupedEntries).length === 0 ? (
-                <div className={styles.emptyState}>No entries yet</div>
-              ) : (
-                <div className={styles.tableGroupsList}>
-                  {Object.entries(groupedEntries).map(([monthKey, entries]) => (
-                    <div key={monthKey} className={styles.tableMonthGroup}>
-                      <div className={styles.monthHeaderTable}>
-                        {monthKey} ({entries.length})
-                      </div>
-                      <div className={styles.tableWrapper}>
-                        <table className={styles.entriesTable}>
-                          <thead>
-                            <tr>
-                              <th>Input Date</th>
-                              <th>Material</th>
-                              <th>Type</th>
-                              <th>Handler</th>
-                              <th>Total</th>
-                              <th>Units</th>
-                              <th>Actions</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {entries.map((entry) => (
-                              <tr key={entry._id}>
-                                <td className={styles.dateCell}>
-                                  {new Date(entry.inputDate).toLocaleDateString(
-                                    "en-US",
-                                    {
-                                      month: "short",
-                                      day: "numeric",
-                                      year: "numeric",
-                                    }
-                                  )}
-                                </td>
-                                <td className={styles.materialCell}>
-                                  {entry.wasteMaterial}
-                                </td>
-                                <td>
-                                  <span
-                                    className={`${styles.badge} ${
-                                      entry.includeHazardous
-                                        ? styles.badgeHazardous
-                                        : styles.badgeNonHazardous
-                                    }`}
-                                  >
-                                    {entry.includeHazardous
-                                      ? "Hazardous"
-                                      : "Non-Hazardous"}
-                                  </span>
-                                </td>
-                                <td className={styles.handlerCell}>
-                                  {entry.wasteHandler || "—"}
-                                </td>
-                                <td className={styles.totalCell}>
-                                  {entry.includeHazardous
-                                    ? entry.hazardousData?.total
-                                    : entry.nonHazardousData?.total}
-                                </td>
-                                <td className={styles.unitCell}>
-                                  {entry.unit}
-                                </td>
-                                <td className={styles.actionCell}>
-                                  <button
-                                    className={styles.deleteButton}
-                                    onClick={() => handleDeleteEntry(entry._id)}
-                                    aria-label="Delete entry"
-                                  >
-                                    <Trash2 size={14} />
-                                  </button>
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </>
-        )}
-
-        {/* Submit Button - Footer */}
-        {wasteEntries.length > 0 && (
-          <div className={styles.sidebarFooter}>
-            <button
-              className={styles.submitButton}
-              onClick={handleSubmitEntries}
-            >
-              Submit All Entries
-            </button>
-          </div>
-        )}
-      </div>
-
-      {/* Main Content */}
       <div className={styles.mainContent}>
-        {/* Top Bar */}
-
-        {/* Entry Form */}
-        <div className={styles.formContainer}>
-          <div className={styles.card}>
-            <h2 className={styles.cardTitle}>Add Waste Entry</h2>
-
-            {error && <div className={styles.errorAlert}>{error}</div>}
-
-            <div className={styles.formGrid}>
-              <div className={styles.formGroup}>
-                <label className={styles.label}>Waste Material *</label>
-                <input
-                  placeholder="e.g., Plastic, Paper, Metal"
-                  className={styles.input}
-                  value={currentEntry.wasteMaterial}
-                  onChange={(e) =>
-                    setCurrentEntry({
-                      ...currentEntry,
-                      wasteMaterial: e.target.value,
-                    })
-                  }
-                />
-                {errors.wasteMaterial && (
-                  <span className={styles.errorText}>
-                    {errors.wasteMaterial}
-                  </span>
-                )}
-              </div>
-
-              <div className={styles.formGroup}>
-                <label className={styles.label}>Waste Handler</label>
-                <input
-                  placeholder="Handler or vendor name"
-                  className={styles.input}
-                  value={currentEntry.wasteHandler}
-                  onChange={(e) =>
-                    setCurrentEntry({
-                      ...currentEntry,
-                      wasteHandler: e.target.value,
-                    })
-                  }
-                />
-              </div>
-
-              <div className={styles.formGroup}>
-                <label className={styles.label}>Mode of Disposal</label>
-                <input
-                  placeholder="e.g., Recycling center, Landfill"
-                  className={styles.input}
-                  value={currentEntry.modeOfDisposal}
-                  onChange={(e) =>
-                    setCurrentEntry({
-                      ...currentEntry,
-                      modeOfDisposal: e.target.value,
-                    })
-                  }
-                />
-              </div>
-
-              <div className={styles.formGroup}>
-                <label className={styles.label}>Input Date *</label>
-                <input
-                  type="date"
-                  className={styles.input}
-                  value={currentEntry.inputDate}
-                  min={minDate}
-                  max={maxDate}
-                  onChange={(e) =>
-                    setCurrentEntry({
-                      ...currentEntry,
-                      inputDate: e.target.value,
-                    })
-                  }
-                />
-                {errors.inputDate && (
-                  <span className={styles.errorText}>{errors.inputDate}</span>
-                )}
-                {fieldErrors.inputDate && (
-                  <span className={styles.errorText}>
-                    {fieldErrors.inputDate}
-                  </span>
-                )}
-              </div>
-
-              <div className={styles.formGroup}>
-                <label className={styles.label}>Unit *</label>
-                <select
-                  value={selectedUnit}
-                  onChange={(e) => setSelectedUnit(e.target.value)}
-                  className={styles.input}
-                >
-                  <option value="kg">Kilograms (kg)</option>
-                  <option value="tonnes">Tonnes</option>
-                  <option value="metric_tonnes">Metric Tonnes (MT)</option>
-                </select>
-              </div>
+        <div className={styles.excelGridContainer}>
+          {/* Toolbar */}
+          <div className={styles.excelToolbar}>
+            <div className={styles.toolbarLeft}>
+              <h2 className={styles.excelTitle}>Waste Entry Spreadsheet</h2>
+              <span className={styles.entryCount}>{gridData.length} entries</span>
             </div>
-
-            <div className={styles.tabContainer}>
-              <button
-                className={`${styles.tab} ${
-                  activeTab === "hazardous" ? styles.tabActive : ""
-                }`}
-                onClick={() => setActiveTab("hazardous")}
-              >
-                Hazardous Waste
+            <div className={styles.toolbarRight}>
+              <button className={styles.toolbarBtn} onClick={handleExport}>
+                <Download size={16} />
+                Export
               </button>
-              <button
-                className={`${styles.tab} ${
-                  activeTab === "nonHazardous" ? styles.tabActive : ""
-                }`}
-                onClick={() => setActiveTab("nonHazardous")}
-              >
-                Non-Hazardous Waste
-              </button>
-            </div>
-
-            {renderDisposalInputs()}
-            <div className={styles.bottomWasteButtons}>
-              <button
-                className={styles.addButton}
-                onClick={handleAddEntry}
-                disabled={loading}
-              >
-                <Plus size={16} />
-                {loading ? "Saving..." : "Save Entry"}
-              </button>
-              <button
-                onClick={() => setShowDashboard(true)}
-                className={styles.dashboardButton}
-              >
+              <button className={styles.toolbarBtn} onClick={() => setShowDashboard(true)}>
                 <BarChart3 size={16} />
-                View Compliance Dashboard
+                Dashboard
               </button>
-              
             </div>
           </div>
+
+          {/* Info Banner */}
+          <div className={styles.infoBanner}>
+            <Info size={16} />
+            <span>Using the grid. The grid below allows full copy and paste from Excel.</span>
+          </div>
+
+          {error && <div className={styles.errorAlert}>{error}</div>}
+
+          {/* Excel-like Grid */}
+          <div className={styles.excelTableWrapper} ref={tableRef}>
+            <table className={styles.excelTable}>
+              <thead className={styles.excelTableHead}>
+                <tr>
+                  <th className={styles.excelTh}>Material</th>
+                  <th className={styles.excelTh}>Handler</th>
+                  <th className={styles.excelTh}>Disposal Mode</th>
+                  <th className={styles.excelTh}>Date</th>
+                  <th className={styles.excelTh}>Type</th>
+                  <th className={styles.excelTh}>Unit</th>
+                  <th className={styles.excelTh}>Total</th>
+                  <th className={styles.excelTh}>Reuse</th>
+                  <th className={styles.excelTh}>Recycle</th>
+                  <th className={styles.excelTh}>Composting</th>
+                  <th className={styles.excelTh}>Incin. (Heat)</th>
+                  <th className={styles.excelTh}>Incin. (No Heat)</th>
+                  <th className={styles.excelTh}>Landfill</th>
+                  <th className={styles.excelTh}>Exemption</th>
+                  <th className={styles.excelTh}>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {/* New Entry Row */}
+                <tr className={styles.newEntryRow}>
+                  <td className={styles.excelTd}>
+                    <input
+                      type="text"
+                      className={styles.excelInput}
+                      placeholder="Enter material..."
+                      value={newRow.wasteMaterial}
+                      onChange={(e) => setNewRow({...newRow, wasteMaterial: e.target.value})}
+                    />
+                  </td>
+                  <td className={styles.excelTd}>
+                    <input
+                      type="text"
+                      className={styles.excelInput}
+                      placeholder="Handler..."
+                      value={newRow.wasteHandler}
+                      onChange={(e) => setNewRow({...newRow, wasteHandler: e.target.value})}
+                    />
+                  </td>
+                  <td className={styles.excelTd}>
+                    <input
+                      type="text"
+                      className={styles.excelInput}
+                      placeholder="Disposal..."
+                      value={newRow.modeOfDisposal}
+                      onChange={(e) => setNewRow({...newRow, modeOfDisposal: e.target.value})}
+                    />
+                  </td>
+                  <td className={styles.excelTd}>
+                    <input
+                      type="date"
+                      className={styles.excelInput}
+                      value={newRow.inputDate}
+                      min={dateRange?.startDate?.toISOString().split("T")[0]}
+                      max={dateRange?.endDate?.toISOString().split("T")[0]}
+                      onChange={(e) => setNewRow({...newRow, inputDate: e.target.value})}
+                    />
+                  </td>
+                  <td className={styles.excelTd}>
+                    <select
+                      className={styles.excelSelect}
+                      value={newRow.type}
+                      onChange={(e) => setNewRow({...newRow, type: e.target.value})}
+                    >
+                      <option value="hazardous">Hazardous</option>
+                      <option value="nonHazardous">Non-Hazardous</option>
+                    </select>
+                  </td>
+                  <td className={styles.excelTd}>
+                    <select
+                      className={styles.excelSelect}
+                      value={newRow.unit}
+                      onChange={(e) => setNewRow({...newRow, unit: e.target.value})}
+                    >
+                      <option value="kg">kg</option>
+                      <option value="tonnes">Tonnes</option>
+                      <option value="metric_tonnes">MT</option>
+                    </select>
+                  </td>
+                  {['total', 'reuse', 'recycle', 'composting', 'incinerationWithHeat', 'incinerationWithoutHeat', 'landfill', 'exemption'].map(field => (
+                    <td key={field} className={styles.excelTd}>
+                      <input
+                        type="number"
+                        className={styles.excelInput}
+                        placeholder="0.00"
+                        value={newRow[field]}
+                        onChange={(e) => setNewRow({...newRow, [field]: e.target.value})}
+                      />
+                    </td>
+                  ))}
+                  <td className={styles.excelTd}>
+                    <button
+                      className={styles.addRowBtn}
+                      onClick={handleAddRow}
+                      disabled={loading}
+                      title="Add Entry (Ctrl+Enter)"
+                    >
+                      <Plus size={16} />
+                    </button>
+                  </td>
+                </tr>
+
+                {/* Existing Entries Grouped by Month */}
+                {sortedMonths.length === 0 ? (
+                  <tr>
+                    <td colSpan="15" className={styles.emptyState}>
+                      No entries yet. Add your first entry above.
+                    </td>
+                  </tr>
+                ) : (
+                  sortedMonths.map((monthKey) => (
+                    <>
+                      <tr key={monthKey} className={`${styles.monthGroupRow} ${!expandedMonths[monthKey] ? styles.collapsed : ''}`} onClick={() => toggleMonth(monthKey)}>
+                        <td colSpan="15" className={styles.monthGroupCell}>
+                          {formatMonth(monthKey)} ({groupedData[monthKey].length} entries)
+                        </td>
+                      </tr>
+                      {expandedMonths[monthKey] && groupedData[monthKey].map((entry) => (
+                        <tr key={entry._id} className={styles.excelDataRow}>
+                          <td className={styles.excelTd} onClick={() => setSelectedCell({ rowId: entry._id, field: 'wasteMaterial' })}>
+                            <div className={styles.cellDisplay}>{entry.wasteMaterial}</div>
+                          </td>
+                          <td className={styles.excelTd} onClick={() => setSelectedCell({ rowId: entry._id, field: 'wasteHandler' })}>
+                            <div className={styles.cellDisplay}>{entry.wasteHandler || "-"}</div>
+                          </td>
+                          <td className={styles.excelTd} onClick={() => setSelectedCell({ rowId: entry._id, field: 'modeOfDisposal' })}>
+                            <div className={styles.cellDisplay}>{entry.modeOfDisposal || "-"}</div>
+                          </td>
+                          <td className={styles.excelTd} onClick={() => setSelectedCell({ rowId: entry._id, field: 'inputDate' })}>
+                            <div className={styles.cellDisplay}>{entry.inputDate}</div>
+                          </td>
+                          <td className={styles.excelTd}>
+                            <span className={entry.type === "hazardous" ? styles.hazBadge : styles.nonHazBadge}>
+                              {entry.type === "hazardous" ? "Hazardous" : "Non-Hazardous"}
+                            </span>
+                          </td>
+                          <td className={styles.excelTd} onClick={() => setSelectedCell({ rowId: entry._id, field: 'unit' })}>
+                            <div className={styles.cellDisplay}>{entry.unit}</div>
+                          </td>
+                          {['total', 'reuse', 'recycle', 'composting', 'incinerationWithHeat', 'incinerationWithoutHeat', 'landfill', 'exemption'].map(field => (
+                            <td key={field} className={styles.excelTd} onClick={() => setSelectedCell({ rowId: entry._id, field })}>
+                              <div className={styles.cellDisplay}>{entry[field] || "-"}</div>
+                            </td>
+                          ))}
+                          <td className={styles.excelTd}>
+                            <button
+                              className={styles.deleteBtn}
+                              onClick={() => handleDeleteEntry(entry._id)}
+                              title="Delete Entry"
+                            >
+                              <X size={14} />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Copy Indicator */}
+          {showCopyIndicator && (
+            <div className={styles.copyIndicator}>
+              ✓ Copied to clipboard
+            </div>
+          )}
         </div>
       </div>
     </div>

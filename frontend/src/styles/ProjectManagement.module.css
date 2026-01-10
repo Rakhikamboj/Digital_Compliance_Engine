@@ -78,27 +78,53 @@
 
 .filtersRow {
   display: grid;
-  grid-template-columns: 2fr 1fr 1fr 1fr;
-  gap: 12px;
-  margin-bottom: 12px;
-  flex-shrink: 0;
+  grid-template-columns: minmax(260px, 4.5fr) repeat(4, minmax(160px, 1fr));
+  gap: 16px;
+  margin-bottom: 2rem;
+  align-items: end;
 }
 
+/* Each filter */
 .filterGroup {
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
 
+/* Label */
 .filterLabel {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   color: #194d2a;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
+/* Select & inputs consistency */
+.select,
 .searchBox {
+  width: 100%;
+  min-height: 40px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: #f5f8ee;
+  border: 2px solid #e8f0e3;
+  font-size: 14px;
+}
+
+.select {
+  cursor: pointer;
+}
+
+/* Responsive fix */
+@media (max-width: 1200px) {
+  .filtersRow {
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  }
+}
+
+
+/* .searchBox {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -107,7 +133,7 @@
   border: 2px solid #e8f0e3;
   border-radius: 10px;
   transition: all 0.25s ease;
-}
+} */
 
 .searchBox:focus-within {
   border-color: #194d2a;
@@ -286,8 +312,8 @@
 .th {
   text-align: left;
   padding: 14px 16px;
-  font-size: 11px;
-  font-weight: 700;
+  font-size: 12px;
+  font-weight: 600;
   color: #ffffff;
   text-transform: uppercase;
   letter-spacing: 0.8px;
@@ -297,8 +323,8 @@
 .thCenter {
   text-align: center;
   padding: 14px 16px;
-  font-size: 11px;
-  font-weight: 700;
+  font-size: 12px;
+  font-weight: 600;
   color: #ffffff;
   text-transform: uppercase;
   letter-spacing: 0.8px;
@@ -324,6 +350,7 @@
 .tdCenter {
   padding: 14px 16px;
   text-align: center;
+  font-size: 13px;
 }
 
 .projectNameCell {

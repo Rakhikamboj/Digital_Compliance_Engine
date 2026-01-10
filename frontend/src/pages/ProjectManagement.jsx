@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"
 import { FolderPlus, Calendar } from "lucide-react"
-import { Clock, AlertCircle, XCircle } from "lucide-react"
+import { Clock, XCircle } from "lucide-react"
 import styles from "../styles/ProjectManagement.module.css"
 import Pagination from "../common/Pagination"
 import SearchBar from "../common/Searchbar"
@@ -25,6 +25,11 @@ const ProjectManagement = () => {
   const [statusFilter, setStatusFilter] = useState("all")
   const [auditorFilter, setAuditorFilter] = useState("all")
   const [sortBy, setSortBy] = useState("newest")
+  const [industryFilter, setIndustryFilter] = useState("all")
+  const industries = Array.from(
+  new Set(projects.map(p => p.industry).filter(Boolean))
+);
+
 
   const [formData, setFormData] = useState({
     projectName: "",
@@ -49,49 +54,63 @@ const ProjectManagement = () => {
   useEffect(() => {
     applyFilters()
     setCurrentPage(1) // Reset to first page when filters change
-  }, [projects, searchQuery, statusFilter, auditorFilter, sortBy])
+  }, [projects, searchQuery, statusFilter, auditorFilter, sortBy, industryFilter])
 
   const applyFilters = () => {
-    let filtered = [...projects]
+  let filtered = [...projects];
 
-    if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase().trim()
-      filtered = filtered.filter(p =>
-        p.projectName?.toLowerCase().includes(query) ||
-        p.clientName?.toLowerCase().includes(query) ||
-        
-        p.industry?.toLowerCase().includes(query) ||
-        p.assignedAuditor?.email?.toLowerCase().includes(query)
-      )
-    }
-
-    if (statusFilter !== "all") {
-      filtered = filtered.filter(p => p.status === statusFilter)
-    }
-
-    if (auditorFilter !== "all") {
-      if (auditorFilter === "unassigned") {
-        filtered = filtered.filter(p => !p.assignedAuditor)
-      } else {
-        filtered = filtered.filter(p => p.assignedAuditor?._id === auditorFilter)
-      }
-    }
-
-    filtered.sort((a, b) => {
-      if (sortBy === "newest") {
-        return new Date(b.createdAt || 0) - new Date(a.createdAt || 0)
-      } else if (sortBy === "oldest") {
-        return new Date(a.createdAt || 0) - new Date(b.createdAt || 0)
-      } else if (sortBy === "name") {
-        return (a.projectName || "").localeCompare(b.projectName || "")
-      } else if (sortBy === "client") {
-        return (a.clientName || "").localeCompare(b.clientName || "")
-      }
-      return 0
-    })
-
-    setFilteredProjects(filtered)
+  // Search
+  if (searchQuery.trim()) {
+    const query = searchQuery.toLowerCase();
+    filtered = filtered.filter(p =>
+      p.projectName?.toLowerCase().includes(query) ||
+      p.clientName?.toLowerCase().includes(query) ||
+      p.companyName?.toLowerCase().includes(query) ||
+      p.industry?.toLowerCase().includes(query) ||
+      p.assignedAuditor?.email?.toLowerCase().includes(query)
+    );
   }
+
+  // Status
+  if (statusFilter !== "all") {
+    filtered = filtered.filter(p => p.status === statusFilter);
+  }
+
+  // Auditor
+  if (auditorFilter !== "all") {
+    if (auditorFilter === "unassigned") {
+      filtered = filtered.filter(p => !p.assignedAuditor);
+    } else {
+      filtered = filtered.filter(p => p.assignedAuditor?._id === auditorFilter);
+    }
+  }
+
+  // ✅ Industry
+  if (industryFilter !== "all") {
+    filtered = filtered.filter(p => p.industry === industryFilter);
+  }
+
+  // Sorting
+  filtered.sort((a, b) => {
+    if (sortBy === "newest") {
+      return new Date(b.createdAt) - new Date(a.createdAt);
+    }
+    if (sortBy === "oldest") {
+      return new Date(a.createdAt) - new Date(b.createdAt);
+    }
+    if (sortBy === "name") {
+      return (a.projectName || "").localeCompare(b.projectName || "");
+    }
+    if (sortBy === "client") {
+      return (a.clientName || "").localeCompare(b.clientName || "");
+    }
+    return 0;
+  });
+
+  setFilteredProjects(filtered);
+};
+
+
 
   const fetchProjects = async () => {
     try {
@@ -252,10 +271,11 @@ const ProjectManagement = () => {
     setStatusFilter("all")
     setAuditorFilter("all")
     setSortBy("newest")
+    setIndustryFilter("all")
   }
 
   const hasActiveFilters = () => {
-    return searchQuery !== "" || statusFilter !== "all" || auditorFilter !== "all" || sortBy !== "newest"
+    return searchQuery !== "" || statusFilter !== "all" || auditorFilter !== "all" || sortBy !== "newest" || industryFilter !== "all"
   }
 
   const getFilteredCount = (status) => {
@@ -296,6 +316,38 @@ const ProjectManagement = () => {
           />
         </div>
 
+        
+     <div className={styles.filterGroup}>
+  <label className={styles.filterLabel}>Industry</label>
+  <select
+    value={industryFilter}
+    onChange={(e) => setIndustryFilter(e.target.value)}
+    className={styles.select}
+  >
+    <option value="all">All Industries</option>
+    {industries.map((industry) => (
+      <option key={industry} value={industry}>
+        {industry}
+      </option>
+    ))}
+  </select>
+</div>
+
+
+
+         <div className={styles.filterGroup}>
+          <label className={styles.filterLabel}>Auditor</label>
+          <select value={auditorFilter} onChange={(e) => setAuditorFilter(e.target.value)} className={styles.select}>
+            <option value="all">All Auditors</option>
+            <option value="unassigned">Unassigned</option>
+            {auditors.map((auditor) => (
+              <option key={auditor._id} value={auditor._id}>
+                {auditor.email.split('@')[0]}
+              </option>
+            ))}
+          </select>
+        </div>
+
         <div className={styles.filterGroup}>
           <label className={styles.filterLabel}>Status</label>
           <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className={styles.select}>
@@ -308,18 +360,7 @@ const ProjectManagement = () => {
           </select>
         </div>
 
-        <div className={styles.filterGroup}>
-          <label className={styles.filterLabel}>Auditor</label>
-          <select value={auditorFilter} onChange={(e) => setAuditorFilter(e.target.value)} className={styles.select}>
-            <option value="all">All Auditors</option>
-            <option value="unassigned">Unassigned</option>
-            {auditors.map((auditor) => (
-              <option key={auditor._id} value={auditor._id}>
-                {auditor.email.split('@')[0]}
-              </option>
-            ))}
-          </select>
-        </div>
+       
 
         <div className={styles.filterGroup}>
           <label className={styles.filterLabel}>Sort By</label>
@@ -342,7 +383,15 @@ const ProjectManagement = () => {
               <span className={styles.filterBadge}>
                 Search: "{searchQuery.length > 20 ? searchQuery.substring(0, 20) + '...' : searchQuery}"
               </span>
+
             )}
+
+            {industryFilter !== "all" && (
+  <span className={styles.filterBadge}>
+    Industry: {industryFilter}
+  </span>
+)}
+
             {statusFilter !== "all" && (
               <span className={styles.filterBadge}>Status: {statusFilter}</span>
             )}
@@ -402,7 +451,7 @@ const ProjectManagement = () => {
                   <th className={styles.th}>Client Name</th>
                   <th className={styles.th}>Industry</th>
                   <th className={styles.th}>Auditor Assigned</th>
-                  <th className={styles.thCenter}>Reporting Period</th>
+                  <th className={styles.th}>Reporting Period</th>
                   <th className={styles.thCenter}>Created Date</th>
                   <th className={styles.thCenter}>Status</th>
                  
@@ -418,14 +467,14 @@ const ProjectManagement = () => {
                          
                           <div className={styles.projectInfo}>
                             <div className={styles.projectName}>{project.projectName}</div>
-                            {/* <div className={styles.projectIndustry}>{project.industry}</div> */}
+                            
                           </div>
                         </div>
                       </td>
                       <td className={styles.td}>
                         <div className={styles.clientInfo}>
                           <div className={styles.clientName}>{project.clientName}</div>
-                          {/* <div className={styles.companyName}>{project.companyName}</div> */}
+
                         </div>
                       </td>
                       <td className={styles.td}>{project.industry || "—"}</td>
@@ -445,9 +494,7 @@ const ProjectManagement = () => {
                             <div className={styles.periodYear}>
                               {project.reportingPeriod.periodType === "financial" ? "FY" : "CY"} {project.reportingPeriod.year}
                             </div>
-                            {/* <div className={styles.periodType}>
-                              {project.reportingPeriod.periodType === "financial" ? "Financial Year" : "Calendar Year"}
-                            </div> */}
+                           
                           </div>
                         ) : (
                           <span className={styles.unassigned}>Not set</span>

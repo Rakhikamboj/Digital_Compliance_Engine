@@ -13,16 +13,16 @@
   --color-danger: #dc2626;
   --color-danger-light: #ef4444;
   --color-warning: #f59e0b;  
-  --color-gray-50: #fafafa;
-  --color-gray-100: #f5f5f5;
-  --color-gray-200: #e5e7eb;
-  --color-gray-300: #d1d5db;
-  --color-gray-400: #9ca3af;
-  --color-gray-500: #6b7280;
-  --color-gray-600: #4b5563;
-  --color-gray-700: #374151;
-  --color-gray-800: #1f2937;
-  --color-gray-900: #111827;
+  --color-primary-50: #fafafa;
+  --color-primary-100: #f5f5f5;
+  --color-primary-200: #e5e7eb;
+  --color-primary-300: #d1d5db;
+  --color-primary-400: #9ca3af;
+  --color-primary-500: #6b7280;
+  --color-primary-600: #4b5563;
+  --color-primary-700: #374151;
+  --color-primary-800: #1f2937;
+  --color-primary-900: #111827;
   
   --color-bg-primary: #ffffff;
   --color-bg-secondary: #fefffa;
@@ -67,13 +67,13 @@
 
 .sidebar {
   position: absolute;
-  bottom: 6rem;
+  bottom: 2rem;
   left: 0;
   width: 280px;
 
   height: 100vh;
   background: var(--color-bg-primary);
-  border-right: 1px solid var(--color-gray-200);
+  border-right: 1px solid var(--color-primary-200);
   display: flex;
   flex-direction: column;
   transition: width 0.3s cubic-bezier(0.2, 0, 0.2, 1), box-shadow 0.3s ease;
@@ -82,8 +82,679 @@
   box-shadow: var(--shadow-lg);
 }
 
+/* ============================================
+   EXCEL-LIKE GRID STYLES - ENHANCED
+   Full Excel Experience with Copy/Paste Support
+   ============================================ */
+
+/* Grid Container */
+.excelGridContainer {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 40px);
+  background: #ffffff;
+  border-radius: 0;
+  box-shadow: 0 0 0 1px #d1d5db;
+  margin: 20px;
+  overflow: hidden;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Excel Toolbar */
+.excelToolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%);
+  border-bottom: 1px solid #d1d5db;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.toolbarLeft {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.excelTitle {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0;
+}
+
+.entryCount {
+  padding: 4px 10px;
+  background: #e0f2fe;
+  color: #0369a1;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid #bae6fd;
+}
+
+.toolbarRight {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.toolbarBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: #ffffff;
+  color: #374151;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.1s ease;
+}
+
+.toolbarBtn:hover {
+  background: #f9fafb;
+  border-color: #9ca3af;
+}
+
+.toolbarBtn:active {
+  background: #f3f4f6;
+  transform: scale(0.98);
+}
+
+.toolbarBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Info Banner */
+.infoBanner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: #dbeafe;
+  border-bottom: 1px solid #93c5fd;
+  font-size: 12px;
+  color: #1e40af;
+}
+
+.infoBanner svg {
+  flex-shrink: 0;
+}
+
+/* Excel Table Wrapper */
+.excelTableWrapper {
+  flex: 1;
+  overflow: auto;
+  background: #f9fafb;
+  position: relative;
+}
+
+.excelTable {
+  width: 100%;
+  border-collapse: collapse;
+  background: #ffffff;
+  font-size: 13px;
+  table-layout: fixed;
+  min-width: 1800px;
+}
+
+/* Excel Table Head */
+.excelTableHead {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: #f3f4f6;
+}
+
+.excelTh {
+  padding: 8px 12px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 600;
+  color: #374151;
+  background: #f3f4f6;
+  border-right: 1px solid #e5e7eb;
+  border-bottom: 1px solid #d1d5db;
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+  position: relative;
+}
+
+.excelTh:hover {
+  background: #e5e7eb;
+}
+
+.excelTh::after {
+  content: '⇅';
+  position: absolute;
+  right: 4px;
+  opacity: 0.3;
+  font-size: 10px;
+}
+
+.excelTh:last-child {
+  border-right: none;
+}
+
+/* Column Widths */
+.excelTh:nth-child(1),
+.excelTd:nth-child(1) { width: 150px; } /* Material */
+.excelTh:nth-child(2),
+.excelTd:nth-child(2) { width: 140px; } /* Handler */
+.excelTh:nth-child(3),
+.excelTd:nth-child(3) { width: 140px; } /* Disposal */
+.excelTh:nth-child(4),
+.excelTd:nth-child(4) { width: 120px; } /* Date */
+.excelTh:nth-child(5),
+.excelTd:nth-child(5) { width: 130px; } /* Type */
+.excelTh:nth-child(6),
+.excelTd:nth-child(6) { width: 90px; } /* Unit */
+.excelTh:nth-child(7),
+.excelTd:nth-child(7) { width: 110px; } /* Total */
+.excelTh:nth-child(8),
+.excelTd:nth-child(8) { width: 100px; } /* Reuse */
+.excelTh:nth-child(9),
+.excelTd:nth-child(9) { width: 100px; } /* Recycle */
+.excelTh:nth-child(10),
+.excelTd:nth-child(10) { width: 110px; } /* Composting */
+.excelTh:nth-child(11),
+.excelTd:nth-child(11) { width: 120px; } /* Incin Heat */
+.excelTh:nth-child(12),
+.excelTd:nth-child(12) { width: 130px; } /* Incin No Heat */
+.excelTh:nth-child(13),
+.excelTd:nth-child(13) { width: 100px; } /* Landfill */
+.excelTh:nth-child(14),
+.excelTd:nth-child(14) { width: 100px; } /* Exemption */
+.excelTh:nth-child(15),
+.excelTd:nth-child(15) { width: 80px; } /* Actions */
+
+/* Excel Table Cells */
+.excelTd {
+  padding: 0;
+  border-right: 1px solid #e5e7eb;
+  border-bottom: 1px solid #e5e7eb;
+  background: #ffffff;
+  vertical-align: middle;
+  position: relative;
+}
+
+.excelTd:last-child {
+  border-right: none;
+}
+
+/* Cell Focus/Selection */
+.excelTd.selected {
+  outline: 2px solid #2563eb;
+  outline-offset: -2px;
+  z-index: 5;
+}
+
+.excelTd.editing {
+  outline: 2px solid #059669;
+  outline-offset: -2px;
+  z-index: 6;
+}
+
+/* Excel Inputs */
+.excelInput,
+.excelSelect {
+  width: 100%;
+  height: 100%;
+  min-height: 36px;
+  padding: 8px 10px;
+  border: none;
+  background: transparent;
+  font-size: 13px;
+  font-weight: 400;
+  color: #111827;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  transition: background 0.1s ease;
+}
+
+.excelInput:focus,
+.excelSelect:focus {
+  outline: none;
+  background: #ffffff;
+  box-shadow: inset 0 0 0 2px #059669;
+}
+
+.excelInput::placeholder {
+  color: #9ca3af;
+  font-weight: 400;
+}
+
+.excelInput[type="number"] {
+  text-align: right;
+  font-family: 'Consolas', 'Courier New', monospace;
+  font-weight: 500;
+}
+
+.excelInput[type="date"] {
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.excelSelect {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%23666' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  padding-right: 28px;
+}
+
+/* Cell Display Mode */
+.cellDisplay {
+  width: 100%;
+  height: 100%;
+  min-height: 36px;
+  padding: 8px 10px;
+  cursor: text;
+  user-select: text;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: flex;
+  align-items: center;
+}
+
+.cellDisplay:hover {
+  background: #f9fafb;
+}
+
+/* New Entry Row */
+.newEntryRow {
+  background: #f0fdf4;
+  border-bottom: 2px solid #10b981;
+}
+
+.newEntryRow .excelTd {
+  background: #f0fdf4;
+  border-bottom: 2px solid #10b981;
+}
+
+.newEntryRow .excelInput,
+.newEntryRow .excelSelect {
+  background: #ffffff;
+  font-weight: 500;
+}
+
+.newEntryRow .excelInput:focus,
+.newEntryRow .excelSelect:focus {
+  box-shadow: inset 0 0 0 2px #10b981;
+}
+
+/* Data Rows */
+.excelDataRow {
+  transition: background 0.05s ease;
+}
+
+.excelDataRow:hover {
+  background: #f9fafb;
+}
+
+.excelDataRow:nth-child(odd) {
+  background: #ffffff;
+}
+
+.excelDataRow:nth-child(even) {
+  background: #fafbfc;
+}
+
+.excelDataRow:hover {
+  background: #f3f4f6 !important;
+}
+
+/* Row Selection */
+.excelDataRow.selectedRow {
+  background: #dbeafe !important;
+}
+
+/* Month Group Rows */
+.monthGroupRow {
+  background: var(--color-primary);
+  cursor: pointer;
+  user-select: none;
+}
+
+.monthGroupRow:hover {
+  background: #374151;
+}
+
+.monthGroupCell {
+  padding: 8px 16px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #ffffff;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid #4b5563;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.monthGroupCell::before {
+  content: '▼';
+  font-size: 10px;
+  transition: transform 0.2s ease;
+}
+
+.monthGroupRow.collapsed .monthGroupCell::before {
+  transform: rotate(-90deg);
+}
+
+/* Action Buttons */
+.addRowBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: #10b981;
+  color: #ffffff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.1s ease;
+}
+
+.addRowBtn:hover:not(:disabled) {
+  background: #059669;
+  transform: scale(1.05);
+}
+
+.addRowBtn:active:not(:disabled) {
+  transform: scale(0.95);
+}
+
+.addRowBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.deleteBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: transparent;
+  color: #dc2626;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.1s ease;
+}
+
+.deleteBtn:hover {
+  background: #fef2f2;
+  border-color: #fecaca;
+}
+
+.deleteBtn:active {
+  transform: scale(0.9);
+}
+
+/* Type Badges */
+.hazBadge,
+.nonHazBadge {
+  display: inline-block;
+  padding: 4px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+.hazBadge {
+  background: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+}
+
+.nonHazBadge {
+  background: #f0fdf4;
+  color: #16a34a;
+  border: 1px solid #bbf7d0;
+}
+
+/* Empty State */
+.emptyState {
+  padding: 60px 20px;
+  text-align: center;
+  color: #6b7280;
+  font-size: 14px;
+  background: #fafbfc;
+}
+
+/* Copy/Paste Indicator */
+.copyIndicator {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  padding: 12px 16px;
+  background: #1f2937;
+  color: #ffffff;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  z-index: 1000;
+  animation: slideIn 0.2s ease;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(100px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Scrollbar Styling */
+.excelTableWrapper::-webkit-scrollbar {
+  width: 14px;
+  height: 14px;
+}
+
+.excelTableWrapper::-webkit-scrollbar-track {
+  background: var(--color-bg-accent);
+  border: 1px solid var(--color-bg-accent);
+}
+
+.excelTableWrapper::-webkit-scrollbar-thumb {
+  background: #9ca3af;
+  border-radius: 7px;
+  border: 3px solid #f9fafb;
+}
+
+.excelTableWrapper::-webkit-scrollbar-thumb:hover {
+  background: #6b7280;
+}
+
+.excelTableWrapper::-webkit-scrollbar-corner {
+  background: #f9fafb;
+}
+
+/* Context Menu */
+.contextMenu {
+  position: fixed;
+  background: #ffffff;
+  border: 1px solid var(--color-bg-accent);
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  padding: 4px;
+  z-index: 1000;
+  min-width: 180px;
+}
+
+.contextMenuItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  font-size: 13px;
+  color: var(--color-primary-dark);
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background 0.1s ease;
+}
+
+.contextMenuItem:hover {
+  background: #f3f4f6;
+}
+
+.contextMenuItem.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.contextMenuItem kbd {
+  margin-left: auto;
+  padding: 2px 6px;
+  background: #f3f4f6;
+  border: 1px solid var(#bbf7d0);
+  border-radius: 3px;
+  font-size: 11px;
+  font-family: monospace;
+  color: #6b7280;
+}
+
+/* Loading State */
+.loadingOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.95);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  z-index: 100;
+}
+
+.loadingSpinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid #e5e7eb;
+  border-top-color: var(--color-success);
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.loadingText {
+  font-size: 14px;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+/* Keyboard Shortcuts Help */
+.shortcutsHelp {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  padding: 12px 16px;
+  background: var(--color-primary-dark);
+  color: #ffffff;
+  border-radius: 8px;
+  font-size: 12px;
+  max-width: 300px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  z-index: 999;
+}
+
+.shortcutsHelp kbd {
+  display: inline-block;
+  padding: 2px 6px;
+  background: #374151;
+  border: 1px solid #4b5563;
+  border-radius: 3px;
+  font-family: monospace;
+  font-size: 11px;
+  margin: 0 2px;
+}
+
+/* Responsive Design */
+@media (max-width: 1400px) {
+  .excelTable {
+    min-width: 1600px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .excelGridContainer {
+    margin: 10px;
+  }
+
+  .excelToolbar {
+    flex-direction: column;
+    gap: 8px;
+    align-items: stretch;
+  }
+
+  .toolbarLeft,
+  .toolbarRight {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 768px) {
+  .excelTitle {
+    font-size: 14px;
+  }
+
+  .toolbarBtn {
+    font-size: 12px;
+    padding: 6px 10px;
+  }
+
+  .excelTable {
+    font-size: 12px;
+  }
+}
+
+/* Print Styles */
+@media print {
+  .excelToolbar,
+  .addRowBtn,
+  .deleteBtn,
+  .infoBanner {
+    display: none;
+  }
+
+  .newEntryRow {
+    display: none;
+  }
+
+  .excelTable {
+    box-shadow: none;
+  }
+
+  .excelDataRow:nth-child(even) {
+    background: #f9fafb;
+  }
+}
+
 .sidebarExpanded {
-  width: 900px;
+  width: 1400px;
   z-index: 900;
   box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.3);
 }
@@ -193,7 +864,7 @@
 .sidebarSection {
   padding: var(--spacing-sm);
   padding: 10px ;
-  border-bottom: 1px solid var(--color-gray-200);
+  border-bottom: 1px solid var(--color-primary-200);
 }
 
 .allEntriesSection {
@@ -205,7 +876,7 @@
 .sectionHeading {
   font-size: 13px;
   font-weight: 700;
-  color: var(--color-gray-900);
+  color: var(--color-primary-900);
   margin: var(--spacing-sm) 0;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -219,7 +890,7 @@
 }
 
 .sectionHeadingWithIcon svg {
-  color: var(--color-gray-600);
+  color: var(--color-primary-600);
 }
 
 /* Loading and Empty States */
@@ -227,7 +898,7 @@
 .emptyState {
   padding: var(--spacing-xl) var(--spacing-md);
   text-align: center;
-  color: var(--color-gray-500);
+  color: var(--color-primary-500);
   font-size: 14px;
   font-weight: 500;
 }
@@ -263,7 +934,7 @@
 .recentEntryDate {
   font-size: 11px;
   font-weight: 600;
-  color: var(--color-gray-900);
+  color: var(--color-primary-light);
   line-height: 1.4;
   flex: 1;
 }
@@ -282,7 +953,7 @@
   text-align: center;
   font-size: 13px;
   font-weight: 600;
-  color: var(--color-gray-700);
+  color: var(--color-primary-dark);
   background: transparent;
   border: 1px solid transparent;
   border-radius: var(--radius-sm);
@@ -291,12 +962,12 @@
 }
 
 .sortButton:hover {
-  background: var(--color-gray-100);
-  border-color: var(--color-gray-200);
+ background: var(--color-primary-300);
+  border-color: var(--color-primary-light);
 }
 
 .sortButtonActive {
-  background: var(--color-gray-100);
+  background: transparent;
   border-color: var(--color-primary);
   color: var(--color-primary);
   font-weight: 700;
@@ -316,7 +987,7 @@
 .monthHeaderCompact {
   font-size: 12px;
   font-weight: 700;
-  color: var(--color-gray-700);
+  color: var(--color-primary-light);
   padding: var(--spacing-sm) 0;
   margin-bottom: var(--spacing-xs);
 }
@@ -333,27 +1004,27 @@
   justify-content: space-between;
   align-items: center;
   padding: 6px var(--spacing-sm);
-  background: var(--color-gray-50);
+  background: var(--color-primary-300);
   border-radius: var(--radius-sm);
   transition: background var(--transition-fast);
 }
 
 .compactEntry:hover {
-  background: var(--color-gray-100);
+  background: var(--color-primary-100);
 }
 
 .compactEntryText {
   font-size: 11px;
   font-weight: 600;
-  color: var(--color-gray-700);
+  color: var(--color-primary-700);
   flex: 1;
 }
 
 /* Expanded Table Filters */
 .sortFiltersExpanded {
   padding: var(--spacing-md);
-  background: var(--color-gray-50);
-  border-bottom: 1px solid var(--color-gray-200);
+  background: var(--color-primary-50);
+  border-bottom: 1px solid var(--color-primary-200);
 }
 
 .filterGroup {
@@ -363,14 +1034,14 @@
 }
 
 .filterGroup svg {
-  color: var(--color-gray-600);
+  color: var(--color-primary-600);
   flex-shrink: 0;
 }
 
 .filterLabel {
   font-size: 13px;
   font-weight: 700;
-  color: var(--color-gray-900);
+  color: var(--color-primary-900);
   flex-shrink: 0;
 }
 
@@ -378,9 +1049,9 @@
   padding: 6px 12px;
   font-size: 12px;
   font-weight: 600;
-  color: var(--color-gray-700);
+  color: var(--color-primary-700);
   background: var(--color-bg-primary);
-  border: 1px solid var(--color-gray-300);
+  border: 1px solid var(--color-primary-300);
   border-radius: var(--radius-sm);
   cursor: pointer;
   transition: all var(--transition-fast);
@@ -416,9 +1087,9 @@
 .monthHeaderTable {
   font-size: 13px;
   font-weight: 700;
-  color: var(--color-gray-700);
+  color: var(--color-primary-700);
   padding: var(--spacing-sm) var(--spacing-md);
-  background: var(--color-gray-100);
+  background: var(--color-primary-100);
   border-radius: var(--radius-md);
   margin-bottom: var(--spacing-sm);
 }
@@ -426,7 +1097,7 @@
 .tableWrapper {
   overflow-x: auto;
   border-radius: var(--radius-md);
-  border: 1px solid var(--color-gray-200);
+  border: 1px solid var(--color-primary-200);
   background: var(--color-bg-primary);
 }
 
@@ -439,7 +1110,7 @@
 }
 
 .entriesTable thead {
-  background: var(--color-gray-50);
+  background: var(--color-primary-50);
   position: sticky;
   top: 0;
   z-index: 10;
@@ -450,20 +1121,20 @@
   padding: 12px;
   font-size: 11px;
   font-weight: 700;
-  color: var(--color-gray-700);
+  color: var(--color-primary-700);
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  border-bottom: 2px solid var(--color-gray-200);
+  border-bottom: 2px solid var(--color-primary-200);
   white-space: nowrap;
 }
 
 .entriesTable tbody tr {
-  border-bottom: 1px solid var(--color-gray-100);
+  border-bottom: 1px solid var(--color-primary-100);
   transition: background var(--transition-fast);
 }
 
 .entriesTable tbody tr:hover {
-  background: var(--color-gray-50);
+  background: var(--color-primary-50);
 }
 
 .entriesTable tbody tr:last-child {
@@ -473,12 +1144,12 @@
 .entriesTable td {
   padding: 12px;
   font-weight: 500;
-  color: var(--color-gray-700);
+  color: var(--color-primary-700);
 }
 
 .dateCell {
   font-weight: 600;
-  color: var(--color-gray-900);
+  color: var(--color-primary-900);
   white-space: nowrap;
 }
 
@@ -488,20 +1159,20 @@
 }
 
 .handlerCell {
-  color: var(--color-gray-600);
+  color: var(--color-primary-600);
   white-space: nowrap;
 }
 
 .totalCell {
   text-align: right;
   font-weight: 700;
-  color: var(--color-gray-900);
+  color: var(--color-primary-900);
   white-space: nowrap;
 }
 
 .unitCell {
   text-align: center;
-  color: var(--color-gray-600);
+  color: var(--color-primary-600);
   white-space: nowrap;
 }
 
@@ -569,8 +1240,8 @@
 .sidebarFooter {
   padding: var(--spacing-ms);
   padding: 12px;
-  border-top: 1px solid var(--color-gray-200);
-  background: var(--color-gray-50);
+  border-top: 1px solid var(--color-primary-200);
+  background: var(--color-primary-50);
   margin-top: auto;
 }
 
@@ -701,20 +1372,20 @@
   padding: 12px var(--spacing-md);
   font-size: 14px;
   font-weight: 500;
-  color: var(--color-gray-900);
+  color: var(--color-primary-900);
   background: var(--color-bg-primary);
-  border: 2px solid var(--color-gray-200);
+  border: 2px solid var(--color-primary-200);
   border-radius: var(--radius-md);
   transition: all var(--transition-fast);
   box-sizing: border-box;
 }
 
 .input::placeholder {
-  color: var(--color-gray-400);
+  color: var(--color-primary-400);
 }
 
 .input:hover {
-  border-color: var(--color-gray-300);
+  border-color: var(--color-primary-300);
 }
 
 .input:focus {
@@ -724,7 +1395,7 @@
 }
 
 .input:disabled {
-  background: var(--color-gray-100);
+  background: var(--color-primary-100);
   cursor: not-allowed;
   opacity: 0.6;
 }
@@ -753,7 +1424,7 @@
 .tabContainer {
   display: flex;
   gap: var(--spacing-sm);
-  border-bottom: 2px solid var(--color-gray-200);
+  border-bottom: 2px solid var(--color-primary-200);
   margin-bottom: var(--spacing-lg);
 }
 
@@ -761,7 +1432,7 @@
   padding: 14px var(--spacing-xl);
   font-size: 14px;
   font-weight: 700;
-  color: var(--color-gray-500);
+  color: var(--color-primary-500);
   background: transparent;
   border: none;
   border-bottom: 3px solid transparent;
@@ -806,7 +1477,7 @@
 .addButton {
   width:auto;  
   text-align: center; 
-  color: var(--color-gray-700); 
+  color: var(--color-primary-700); 
   display: inline-flex; 
   gap: var(--spacing-sm);
     padding: 10px 16px;
@@ -840,18 +1511,18 @@
 .backButton {
   padding: 10px var(--spacing-md);
   background: var(--color-bg-primary);
-  border: 1px solid var(--color-gray-300);
+  border: 1px solid var(--color-primary-300);
   border-radius: var(--radius-md);
   font-size: 14px;
   font-weight: 600;
-  color: var(--color-gray-700);
+  color: var(--color-primary-700);
   cursor: pointer;
   transition: all var(--transition-fast);
 }
 
 .backButton:hover {
-  background: var(--color-gray-50);
-  border-color: var(--color-gray-400);
+  background: var(--color-primary-50);
+  border-color: var(--color-primary-400);
 }
 
 /* ============================================
