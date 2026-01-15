@@ -4,7 +4,7 @@ import { Clock, XCircle } from "lucide-react"
 import styles from "../styles/ProjectManagement.module.css"
 import Pagination from "../common/Pagination"
 import SearchBar from "../common/Searchbar"
-
+import { useToast } from "../context/ToastContext"
 const API_URL = import.meta.env.VITE_API_KEY
 
 const ProjectManagement = () => {
@@ -14,6 +14,7 @@ const ProjectManagement = () => {
   const [loading, setLoading] = useState(true)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [step, setStep] = useState(1)
+  const { showToast } = useToast();
   const [error, setError] = useState(null)
 
   // Pagination states
@@ -119,7 +120,7 @@ const ProjectManagement = () => {
       const token = localStorage.getItem("token")
       if (!token || token === "undefined" || token === "null") {
         console.error("ProjectManagement: No valid token available")
-        setError("Authentication required. Please login again.")
+        showToast("Authentication required. Please login again.", "error")
         setLoading(false)
         return
       }
@@ -139,15 +140,15 @@ const ProjectManagement = () => {
       } else {
         const errorData = await response.json().catch(() => ({}))
         console.error("ProjectManagement: Fetch failed", response.status, errorData.message)
-        setError(errorData.message || "Failed to fetch projects")
+        showToast(errorData.message || "Failed to fetch projects", "error")
         if (response.status === 401) {
           localStorage.removeItem("token")
-          setError("Session expired. Please login again.")
+          showToast("Session expired. Please login again.", "error")
         }
       }
     } catch (error) {
       console.error("Fetch projects error:", error)
-      setError("Network error. Please check your connection.")
+      showToast("Network error. Please check your connection.", "error")
     } finally {
       setLoading(false)
     }
@@ -178,7 +179,7 @@ const ProjectManagement = () => {
     try {
       const token = localStorage.getItem("token")
       if (!token) {
-        alert("Authentication required. Please login again.")
+        showToast("Authentication required. Please login again.", "error")
         return
       }
 
@@ -214,14 +215,14 @@ const ProjectManagement = () => {
           },
           assignedAuditor: "",
         })
-        alert("Project created successfully!")
+        showToast("Project created successfully!", "success")
       } else {
         const data = await response.json()
-        alert(data.message || "Failed to create project")
+        showToast(data.message || "Failed to create project", "error")
       }
     } catch (error) {
       console.error("Create project error:", error)
-      alert("Network error. Please try again.")
+      showToast("Network error. Please try again.", "error")
     }
   }
 

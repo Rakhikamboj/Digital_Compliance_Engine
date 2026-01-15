@@ -53,11 +53,6 @@
    LAYOUT CONTAINERS
    ============================================ */
 
-.containerWithSidebar {
-  position: relative;
-  min-height: 100vh;
-  background: linear-gradient(135deg, var(--color-bg-secondary) 0%, var(--color-bg-accent) 100%);
-}
 
 .dashboardContainer {
   min-height: 100vh;
@@ -67,7 +62,7 @@
 
 .sidebar {
   position: absolute;
-  bottom: 2rem;
+  top: 6rem;
   left: 0;
   width: 280px;
 
@@ -754,8 +749,8 @@
 }
 
 .sidebarExpanded {
-  width: 1400px;
-  z-index: 900;
+  width: 1220px;
+  z-index: 200;
   box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.3);
 }
 
@@ -856,9 +851,9 @@
   /* transform: translateY(-50%) scale(1.05); */
 }
 
-.toggleButton:active {
+/* .toggleButton:active {
 
-}
+} */
 
 /* Sidebar Sections */
 .sidebarSection {
@@ -1326,7 +1321,7 @@
 .formContainer {
   flex: 1;
   padding: var(--spacing-lg);
-  background-color: #fefffa;
+  background-color: #ffffff;
 }
 
 .card {
@@ -1443,22 +1438,27 @@
 }
 
 .tab:hover {
-  color: var(--color-primary);
+  color: #194d2a;
 }
 
 .tabActive {
-  color: var(--color-primary);
-  border-bottom-color: var(--color-primary);
+  color: #194d2a;
+  border-bottom-color: #194d2a;
 }
 
-/* Waste Data Section */
+
+
 .wasteDataSection {
   background: linear-gradient(135deg, var(--color-bg-secondary) 0%, var(--color-bg-accent) 100%);
   border: 1px solid rgba(25, 77, 42, 0.1);
   border-radius: var(--radius-lg);
   padding: var(--spacing-lg);
   margin-bottom: var(--spacing-lg);
+  transition: all var(--transition-base);
+  width: 100%;
+  box-sizing: border-box;
 }
+
 
 .sectionTitle {
   font-size: 16px;

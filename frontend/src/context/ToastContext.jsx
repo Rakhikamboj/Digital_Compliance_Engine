@@ -9,7 +9,7 @@ export const ToastProvider = ({ children }) => {
     type: "success",
   });
 
-  const showToast = (message, type = "success") => {
+const showToast = (message, type = "success") => {
     setToast({ open: true, message, type });
   };
 

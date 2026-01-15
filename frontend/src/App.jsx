@@ -4,16 +4,21 @@ import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import AdminDashboard from "./pages/AdminDashboard";
-import AuditorDashboard from "./pages/AuditorDashbaord";
+import AuditorDashboard from "./pages/AuditorDashbaord"
 
+import { AuthProvider } from "./context/AuthContext";
+import { ToastProvider, useToast } from "./context/ToastContext";
 import Toast from "./common/Toast";
-import { ToastProvider, useToast } from "./common/ToastContext"
+
+import WasteEntryContainer from "./components/CalculateDiversion";
+import WasteDataEntryForm from "./components/FormView";
+import WasteDataEntryExcel from "./components/ExcelView";
 
 const API_URL = import.meta.env.VITE_API_KEY;
 
 const AppContent = () => {
   const navigate = useNavigate();
-  const { toast, closeToast } = useToast(); // ✅ GLOBAL TOAST ACCESS
+  const { toast, closeToast } = useToast();
 
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -38,7 +43,6 @@ const AppContent = () => {
           setUser(data);
         } else {
           localStorage.removeItem("token");
-          setUser(null);
           navigate("/login", { replace: true });
         }
       } catch (error) {
@@ -72,7 +76,6 @@ const AppContent = () => {
 
   return (
     <>
-
       <Toast
         open={toast.open}
         message={toast.message}
@@ -81,10 +84,10 @@ const AppContent = () => {
       />
 
       <Routes>
-        {/* PUBLIC LOGIN */}
+        {/* PUBLIC */}
         <Route path="/login" element={<Auth onLogin={handleLogin} />} />
 
-        {/* PROTECTED ROOT */}
+        {/* ROOT DASHBOARD */}
         <Route
           path="/"
           element={
@@ -102,6 +105,22 @@ const AppContent = () => {
           }
         />
 
+        {/* WASTE ENTRY (AUDITOR ONLY) */}
+        <Route
+          path="/waste-entry"
+          element={
+            user?.role === "AUDITOR" ? (
+              <WasteEntryContainer user={user} />
+            ) : (
+              <Navigate to="/login" replace />
+            )
+          }
+        >
+          <Route index element={<Navigate to="excel" replace />} />
+          <Route path="excel" element={<WasteDataEntryExcel user={user} />} />
+          <Route path="form" element={<WasteDataEntryForm user={user} />} />
+        </Route>
+
         {/* FALLBACK */}
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
@@ -109,12 +128,13 @@ const AppContent = () => {
   );
 };
 
-
 const App = () => {
   return (
-    <ToastProvider>
-      <AppContent />
-    </ToastProvider>
+    <AuthProvider>
+      <ToastProvider>
+        <AppContent />
+      </ToastProvider>
+    </AuthProvider>
   );
 };
 

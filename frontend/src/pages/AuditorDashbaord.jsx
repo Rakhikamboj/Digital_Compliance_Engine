@@ -5,7 +5,7 @@ import WasteDataEntry from "../components/CalculateDiversion"
 import Pagination from "../common/Pagination"
 import styles from "../styles/AuditorDashboard.module.css"
 import AuditorHeader from "../components/AuditorHeader"
-import { useToast } from "../common/ToastContext";
+import { useToast } from "../context/ToastContext";
 
 const API_URL = import.meta.env.VITE_API_KEY
 

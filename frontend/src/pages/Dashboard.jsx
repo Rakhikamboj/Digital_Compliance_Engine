@@ -14,7 +14,7 @@ import {
 } from "recharts"
 import styles from "../styles/Dashboard.module.css"
 import { Leaf, Trash2, AlertCircle, Download, FileText, X } from "lucide-react"
-
+import { useToast } from "../context/ToastContext"
 const API_URL = import.meta.env.VITE_API_KEY + "/api/waste-entries"
 
 // Circular Progress Component
@@ -59,6 +59,7 @@ const ComplianceDashboard = ({ projectSelected, reportingPeriod = { periodType: 
   const [showPreview, setShowPreview] = useState(false)
   const [pdfLoading, setPdfLoading] = useState(false)
   const previewRef = useRef(null)
+      const { showToast } = useToast();
 
   // Get auth token from localStorage
   const getAuthToken = () => {
@@ -478,7 +479,7 @@ const ComplianceDashboard = ({ projectSelected, reportingPeriod = { periodType: 
       setPdfLoading(true)
 
       if (!window.jspdf) {
-        alert("PDF library is still loading. Please try again in a moment.")
+        showToast("PDF library is still loading. Please try again in a moment.")
         setPdfLoading(false)
         return
       }
@@ -487,7 +488,7 @@ const ComplianceDashboard = ({ projectSelected, reportingPeriod = { periodType: 
       doc.save(`ESG-Compliance-Report-${reportingPeriod.year}.pdf`)
     } catch (error) {
       console.error("Error generating PDF:", error)
-      alert("Failed to generate PDF. Please try again.")
+      showToast("Failed to generate PDF. Please try again.")
     } finally {
       setPdfLoading(false)
     }
@@ -549,6 +550,7 @@ const ComplianceDashboard = ({ projectSelected, reportingPeriod = { periodType: 
           <div className={styles.headerContent}>
             <div className={styles.headerLeft}>
               <div>
+                
                 <h1 className={styles.headerTitle}>Compliance Dashboard</h1>
                 <p className={styles.headerSubtitle}>
                   {reportingPeriod.periodType === "financial" ? "FY" : ""} {reportingPeriod.year}

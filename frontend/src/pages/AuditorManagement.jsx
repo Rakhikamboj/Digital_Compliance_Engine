@@ -2,7 +2,7 @@ import { useState, useEffect } from "react"
 import { UserPlus, MoreVertical, X, Users, Search } from "lucide-react"
 import styles from "../styles/AuditorManagement.module.css"
 import Pagination from "../common/Pagination"
-
+import { useToast } from "../context/ToastContext";
 const API_URL = import.meta.env.VITE_API_KEY
 
 const AuditorManagement = () => {
@@ -11,6 +11,7 @@ const AuditorManagement = () => {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [error, setError] = useState(null)
   const [searchQuery, setSearchQuery] = useState("")
+    const { showToast } = useToast();
   
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1)
@@ -37,7 +38,7 @@ const AuditorManagement = () => {
       
       if (!token || token === "undefined" || token === "null") {
         console.error("AuditorManagement: No valid token available")
-        setError("Authentication required. Please login again.")
+        showToast("Authentication required. Please login again.", "error");
         setLoading(false)
         return
       }
@@ -57,7 +58,7 @@ const AuditorManagement = () => {
       } else {
         const errorData = await response.json().catch(() => ({}))
         console.error("AuditorManagement: Fetch failed", response.status, errorData.message)
-        setError(errorData.message || "Failed to fetch auditors")
+        showToast(errorData.message || "Failed to fetch auditors", "error")
         
         if (response.status === 401) {
           localStorage.removeItem("token")
@@ -66,7 +67,7 @@ const AuditorManagement = () => {
       }
     } catch (error) {
       console.error("Fetch auditors error:", error)
-      setError("Network error. Please check your connection.")
+      showToast("Network error. Please check your connection.", "error")
     } finally {
       setLoading(false)
     }
@@ -78,7 +79,7 @@ const AuditorManagement = () => {
       const token = localStorage.getItem("token")
       
       if (!token) {
-        alert("Authentication required. Please login again.")
+        showToast("Authentication required. Please login again.", "error")
         return
       }
 
@@ -105,14 +106,14 @@ const AuditorManagement = () => {
           companyName: "",
           status: "Active",
         })
-        alert("Auditor created successfully!")
+        showToast("Auditor created successfully!", "success")
       } else {
         const data = await response.json()
-        alert(data.message || "Failed to create auditor")
+        showToast(data.message || "Failed to create auditor", "error")
       }
     } catch (error) {
       console.error("Create auditor error:", error)
-      alert("Network error. Please try again.")
+      showToast("Network error. Please try again.", "error")
     }
   }
 
