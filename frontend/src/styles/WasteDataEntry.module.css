@@ -62,7 +62,7 @@
 
 .sidebar {
   position: absolute;
-  top: 6rem;
+  bottom: 7rem;
   left: 0;
   width: 280px;
 
@@ -1457,9 +1457,12 @@
   transition: all var(--transition-base);
   width: 100%;
   box-sizing: border-box;
-}
-
-
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    background: #ffffff;
+    font-family: system-ui, -apple-system, sans-serif;
+  }
 .sectionTitle {
   font-size: 16px;
   font-weight: 700;

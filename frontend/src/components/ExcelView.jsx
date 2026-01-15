@@ -1,7 +1,9 @@
 import { useState, useEffect, useRef } from "react";
 import { Plus, Download, BarChart3, X, ChevronDown, ArrowUp, ArrowDown, Filter, Check, ChevronLeft } from "lucide-react";
-import ComplianceDashboard from "../pages/Dashboard";
+// import ComplianceDashboard from "../pages/Dashboard";
 import { useToast } from "../context/ToastContext"
+import styles from "../styles/ExcelView.mocule.css";
+
 // Mock API URL - Replace with your actual API
 const API_URL = import.meta.env.VITE_API_KEY || "http://localhost:5000";
 
@@ -18,11 +20,6 @@ const DISPOSAL_MODES = [
   "Incineration with Heat Recovery", "Incineration without Heat Recovery",
   "Treatment", "Others"
 ];
-
-// Toast notification helper
-const showToast = (message, type = "info") => {
-  console.log(`[${type.toUpperCase()}] ${message}`);
-};
 
 // Column Header with Filter/Sort Dropdown
 const ColumnHeader = ({ 
@@ -62,23 +59,20 @@ const ColumnHeader = ({
 
   if (!enableSort && !enableFilter) {
     return (
-      <th style={styles.th}>
-        <div style={styles.headerContent}>
-          <span style={styles.headerLabel}>{label}</span>
+      <th className={styles.th}>
+        <div className={styles.headerContent}>
+          <span className={styles.headerLabel}>{label}</span>
         </div>
       </th>
     );
   }
 
   return (
-    <th style={styles.th}>
-      <div style={styles.headerContent}>
-        <span style={styles.headerLabel}>{label}</span>
+    <th className={styles.th}>
+      <div className={styles.headerContent}>
+        <span className={styles.headerLabel}>{label}</span>
         <button 
-          style={{
-            ...styles.headerButton,
-            ...(hasActiveFilter || isSorted ? styles.headerButtonActive : {})
-          }}
+          className={`${styles.headerButton} ${hasActiveFilter || isSorted ? styles.headerButtonActive : ''}`}
           onClick={() => setShowDropdown(!showDropdown)}
         >
           <ChevronDown size={20} />
@@ -86,16 +80,13 @@ const ColumnHeader = ({
       </div>
 
       {showDropdown && (
-        <div ref={dropdownRef} style={styles.dropdown}>
+        <div ref={dropdownRef} className={styles.dropdown}>
           {enableSort && (
             <>
-              <div style={styles.dropdownSection}>
-                <div style={styles.sectionTitle}>Sort</div>
+              <div className={styles.dropdownSection}>
+                <div className={styles.sectionTitle}>Sort</div>
                 <button
-                  style={{
-                    ...styles.dropdownItem,
-                    ...(isSorted && sortConfig.direction === "asc" ? styles.dropdownItemActive : {})
-                  }}
+                  className={`${styles.dropdownItem} ${isSorted && sortConfig.direction === "asc" ? styles.dropdownItemActive : ''}`}
                   onClick={() => {
                     onSort(field, "asc");
                     setShowDropdown(false);
@@ -106,10 +97,7 @@ const ColumnHeader = ({
                   {isSorted && sortConfig.direction === "asc" && <Check size={14} />}
                 </button>
                 <button
-                  style={{
-                    ...styles.dropdownItem,
-                    ...(isSorted && sortConfig.direction === "desc" ? styles.dropdownItemActive : {})
-                  }}
+                  className={`${styles.dropdownItem} ${isSorted && sortConfig.direction === "desc" ? styles.dropdownItemActive : ''}`}
                   onClick={() => {
                     onSort(field, "desc");
                     setShowDropdown(false);
@@ -120,13 +108,13 @@ const ColumnHeader = ({
                   {isSorted && sortConfig.direction === "desc" && <Check size={14} />}
                 </button>
               </div>
-              {enableFilter && <div style={styles.divider}></div>}
+              {enableFilter && <div className={styles.divider}></div>}
             </>
           )}
 
           {enableFilter && (
-            <div style={styles.dropdownSection}>
-              <div style={styles.sectionTitle}>
+            <div className={styles.dropdownSection}>
+              <div className={styles.sectionTitle}>
                 <Filter size={12} />
                 <span>Filter</span>
               </div>
@@ -138,11 +126,11 @@ const ColumnHeader = ({
                     placeholder="Search..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    style={styles.searchInput}
+                    className={styles.searchInput}
                     onClick={(e) => e.stopPropagation()}
                   />
-                  <div style={styles.optionsList}>
-                    <label style={styles.checkboxLabel}>
+                  <div className={styles.optionsList}>
+                    <label className={styles.checkboxLabel}>
                       <input
                         type="checkbox"
                         checked={!filterConfig[field] || filterConfig[field].length === 0}
@@ -151,7 +139,7 @@ const ColumnHeader = ({
                       <span>(Select All)</span>
                     </label>
                     {filteredOptions.map((option) => (
-                      <label key={option} style={styles.checkboxLabel}>
+                      <label key={option} className={styles.checkboxLabel}>
                         <input
                           type="checkbox"
                           checked={!filterConfig[field] || filterConfig[field].length === 0 || filterConfig[field].includes(option)}
@@ -171,20 +159,20 @@ const ColumnHeader = ({
                   </div>
                 </>
               ) : filterType === "date" ? (
-                <div style={styles.dateFilterContainer}>
+                <div className={styles.dateFilterContainer}>
                   <input
                     type="date"
                     placeholder="From"
                     value={filterConfig[`${field}From`] || ""}
                     onChange={(e) => onFilter(`${field}From`, e.target.value)}
-                    style={styles.dateInput}
+                    className={styles.dateInput}
                   />
                   <input
                     type="date"
                     placeholder="To"
                     value={filterConfig[`${field}To`] || ""}
                     onChange={(e) => onFilter(`${field}To`, e.target.value)}
-                    style={styles.dateInput}
+                    className={styles.dateInput}
                   />
                 </div>
               ) : (
@@ -193,13 +181,13 @@ const ColumnHeader = ({
                   placeholder={`Filter ${label}...`}
                   value={filterConfig[field] || ""}
                   onChange={(e) => onFilter(field, e.target.value)}
-                  style={styles.filterInput}
+                  className={styles.filterInput}
                 />
               )}
 
               {hasActiveFilter && (
                 <button
-                  style={styles.clearFilterBtn}
+                  className={styles.clearFilterBtn}
                   onClick={() => {
                     if (filterType === "date") {
                       onFilter(`${field}From`, "");
@@ -222,7 +210,6 @@ const ColumnHeader = ({
 };
 
 const WasteEntryExcel = ({ projectInfo }) => {
-  // const [showDashboard, setShowDashboard] = useState(false);
   const [wasteEntries, setWasteEntries] = useState([]);
   const [showAddRow, setShowAddRow] = useState(false);
   const [sortConfig, setSortConfig] = useState({ field: null, direction: null });
@@ -231,7 +218,7 @@ const WasteEntryExcel = ({ projectInfo }) => {
   const [editingCell, setEditingCell] = useState(null);
   const [editValue, setEditValue] = useState("");
   const [expandedMonths, setExpandedMonths] = useState({});
-     const { showToast } = useToast();
+  const { showToast } = useToast();
   const [loading, setLoading] = useState(false);
   const [fetchLoading, setFetchLoading] = useState(true);
 
@@ -645,7 +632,7 @@ const WasteEntryExcel = ({ projectInfo }) => {
 
     if (field === "type") {
       return (
-        <span style={entry.type === "hazardous" ? styles.badgeHazardous : styles.badgeNonHazardous}>
+        <span className={entry.type === "hazardous" ? styles.badgeHazardous : styles.badgeNonHazardous}>
           {entry.type === "hazardous" ? "Hazardous" : "Non-Hazardous"}
         </span>
       );
@@ -664,7 +651,7 @@ const WasteEntryExcel = ({ projectInfo }) => {
             onChange={(e) => setEditValue(e.target.value)}
             onBlur={handleSaveCellEdit}
             autoFocus
-            style={styles.editSelect}
+            className={styles.editSelect}
           >
             <option value="">Select...</option>
             {WASTE_MATERIALS.map(m => <option key={m} value={m}>{m}</option>)}
@@ -679,7 +666,7 @@ const WasteEntryExcel = ({ projectInfo }) => {
             onChange={(e) => setEditValue(e.target.value)}
             onBlur={handleSaveCellEdit}
             autoFocus
-            style={styles.editSelect}
+            className={styles.editSelect}
           >
             <option value="">Select...</option>
             {DISPOSAL_MODES.map(m => <option key={m} value={m}>{m}</option>)}
@@ -694,7 +681,7 @@ const WasteEntryExcel = ({ projectInfo }) => {
             onChange={(e) => setEditValue(e.target.value)}
             onBlur={handleSaveCellEdit}
             autoFocus
-            style={styles.editSelect}
+            className={styles.editSelect}
           >
             <option value="kg">kg</option>
             <option value="tonnes">Tonnes</option>
@@ -710,10 +697,7 @@ const WasteEntryExcel = ({ projectInfo }) => {
           onChange={(e) => setEditValue(e.target.value)}
           onBlur={handleSaveCellEdit}
           autoFocus
-          style={{
-            ...styles.editInput,
-            ...(isNumeric ? { textAlign: 'right' } : {})
-          }}
+          className={`${styles.editInput} ${isNumeric ? styles.editInputNumeric : ''}`}
         />
       );
     }
@@ -765,45 +749,41 @@ const WasteEntryExcel = ({ projectInfo }) => {
   });
 
   return (
-    <div style={styles.container}>
-      <div style={styles.toolbar}>
-        <div style={styles.toolbarLeft}>
-          <h2 style={styles.title}>Waste Entry Spreadsheet</h2>
-          <span style={styles.entryCount}>
+    <div className={styles.container}>
+      <div className={styles.toolbar}>
+        <div className={styles.toolbarLeft}>
+          <h2 className={styles.title}>Waste Entry Spreadsheet</h2>
+          <span className={styles.entryCount}>
             {sortedData.length} {sortedData.length !== gridData.length && `of ${gridData.length}`} entries
           </span>
           {hasActiveFilters && (
-            <button style={styles.clearAllBtn} onClick={clearAllFilters}>
+            <button className={styles.clearAllBtn} onClick={clearAllFilters}>
               Clear All Filters
             </button>
           )}
         </div>
-        <div style={styles.toolbarRight}>
-          <button style={styles.addBtn} onClick={() => setShowAddRow(!showAddRow)}>
+        <div className={styles.toolbarRight}>
+          <button className={styles.addBtn} onClick={() => setShowAddRow(!showAddRow)}>
             <Plus size={16} />
             Add Entry
           </button>
-          <button style={styles.toolbarBtn} onClick={handleExport}>
+          <button className={styles.toolbarBtn} onClick={handleExport}>
             <Download size={16} />
             Export
           </button>
-          {/* <button className={styles.dashboardBtn} onClick={() => setShowDashboard(true)}>
-            <BarChart3 size={16} />
-            Dashboard
-          </button> */}
         </div>
       </div>
 
-      <div style={styles.infoBanner}>
+      <div className={styles.infoBanner}>
         Click column headers to sort and filter.
       </div>
 
       {fetchLoading && (
-        <div style={styles.loadingState}>Loading waste entries...</div>
+        <div className={styles.loadingState}>Loading waste entries...</div>
       )}
 
-      <div style={styles.tableWrapper}>
-        <table style={styles.table}>
+      <div className={styles.tableWrapper}>
+        <table className={styles.table}>
           <thead>
             <tr>
               <ColumnHeader label="Material" field="wasteMaterial" sortConfig={sortConfig} onSort={handleSort} filterConfig={filterConfig} onFilter={handleFilter} filterType="text" enableSort={true} enableFilter={true} />
@@ -820,50 +800,50 @@ const WasteEntryExcel = ({ projectInfo }) => {
               <ColumnHeader label="Incin. (No Heat)" field="incinerationWithoutHeat" sortConfig={sortConfig} onSort={handleSort} filterConfig={filterConfig} onFilter={handleFilter} enableSort={false} enableFilter={false} />
               <ColumnHeader label="Landfill" field="landfill" sortConfig={sortConfig} onSort={handleSort} filterConfig={filterConfig} onFilter={handleFilter} enableSort={false} enableFilter={false} />
               <ColumnHeader label="Exemption" field="exemption" sortConfig={sortConfig} onSort={handleSort} filterConfig={filterConfig} onFilter={handleFilter} enableSort={false} enableFilter={false} />
-              <th style={styles.th}>Actions</th>
+              <th className={styles.th}>Actions</th>
             </tr>
           </thead>
           <tbody>
             {showAddRow && (
-              <tr style={styles.newRow}>
-                <td style={styles.td}>
-                  <select style={styles.select} value={newRow.wasteMaterial} onChange={(e) => setNewRow({...newRow, wasteMaterial: e.target.value})}>
+              <tr className={styles.newRow}>
+                <td className={styles.td}>
+                  <select className={styles.select} value={newRow.wasteMaterial} onChange={(e) => setNewRow({...newRow, wasteMaterial: e.target.value})}>
                     <option value="">Select...</option>
                     {WASTE_MATERIALS.map(m => <option key={m} value={m}>{m}</option>)}
                   </select>
                 </td>
-                <td style={styles.td}>
-                  <input style={styles.input} placeholder="Handler..." value={newRow.wasteHandler} onChange={(e) => setNewRow({...newRow, wasteHandler: e.target.value})} />
+                <td className={styles.td}>
+                  <input className={styles.input} placeholder="Handler..." value={newRow.wasteHandler} onChange={(e) => setNewRow({...newRow, wasteHandler: e.target.value})} />
                 </td>
-                <td style={styles.td}>
-                  <select style={styles.select} value={newRow.modeOfDisposal} onChange={(e) => setNewRow({...newRow, modeOfDisposal: e.target.value})}>
+                <td className={styles.td}>
+                  <select className={styles.select} value={newRow.modeOfDisposal} onChange={(e) => setNewRow({...newRow, modeOfDisposal: e.target.value})}>
                     <option value="">Select...</option>
                     {DISPOSAL_MODES.map(m => <option key={m} value={m}>{m}</option>)}
                   </select>
                 </td>
-                <td style={styles.td}>
-                  <input type="date" style={styles.input} value={newRow.inputDate} onChange={(e) => setNewRow({...newRow, inputDate: e.target.value})} />
+                <td className={styles.td}>
+                  <input type="date" className={styles.input} value={newRow.inputDate} onChange={(e) => setNewRow({...newRow, inputDate: e.target.value})} />
                 </td>
-                <td style={styles.td}>
-                  <select style={styles.select} value={newRow.type} onChange={(e) => setNewRow({...newRow, type: e.target.value})}>
+                <td className={styles.td}>
+                  <select className={styles.select} value={newRow.type} onChange={(e) => setNewRow({...newRow, type: e.target.value})}>
                     <option value="hazardous">Hazardous</option>
                     <option value="nonHazardous">Non-Hazardous</option>
                   </select>
                 </td>
-                <td style={styles.td}>
-                  <select style={styles.select} value={newRow.unit} onChange={(e) => setNewRow({...newRow, unit: e.target.value})}>
+                <td className={styles.td}>
+                  <select className={styles.select} value={newRow.unit} onChange={(e) => setNewRow({...newRow, unit: e.target.value})}>
                     <option value="kg">kg</option>
                     <option value="tonnes">Tonnes</option>
                     <option value="metric_tonnes">MT</option>
                   </select>
                 </td>
                 {['total', 'reuse', 'recycle', 'composting', 'incinerationWithHeat', 'incinerationWithoutHeat', 'landfill', 'exemption'].map(field => (
-                  <td key={field} style={styles.td}>
-                    <input type="number" style={{...styles.input, textAlign: 'right'}} placeholder="0" value={newRow[field]} onChange={(e) => setNewRow({...newRow, [field]: e.target.value})} />
+                  <td key={field} className={styles.td}>
+                    <input type="number" className={`${styles.input} ${styles.inputNumeric}`} placeholder="0" value={newRow[field]} onChange={(e) => setNewRow({...newRow, [field]: e.target.value})} />
                   </td>
                 ))}
-                <td style={styles.td}>
-                  <button onClick={handleAddRow} disabled={loading} style={styles.saveBtn}>
+                <td className={styles.td}>
+                  <button onClick={handleAddRow} disabled={loading} className={styles.saveBtn}>
                     <Plus size={16} />
                   </button>
                 </td>
@@ -872,64 +852,64 @@ const WasteEntryExcel = ({ projectInfo }) => {
 
             {sortedMonths.length === 0 ? (
               <tr>
-                <td colSpan="15" style={styles.emptyState}>
+                <td colSpan="15" className={styles.emptyState}>
                   No entries yet. Add your first entry above.
                 </td>
               </tr>
             ) : (
               sortedMonths.map((monthKey) => (
                 <>
-                  <tr key={`header-${monthKey}`} onClick={() => toggleMonth(monthKey)} style={styles.monthHeader}>
-                    <td colSpan="15" style={styles.monthHeaderCell}>
-                      <span style={styles.monthArrow}>{expandedMonths[monthKey] ? '▼' : '▶'}</span> {formatMonth(monthKey)} ({groupedData[monthKey].length} entries)
+                  <tr key={`header-${monthKey}`} onClick={() => toggleMonth(monthKey)} className={styles.monthHeader}>
+                    <td colSpan="15" className={styles.monthHeaderCell}>
+                      <span className={styles.monthArrow}>{expandedMonths[monthKey] ? '▼' : '▶'}</span> {formatMonth(monthKey)} ({groupedData[monthKey].length} entries)
                     </td>
                   </tr>
                   {expandedMonths[monthKey] && groupedData[monthKey].map((entry, idx) => (
-                    <tr key={entry._id} style={{...styles.dataRow, ...(idx % 2 === 0 ? styles.evenRow : {})}}>
-                      <td style={{...styles.td, ...styles.editableCell}} onDoubleClick={() => handleCellDoubleClick(entry._id, "wasteMaterial", entry.wasteMaterial)}>
+                    <tr key={entry._id} className={`${styles.dataRow} ${idx % 2 === 0 ? styles.evenRow : ''}`}>
+                      <td className={`${styles.td} ${styles.editableCell}`} onDoubleClick={() => handleCellDoubleClick(entry._id, "wasteMaterial", entry.wasteMaterial)}>
                         {renderCell(entry, "wasteMaterial")}
                       </td>
-                      <td style={{...styles.td, ...styles.editableCell}} onDoubleClick={() => handleCellDoubleClick(entry._id, "wasteHandler", entry.wasteHandler)}>
+                      <td className={`${styles.td} ${styles.editableCell}`} onDoubleClick={() => handleCellDoubleClick(entry._id, "wasteHandler", entry.wasteHandler)}>
                         {renderCell(entry, "wasteHandler")}
                       </td>
-                      <td style={{...styles.td, ...styles.editableCell}} onDoubleClick={() => handleCellDoubleClick(entry._id, "modeOfDisposal", entry.modeOfDisposal)}>
+                      <td className={`${styles.td} ${styles.editableCell}`} onDoubleClick={() => handleCellDoubleClick(entry._id, "modeOfDisposal", entry.modeOfDisposal)}>
                         {renderCell(entry, "modeOfDisposal")}
                       </td>
-                      <td style={{...styles.td, ...styles.editableCell}} onDoubleClick={() => handleCellDoubleClick(entry._id, "inputDate", entry.inputDate)}>
+                      <td className={`${styles.td} ${styles.editableCell}`} onDoubleClick={() => handleCellDoubleClick(entry._id, "inputDate", entry.inputDate)}>
                         {renderCell(entry, "inputDate")}
                       </td>
-                      <td style={styles.td}>
+                      <td className={styles.td}>
                         {renderCell(entry, "type")}
                       </td>
-                      <td style={{...styles.td, ...styles.editableCell}} onDoubleClick={() => handleCellDoubleClick(entry._id, "unit", entry.unit)}>
+                      <td className={`${styles.td} ${styles.editableCell}`} onDoubleClick={() => handleCellDoubleClick(entry._id, "unit", entry.unit)}>
                         {renderCell(entry, "unit")}
                       </td>
-                      <td style={{...styles.td, ...styles.editableCell, textAlign: 'right'}} onDoubleClick={() => handleCellDoubleClick(entry._id, "total", entry.total)}>
+                      <td className={`${styles.td} ${styles.editableCell} ${styles.tdNumeric}`} onDoubleClick={() => handleCellDoubleClick(entry._id, "total", entry.total)}>
                         {renderCell(entry, "total")}
                       </td>
-                      <td style={{...styles.td, ...styles.editableCell, textAlign: 'right'}} onDoubleClick={() => handleCellDoubleClick(entry._id, "reuse", entry.reuse)}>
+                      <td className={`${styles.td} ${styles.editableCell} ${styles.tdNumeric}`} onDoubleClick={() => handleCellDoubleClick(entry._id, "reuse", entry.reuse)}>
                         {renderCell(entry, "reuse")}
                       </td>
-                      <td style={{...styles.td, ...styles.editableCell, textAlign: 'right'}} onDoubleClick={() => handleCellDoubleClick(entry._id, "recycle", entry.recycle)}>
+                      <td className={`${styles.td} ${styles.editableCell} ${styles.tdNumeric}`} onDoubleClick={() => handleCellDoubleClick(entry._id, "recycle", entry.recycle)}>
                         {renderCell(entry, "recycle")}
                       </td>
-                      <td style={{...styles.td, ...styles.editableCell, textAlign: 'right'}} onDoubleClick={() => handleCellDoubleClick(entry._id, "composting", entry.composting)}>
+                      <td className={`${styles.td} ${styles.editableCell} ${styles.tdNumeric}`} onDoubleClick={() => handleCellDoubleClick(entry._id, "composting", entry.composting)}>
                         {renderCell(entry, "composting")}
                       </td>
-                      <td style={{...styles.td, ...styles.editableCell, textAlign: 'right'}} onDoubleClick={() => handleCellDoubleClick(entry._id, "incinerationWithHeat", entry.incinerationWithHeat)}>
+                      <td className={`${styles.td} ${styles.editableCell} ${styles.tdNumeric}`} onDoubleClick={() => handleCellDoubleClick(entry._id, "incinerationWithHeat", entry.incinerationWithHeat)}>
                         {renderCell(entry, "incinerationWithHeat")}
                       </td>
-                      <td style={{...styles.td, ...styles.editableCell, textAlign: 'right'}} onDoubleClick={() => handleCellDoubleClick(entry._id, "incinerationWithoutHeat", entry.incinerationWithoutHeat)}>
+                      <td className={`${styles.td} ${styles.editableCell} ${styles.tdNumeric}`} onDoubleClick={() => handleCellDoubleClick(entry._id, "incinerationWithoutHeat", entry.incinerationWithoutHeat)}>
                         {renderCell(entry, "incinerationWithoutHeat")}
                       </td>
-                      <td style={{...styles.td, ...styles.editableCell, textAlign: 'right'}} onDoubleClick={() => handleCellDoubleClick(entry._id, "landfill", entry.landfill)}>
+                      <td className={`${styles.td} ${styles.editableCell} ${styles.tdNumeric}`} onDoubleClick={() => handleCellDoubleClick(entry._id, "landfill", entry.landfill)}>
                         {renderCell(entry, "landfill")}
                       </td>
-                      <td style={{...styles.td, ...styles.editableCell, textAlign: 'right'}} onDoubleClick={() => handleCellDoubleClick(entry._id, "exemption", entry.exemption)}>
+                      <td className={`${styles.td} ${styles.editableCell} ${styles.tdNumeric}`} onDoubleClick={() => handleCellDoubleClick(entry._id, "exemption", entry.exemption)}>
                         {renderCell(entry, "exemption")}
                       </td>
-                      <td style={styles.td}>
-                        <button style={styles.deleteBtn} onClick={() => handleDeleteEntry(entry._id)}>
+                      <td className={styles.td}>
+                        <button className={styles.deleteBtn} onClick={() => handleDeleteEntry(entry._id)}>
                           <X size={14} />
                         </button>
                       </td>
@@ -943,66 +923,12 @@ const WasteEntryExcel = ({ projectInfo }) => {
       </div>
 
       {showCopyIndicator && (
-        <div style={styles.copyIndicator}>
+        <div className={styles.copyIndicator}>
           ✓ Copied to clipboard
         </div>
       )}
     </div>
   );
-};
-
-const styles = {
-  container: { display: 'flex', flexDirection: 'column', height: '100vh', background: '#ffffff', fontFamily: 'system-ui, -apple-system, sans-serif' },
-  toolbar: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 20px', background: 'linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%)', borderBottom: '1px solid #e5e7eb' },
-  toolbarLeft: { display: 'flex', alignItems: 'center', gap: '16px' },
-  toolbarRight: { display: 'flex', gap: '8px' },
-  title: { fontSize: '18px', fontWeight: '600', color: '#1f2937', margin: 0 },
-  entryCount: { padding: '4px 10px', background: '#e0f2fe', color: '#0369a1', borderRadius: '6px', fontSize: '12px', fontWeight: '600' },
-  clearAllBtn: { padding: '4px 10px', background: '#dc2626', color: '#ffffff', border: 'none', borderRadius: '6px', fontSize: '12px', fontWeight: '600', cursor: 'pointer' },
-toolbarBtn: { display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 14px', background: '#194d2a', color: '#ffffff', border: 'none', borderRadius: '6px', fontSize: '13px', fontWeight: '600', cursor: 'pointer' },
-dashboardBtn: { display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 14px', background: '#194d2a', color: '#ffffff', border: 'none', borderRadius: '6px', fontSize: '13px', fontWeight: '600', cursor: 'pointer' },
-  addBtn: { display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 14px', background: '#194d2a', color: '#ffffff', border: 'none', borderRadius: '6px', fontSize: '13px', fontWeight: '600', cursor: 'pointer' },
-  backButton: { display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 14px', background: '#194d2a', color: '#ffffff', border: 'none', borderRadius: '6px', fontSize: '13px', fontWeight: '600', cursor: 'pointer' },
-  infoBanner: { padding: '10px 20px', background: '#dbeafe', borderBottom: '1px solid #93c5fd', fontSize: '12px', color: '#1e40af' },
-  tableWrapper: { flex: 1, overflow: 'auto', background: '#f9fafb' },
-  table: { width: '100%', borderCollapse: 'collapse', background: '#ffffff', fontSize: '13px', minWidth: '1800px' },
-  th: { position: 'relative', padding: '8px 12px', textAlign: 'left', fontSize: '11px', fontWeight: '600', color: '#374151', background: '#f3f4f6', borderRight: '1px solid #e5e7eb', borderBottom: '2px solid #d1d5db', whiteSpace: 'nowrap' },
-  headerContent: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '4px' },
-  headerLabel: { flex: 1 },
-  headerButton: { display: 'flex', alignItems: 'center', justifyContent: 'center', width: '25px', height: '20px', background: 'transparent', border: '1px solid transparent', borderRadius: '4px', cursor: 'pointer', color: '#6b7280', transition: 'all 0.15s' },
-  headerButtonActive: { background: '#10b981', color: '#ffffff', borderColor: '#059669' },
-  dropdown: { position: 'absolute', top: '100%', left: 0, minWidth: '240px', background: '#ffffff', border: '1px solid #d1d5db', borderRadius: '8px', boxShadow: '0 10px 25px rgba(0, 0, 0, 0.15)', zIndex: 1000, marginTop: '4px' },
-  dropdownSection: { padding: '8px' },
-  sectionTitle: { display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 8px', fontSize: '11px', fontWeight: '700', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em' },
-  dropdownItem: { display: 'flex', alignItems: 'center', gap: '8px', width: '100%', padding: '8px 10px', background: 'transparent', border: 'none', borderRadius: '4px', fontSize: '13px', color: '#374151', cursor: 'pointer', textAlign: 'left', transition: 'background 0.1s' },
-  dropdownItemActive: { background: '#e0f2fe', color: '#0369a1', fontWeight: '600' },
-  divider: { height: '1px', background: '#e5e7eb', margin: '4px 0' },
-  searchInput: { width: '100%', padding: '8px 10px', border: '1px solid #d1d5db', borderRadius: '4px', fontSize: '13px', marginBottom: '8px' },
-  optionsList: { maxHeight: '200px', overflowY: 'auto' },
-  checkboxLabel: { display: 'flex', alignItems: 'center', gap: '8px', padding: '6px 8px', fontSize: '13px', cursor: 'pointer', borderRadius: '4px', transition: 'background 0.1s' },
-  dateFilterContainer: { display: 'flex', flexDirection: 'column', gap: '8px' },
-  dateInput: { width: '100%', padding: '8px 10px', border: '1px solid #d1d5db', borderRadius: '4px', fontSize: '13px' },
-  filterInput: { width: '100%', padding: '8px 10px', border: '1px solid #d1d5db', borderRadius: '4px', fontSize: '13px' },
-  clearFilterBtn: { width: '100%', padding: '6px 10px', background: '#dc2626', color: '#ffffff', border: 'none', borderRadius: '4px', fontSize: '12px', fontWeight: '600', cursor: 'pointer', marginTop: '8px' },
-  td: { padding: '8px 12px', border: '1px solid #e5e7eb', background: '#ffffff' },
-  editableCell: { cursor: 'pointer', transition: 'background 0.1s', position: 'relative' },
-  editInput: { width: '100%', padding: '6px 8px', border: '2px solid #10b981', borderRadius: '4px', fontSize: '13px', outline: 'none', background: '#f0fdf4' },
-  editSelect: { width: '100%', padding: '6px 8px', border: '2px solid #10b981', borderRadius: '4px', fontSize: '13px', outline: 'none', background: '#f0fdf4', cursor: 'pointer' },
-  newRow: { background: '#f0fdf4', borderBottom: '2px solid #10b981' },
-  dataRow: { transition: 'background 0.1s' },
-  evenRow: { background: '#fafbfc' },
-  input: { width: '100%', padding: '6px 8px', border: 'none', background: 'transparent', fontSize: '13px', outline: 'none' },
-  select: { width: '100%', padding: '6px 8px', border: 'none', background: 'transparent', fontSize: '13px', cursor: 'pointer', outline: 'none' },
-  saveBtn: { display: 'flex', alignItems: 'center', justifyContent: 'center', width: '28px', height: '28px', background: '#10b981', color: '#ffffff', border: 'none', borderRadius: '4px', cursor: 'pointer' },
-  deleteBtn: { display: 'flex', alignItems: 'center', justifyContent: 'center', width: '28px', height: '28px', background: 'transparent', color: '#dc2626', border: '1px solid transparent', borderRadius: '4px', cursor: 'pointer', margin: '0 auto' },
-  badgeHazardous: { display: 'inline-block', padding: '4px 8px', background: '#fef2f2', color: '#dc2626', border: '1px solid #fecaca', borderRadius: '4px', fontSize: '11px', fontWeight: '600', textTransform: 'uppercase' },
-  badgeNonHazardous: { display: 'inline-block', padding: '4px 8px', background: '#f0fdf4', color: '#16a34a', border: '1px solid #bbf7d0', borderRadius: '4px', fontSize: '11px', fontWeight: '600', textTransform: 'uppercase' },
-  emptyState: { padding: '60px 20px', textAlign: 'center', color: '#6b7280', fontSize: '14px', background: '#fafbfc' },
-  loadingState: { padding: '40px 20px', textAlign: 'center', color: '#6b7280', fontSize: '14px', background: '#f9fafb' },
-  copyIndicator: { position: 'fixed', bottom: '20px', right: '20px', padding: '12px 16px', background: '#10b981', color: '#ffffff', borderRadius: '8px', fontSize: '13px', fontWeight: '500', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)', zIndex: 1000 },
-  monthHeader: { background: '#194d2a', cursor: 'pointer', userSelect: 'none' },
-  monthHeaderCell: { padding: '10px 16px', fontSize: '12px', fontWeight: '600', color: '#ffffff', textTransform: 'uppercase', letterSpacing: '0.05em' },
-  monthArrow: { display: 'inline-block', width: '16px', textAlign: 'center' }
 };
 
 export default WasteEntryExcel;

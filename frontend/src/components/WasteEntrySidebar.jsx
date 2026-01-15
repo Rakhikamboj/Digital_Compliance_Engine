@@ -6,7 +6,7 @@ import {
   ChevronsRight,
   Trash2,
 } from "lucide-react";
-import styles from "./WasteEntrySidebar.module.css"
+import styles from "../styles/WasteDataEntry.module.css";
 
 const WasteEntrySidebar = ({
   projectInfo,

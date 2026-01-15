@@ -36,9 +36,9 @@
   background: #fff;
 
   box-shadow: 0 4px 10px rgba(15, 12, 42, 0.1);
-  position: relative;
+
   margin-bottom: 20px;
-  z-index: 1000
+  z-index: 500
 }
 
 .logoContainer {

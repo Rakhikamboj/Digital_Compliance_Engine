@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from "react";
-import { Plus,  } from "lucide-react";
-import styles from "../styles/WasteDataEntry.module.css";
+import { Plus, AlertCircle, CheckCircle } from "lucide-react";
+import styles from "../styles/FormView.module.css"
 
 const API_URL = import.meta.env.VITE_API_KEY;
 
-const WasteDataEntryForm = ({  projectInfo }) => {
+const WasteDataEntryForm = ({ projectInfo }) => {
   const [wasteEntries, setWasteEntries] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
   const [fetchLoading, setFetchLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("hazardous");
   const [selectedUnit, setSelectedUnit] = useState("kg");
@@ -201,6 +202,7 @@ const WasteDataEntryForm = ({  projectInfo }) => {
 
     setLoading(true);
     setError("");
+    setSuccessMessage("");
 
     const token = getAuthToken();
     const userId = getUserIdFromToken();
@@ -256,6 +258,7 @@ const WasteDataEntryForm = ({  projectInfo }) => {
       }
 
       setWasteEntries((prev) => [...prev, result.data]);
+      setSuccessMessage("Entry added successfully!");
 
       // Reset form
       setCurrentEntry({
@@ -286,6 +289,9 @@ const WasteDataEntryForm = ({  projectInfo }) => {
       });
 
       setErrors({});
+
+      // Clear success message after 3 seconds
+      setTimeout(() => setSuccessMessage(""), 3000);
     } catch (err) {
       console.error("Add entry error:", err);
       setError(err.message || "Failed to save waste entry");
@@ -294,7 +300,6 @@ const WasteDataEntryForm = ({  projectInfo }) => {
     }
   };
 
-  
   const getFieldLabel = (key) => {
     const labels = {
       total: "Total Waste",
@@ -328,7 +333,7 @@ const WasteDataEntryForm = ({  projectInfo }) => {
           {Object.keys(data).map(key => (
             <div key={key} className={styles.formGroup}>
               <label className={styles.label}>
-                {getFieldLabel(key)} {key === "total" && "*"}
+                {getFieldLabel(key)} {key === "total" && <span style={{ color: '#dc2626' }}>*</span>}
               </label>
               <input 
                 type="number" 
@@ -354,100 +359,141 @@ const WasteDataEntryForm = ({  projectInfo }) => {
   const maxDate = dateRange?.endDate?.toISOString().split("T")[0];
 
   return (
-   
     <div className={styles.formContainer}>
-     
-
-
-      <div className={styles.card}>
-        <h2 className={styles.heading}>Add Waste Entry</h2>
-
-        {error && <div className={styles.errorText}>{error}</div>}
-
-        <div className={styles.formGrid}>
-          <div className={styles.formGroup}>
-            <label className={styles.label}>Waste Material *</label>
-            <input 
-              placeholder="e.g., Plastic, Paper, Metal" 
-              className={styles.input}
-              value={currentEntry.wasteMaterial} 
-              onChange={(e) => setCurrentEntry({ ...currentEntry, wasteMaterial: e.target.value })} 
-            />
-            {errors.wasteMaterial && <span className={styles.errorText}>{errors.wasteMaterial}</span>}
-          </div>
-          <div className={styles.formGroup}>
-            <label className={styles.label}>Waste Handler</label>
-            <input 
-              placeholder="Handler or vendor name" 
-              className={styles.input}
-              value={currentEntry.wasteHandler} 
-              onChange={(e) => setCurrentEntry({ ...currentEntry, wasteHandler: e.target.value })} 
-            />
-          </div>
-          <div className={styles.formGroup}>
-            <label className={styles.label}>Mode of Disposal</label>
-            <input 
-              placeholder="e.g., Recycling center, Landfill" 
-              className={styles.input}
-              value={currentEntry.modeOfDisposal} 
-              onChange={(e) => setCurrentEntry({ ...currentEntry, modeOfDisposal: e.target.value })} 
-            />
-          </div>
-          <div className={styles.formGroup}>
-            <label className={styles.label}>Input Date *</label>
-            <input 
-              type="date" 
-              className={styles.input}
-              value={currentEntry.inputDate}
-              min={minDate}
-              max={maxDate}
-              onChange={(e) => setCurrentEntry({ ...currentEntry, inputDate: e.target.value })} 
-            />
-            {errors.inputDate && <span className={styles.errorText}>{errors.inputDate}</span>}
-          </div>
-          <div className={styles.formGroup}>
-            <label className={styles.label}>Unit *</label>
-            <select 
-              value={selectedUnit} 
-              onChange={(e) => setSelectedUnit(e.target.value)}
-              className={styles.input}
-            >
-              <option value="kg">Kilograms (kg)</option>
-              <option value="tonnes">Tonnes</option>
-              <option value="metric_tonnes">Metric Tonnes (MT)</option>
-            </select>
-          </div>
+      {/* Toolbar - Matching Excel view */}
+      <div className={styles.toolbar}>
+        <div className={styles.toolbarLeft}>
+          <h2 className={styles.heading}>Waste Entry Form</h2>
+          <span className={styles.entryCount}>
+            {wasteEntries.length} total entries
+          </span>
         </div>
-
-<div className={styles.tabContainer}>
-  <button
-    className={`${styles.tab} ${
-      activeTab === "hazardous" ? styles.tabActive : ""
-    }`}
-    onClick={() => setActiveTab("hazardous")}
-  >
-    Hazardous Waste
-  </button>
-
-  <button
-    className={`${styles.tab} ${
-      activeTab === "nonHazardous" ? styles.tabActive : ""
-    }`}
-    onClick={() => setActiveTab("nonHazardous")}
-  >
-    Non-Hazardous Waste
-  </button>
-</div>
-
-
-        {renderDisposalInputs()}
-
-        <button className={styles.addButton} onClick={handleAddEntry} disabled={loading}>
-          <Plus size={16} /> {loading ? "Saving..." : "Add Entry"}
-        </button>
+        <div className={styles.toolbarRight}>
+          {/* Future: Add more toolbar actions here if needed */}
+        </div>
       </div>
 
-     
+      {/* Info Banner - Matching Excel view */}
+      <div className={styles.infoBanner}>
+        Fill in the form below to add a new waste entry. Fields marked with * are required.
+      </div>
+
+      {/* Content Wrapper - Scrollable area */}
+      <div className={styles.contentWrapper}>
+        <div className={styles.card}>
+          <h3 className={styles.cardTitle}>Waste Entry Details</h3>
+
+          {error && (
+            <div className={styles.errorBanner}>
+              <AlertCircle size={16} />
+              {error}
+            </div>
+          )}
+
+          {successMessage && (
+            <div className={styles.successMessage}>
+              <CheckCircle size={16} />
+              {successMessage}
+            </div>
+          )}
+
+          <div className={styles.formGrid}>
+            <div className={styles.formGroup}>
+              <label className={styles.label}>
+                Waste Material <span style={{ color: '#dc2626' }}>*</span>
+              </label>
+              <input 
+                placeholder="e.g., Plastic, Paper, Metal" 
+                className={styles.input}
+                value={currentEntry.wasteMaterial} 
+                onChange={(e) => setCurrentEntry({ ...currentEntry, wasteMaterial: e.target.value })} 
+              />
+              {errors.wasteMaterial && (
+                <span className={styles.errorText}>{errors.wasteMaterial}</span>
+              )}
+            </div>
+
+            <div className={styles.formGroup}>
+              <label className={styles.label}>Waste Handler</label>
+              <input 
+                placeholder="Handler or vendor name" 
+                className={styles.input}
+                value={currentEntry.wasteHandler} 
+                onChange={(e) => setCurrentEntry({ ...currentEntry, wasteHandler: e.target.value })} 
+              />
+            </div>
+
+            <div className={styles.formGroup}>
+              <label className={styles.label}>Mode of Disposal</label>
+              <input 
+                placeholder="e.g., Recycling center, Landfill" 
+                className={styles.input}
+                value={currentEntry.modeOfDisposal} 
+                onChange={(e) => setCurrentEntry({ ...currentEntry, modeOfDisposal: e.target.value })} 
+              />
+            </div>
+
+            <div className={styles.formGroup}>
+              <label className={styles.label}>
+                Input Date <span style={{ color: '#dc2626' }}>*</span>
+              </label>
+              <input 
+                type="date" 
+                className={styles.input}
+                value={currentEntry.inputDate}
+                min={minDate}
+                max={maxDate}
+                onChange={(e) => setCurrentEntry({ ...currentEntry, inputDate: e.target.value })} 
+              />
+              {errors.inputDate && (
+                <span className={styles.errorText}>{errors.inputDate}</span>
+              )}
+            </div>
+
+            <div className={styles.formGroup}>
+              <label className={styles.label}>
+                Unit <span style={{ color: '#dc2626' }}>*</span>
+              </label>
+              <select 
+                value={selectedUnit} 
+                onChange={(e) => setSelectedUnit(e.target.value)}
+                className={styles.input}
+              >
+                <option value="kg">Kilograms (kg)</option>
+                <option value="tonnes">Tonnes</option>
+                <option value="metric_tonnes">Metric Tonnes (MT)</option>
+              </select>
+            </div>
+          </div>
+
+          <div className={styles.tabContainer}>
+            <button
+              className={`${styles.tab} ${activeTab === "hazardous" ? styles.tabActive : ""}`}
+              onClick={() => setActiveTab("hazardous")}
+            >
+              Hazardous Waste
+            </button>
+
+            <button
+              className={`${styles.tab} ${activeTab === "nonHazardous" ? styles.tabActive : ""}`}
+              onClick={() => setActiveTab("nonHazardous")}
+            >
+              Non-Hazardous Waste
+            </button>
+          </div>
+
+          {renderDisposalInputs()}
+
+          <button 
+            className={styles.addButton} 
+            onClick={handleAddEntry} 
+            disabled={loading}
+          >
+            <Plus size={16} /> 
+            {loading ? "Saving..." : "Add Entry"}
+          </button>
+        </div>
+      </div>
     </div>
   );
 };
