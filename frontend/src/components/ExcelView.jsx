@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Plus, Download, BarChart3, X, ChevronDown, ArrowUp, ArrowDown, Filter, Check, ChevronLeft } from "lucide-react";
 // import ComplianceDashboard from "../pages/Dashboard";
 import { useToast } from "../context/ToastContext"
-import styles from "../styles/ExcelView.mocule.css";
+import styles from "../styles/ExcelView.module.css";
 
 // Mock API URL - Replace with your actual API
 const API_URL = import.meta.env.VITE_API_KEY || "http://localhost:5000";
