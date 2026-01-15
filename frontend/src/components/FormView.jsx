@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Plus, AlertCircle, CheckCircle } from "lucide-react";
-import styles from "../styles/FormView.module.css"
+import styles from "../styles/FormView.module.css";
 
 const API_URL = import.meta.env.VITE_API_KEY;
 
