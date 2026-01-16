@@ -6,7 +6,7 @@ import {
   ChevronsRight,
   Trash2,
 } from "lucide-react";
-import styles from "../styles/WasteDataEntry.module.css";
+import styles from "./WasteEntrySidebar.module.css";
 
 const WasteEntrySidebar = ({
   projectInfo,
@@ -228,7 +228,7 @@ const WasteEntrySidebar = ({
           {/* Submit Button Footer */}
           {wasteEntries.length > 0 && (
             <div className={styles.expandedFooter}>
-              <button onClick={onSubmitEntries} className={styles.submitButton}>
+              <button style={{color: '#194d2a'}}onClick={onSubmitEntries} className={styles.submitButton}>
                 Submit All Entries
               </button>
             </div>
