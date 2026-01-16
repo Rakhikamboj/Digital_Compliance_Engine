@@ -1,11 +1,20 @@
-/* Main Container - Full viewport height like Excel view */
+/* Main Container - Adapts to sidebar width */
 .formContainer {
   display: flex;
+  width: 100%;
   flex-direction: column;
   height: 100vh;
   background: #ffffff;
   font-family: system-ui, -apple-system, sans-serif;
   overflow: hidden;
+  margin-left: 80px; /* Default collapsed sidebar width */
+  transition: margin-left 0.3s ease;
+  width: calc(100% - 80px); /* Adjust total width */
+}
+
+.formContainer.withExpandedSidebar {
+  margin-left: 1000px; /* Expanded sidebar width */
+  width: calc(100% - 1000px);
 }
 
 /* Toolbar - Matching Excel view */
@@ -13,9 +22,10 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 20px;
+  padding: 16px 24px;
   background: linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%);
   border-bottom: 1px solid #e5e7eb;
+  flex-shrink: 0;
 }
 
 .toolbarLeft {
@@ -52,6 +62,7 @@
   border-bottom: 1px solid #93c5fd;
   font-size: 12px;
   color: #1e40af;
+  flex-shrink: 0;
 }
 
 /* Content Wrapper - Scrollable area */
@@ -64,7 +75,7 @@
 
 /* Card - Form container */
 .card {
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
   background: #ffffff;
   border: 1px solid #e5e7eb;
@@ -82,10 +93,47 @@
   border-bottom: 2px solid #e5e7eb;
 }
 
+/* Tab Container */
+.tabContainer {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+  padding: 4px;
+  border-radius: 8px;
+  width: fit-content;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.tab {
+  padding: 10px 24px;
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  font-size: 14px;
+  font-weight: 600;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+  position: relative;
+  bottom: -2px;
+}
+
+.tab:hover {
+  color: #374151;
+  background: #f9fafb;
+}
+
+.tabActive {
+  border-bottom: 3px solid #194d2a;
+  color: #194d2a;
+  background: #f0fdf4;
+}
+
 /* Form Grid */
 .formGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 16px;
   margin-bottom: 24px;
 }
@@ -124,51 +172,21 @@
 
 .input:disabled {
   background: #f3f4f6;
-  color: #9ca3af;
+  color: #6b7280;
   cursor: not-allowed;
+  font-weight: 600;
 }
 
 .input::placeholder {
   color: #9ca3af;
 }
 
-/* Tab Container */
-.tabContainer {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 24px;
-  padding: 4px;
-  background: #f3f4f6;
-  border-radius: 8px;
-  width: fit-content;
-}
-
-.tab {
-  padding: 10px 20px;
-  background: transparent;
-  border: none;
-  border-radius: 6px;
-  font-size: 13px;
+.inputReadOnly {
+  background: #f9fafb;
+  border: 2px solid #10b981;
+  color: #065f46;
   font-weight: 600;
-  color: #6b7280;
-  cursor: pointer;
-  transition: all 0.15s;
-  white-space: nowrap;
-}
-
-.tab:hover {
-  background: #e5e7eb;
-  color: #374151;
-}
-
-.tabActive {
-  background: #194d2a;
-  color: #ffffff;
-}
-
-.tabActive:hover {
-  background: #194d2a;
-  color: #ffffff;
+  cursor: default;
 }
 
 /* Waste Data Section */
@@ -183,6 +201,49 @@
   margin: 0 0 16px 0;
   padding-bottom: 8px;
   border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sectionBadge {
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.badgeHazardous {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.badgeNonHazardous {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+/* Total Field Highlight */
+.totalField {
+  grid-column: 1 / -1;
+  background: #f0fdf4;
+  padding: 16px;
+  border-radius: 8px;
+  border: 2px solid #10b981;
+}
+
+.totalField .label {
+  color: #065f46;
+  font-size: 14px;
+}
+
+.totalField .input {
+  background: #ffffff;
+  border: 2px solid #10b981;
+  color: #065f46;
+  font-weight: 700;
+  font-size: 16px;
 }
 
 /* Add Button */
@@ -191,9 +252,9 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  width: 100%;
-  max-width: 200px;
-  padding: 12px 24px;
+  width: auto;
+  max-width: 300px;
+  padding: 10px 22px;
   background: #194d2a;
   color: #ffffff;
   border: none;
@@ -202,13 +263,13 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.15s;
-  margin-top: 8px;
+  margin-top: 16px;
 }
 
 .addButton:hover:not(:disabled) {
   background: #0f3a1f;
   transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(25, 77, 42, 0.2);
+  box-shadow: 0 4px 12px rgba(25, 77, 42, 0.3);
 }
 
 .addButton:active:not(:disabled) {
@@ -227,6 +288,9 @@
   color: #dc2626;
   font-weight: 500;
   margin-top: 4px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .errorBanner {
@@ -265,8 +329,60 @@
   gap: 8px;
 }
 
+/* Help Text */
+.helpText {
+  font-size: 11px;
+  color: #6b7280;
+  margin-top: 4px;
+  font-style: italic;
+}
+
+/* Scrollbar Styling */
+.contentWrapper::-webkit-scrollbar {
+  width: 8px;
+}
+
+.contentWrapper::-webkit-scrollbar-track {
+  background: #f3f4f6;
+}
+
+.contentWrapper::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 4px;
+}
+
+.contentWrapper::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
 /* Responsive Design */
+@media (max-width: 1200px) {
+  .formContainer {
+    margin-left: 80px;
+    width: calc(100% - 80px);
+  }
+
+  .formContainer.withExpandedSidebar {
+    margin-left: 320px;
+    width: calc(100% - 320px);
+  }
+
+  .formGrid {
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  }
+}
+
 @media (max-width: 768px) {
+  .formContainer {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .formContainer.withExpandedSidebar {
+    margin-left: 0;
+    width: 100%;
+  }
+
   .formGrid {
     grid-template-columns: 1fr;
   }
@@ -275,6 +391,7 @@
     flex-direction: column;
     align-items: stretch;
     gap: 12px;
+    padding: 12px 16px;
   }
 
   .toolbarLeft,
@@ -292,10 +409,20 @@
 
   .tabContainer {
     width: 100%;
+    justify-content: space-between;
   }
 
   .tab {
     flex: 1;
     text-align: center;
+    padding: 10px 12px;
+  }
+
+  .addButton {
+    max-width: 100%;
+  }
+
+  .totalField {
+    grid-column: 1;
   }
 }

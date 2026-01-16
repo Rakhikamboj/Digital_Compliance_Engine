@@ -1,23 +1,23 @@
 import { useState, useEffect } from "react";
-import { Table, FileSpreadsheet, BarChart3, ChevronLeftIcon } from "lucide-react";
+import { Table, FileSpreadsheet } from "lucide-react";
 
 import WasteDataEntryExcel from "./ExcelView";
 import WasteDataEntryForm from "./FormView";
 import WasteEntrySidebar from "./WasteEntrySidebar";
-import AuditorHeader from "../components/AuditorHeader";
-import { useToast } from "../context/ToastContext";
-import styles from "./WasteEntrySidebar.module.css";
 import ComplianceDashboard from "../pages/Dashboard";
+import { ToastProvider } from "../context/ToastContext";
+import { useToast } from "../context/ToastContext";
+import styles from "../styles/WasteDataEntry.module.css"
+
 const API_URL = import.meta.env.VITE_API_KEY;
 
 const WasteEntryContainer = ({ projectInfo, onBackToProjects }) => {
   const [activeView, setActiveView] = useState("excel");
-  
-  const [showDashboard, setShowDashboard] = useState(false);
   const [wasteEntries, setWasteEntries] = useState([]);
   const [fetchLoading, setFetchLoading] = useState(true);
   const [sidebarState, setSidebarState] = useState(1); // 0=collapsed, 1=normal, 2=expanded
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [showDashboard, setShowDashboard] = useState(false); // NEW: Dashboard state
 
   const { showToast } = useToast();
 
@@ -79,20 +79,6 @@ const WasteEntryContainer = ({ projectInfo, onBackToProjects }) => {
     }
   }, [projectInfo?._id]);
 
-  if (showDashboard) {
-    return (
-      <div className={styles.dashboardContainer}>
-        <button onClick={() => setShowDashboard(false)} className={styles.backButton}>
-          <ChevronLeftIcon />
-        </button>
-        <ComplianceDashboard
-          projectSelected={projectInfo}
-          reportingPeriod={projectInfo?.reportingPeriod}
-        />
-      </div>
-    );
-  }
-
   const handleDeleteEntry = async (id) => {
     const token = getAuthToken();
     try {
@@ -128,10 +114,21 @@ const WasteEntryContainer = ({ projectInfo, onBackToProjects }) => {
     }
   };
 
+  // NEW: If dashboard is shown, render only the dashboard
+  if (showDashboard) {
+    return (
+      <ToastProvider>
+        <ComplianceDashboard
+          projectSelected={projectInfo}
+          reportingPeriod={projectInfo?.reportingPeriod}
+          onBack={() => setShowDashboard(false)}
+        />
+      </ToastProvider>
+    );
+  }
+
   return (
     <div style={{ position: "relative", minHeight: "100vh" }}>
-      {/* <AuditorHeader /> */}
-
       <WasteEntrySidebar
         projectInfo={projectInfo}
         wasteEntries={wasteEntries}
@@ -142,9 +139,10 @@ const WasteEntryContainer = ({ projectInfo, onBackToProjects }) => {
         onSidebarStateChange={setSidebarState}
         isCollapsed={isCollapsed}
         onToggle={() => setIsCollapsed(prev => !prev)}
+        onShowDashboard={() => setShowDashboard(true)} // NEW: Pass callback
       />
 
-      <div isCollapsed={isCollapsed}
+      <div
         className={`${styles.contentWrapper} ${getContentWrapperClass()}`}
         style={{
           flex: 1,
@@ -155,87 +153,69 @@ const WasteEntryContainer = ({ projectInfo, onBackToProjects }) => {
           transition: "margin-left 0.25s ease, width 0.25s ease",
         }}
       >
-       
-        {/* Toggle and Dashboard Button Container */}
+        {/* Header */}
+        <p
+          style={{
+            fontSize: "14px",
+            color: "#6b7280",
+            margin: "3rem 0",
+          }}
+        >
+          {activeView === "excel" ? "Spreadsheet View" : "Form Entry View"}
+        </p>
+
+        {/* Toggle */}
         <div
           style={{
             display: "flex",
+            background: "#f3f4f6",
+            borderRadius: "10px",
+            padding: "4px",
+            gap: "4px",
             alignItems: "center",
             justifyContent: "flex-end",
-            gap: "12px",
-            marginBottom: "0rem",
+            width: "fit-content",
+            marginLeft: "auto",
+            marginBottom: "16px",
           }}
         >
-          {/* Toggle Buttons */}
-          <div
-            style={{
-              display: "flex",
-              background: "#f3f4f6",
-              borderRadius: "10px",
-              padding: "4px",
-              gap: "4px",
-              alignItems: "center",
-            }}
-          >
-            <button
-              onClick={() => setActiveView("excel")}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: "8px",
-                padding: "10px 20px",
-                background: activeView === "excel" ? "#194d2a" : "transparent",
-                color: activeView === "excel" ? "#fff" : "#6b7280",
-                border: "none",
-                borderRadius: "8px",
-                cursor: "pointer",
-                transition: "all 0.2s ease",
-              }}
-            >
-              <FileSpreadsheet size={18} />
-              Spreadsheet
-            </button>
-
-            <button
-              onClick={() => setActiveView("form")}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-                padding: "10px 20px",
-                background: activeView === "form" ? "#194d2a" : "transparent",
-                color: activeView === "form" ? "#fff" : "#6b7280",
-                border: "none",
-                borderRadius: "8px",
-                cursor: "pointer",
-                transition: "all 0.2s ease",
-              }}
-            >
-              <Table size={18} />
-              Form Entry
-            </button>
-          </div>
-
-          {/* Dashboard Button */}
-          <button 
-            className={styles.toolbarBtn} 
-            onClick={() => setShowDashboard(true)}
+          <button
+            onClick={() => setActiveView("excel")}
             style={{
               display: "flex",
               alignItems: "center",
+              justifyContent: "center",
               gap: "8px",
               padding: "10px 20px",
-              background: "#194d2a",
-              color: "#fff",
+              background: activeView === "excel" ? "#194d2a" : "transparent",
+              color: activeView === "excel" ? "#fff" : "#6b7280",
               border: "none",
               borderRadius: "8px",
               cursor: "pointer",
               transition: "all 0.2s ease",
             }}
           >
-            <BarChart3 size={16} />
-            Dashboard
+            <FileSpreadsheet size={18} />
+            Spreadsheet
+          </button>
+
+          <button
+            onClick={() => setActiveView("form")}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              padding: "10px 20px",
+              background: activeView === "form" ? "#194d2a" : "transparent",
+              color: activeView === "form" ? "#fff" : "#6b7280",
+              border: "none",
+              borderRadius: "8px",
+              cursor: "pointer",
+              transition: "all 0.2s ease",
+            }}
+          >
+            <Table size={18} />
+            Form Entry
           </button>
         </div>
 
@@ -260,7 +240,6 @@ const WasteEntryContainer = ({ projectInfo, onBackToProjects }) => {
             />
           )}
         </main>
-        
       </div>
     </div>
   );

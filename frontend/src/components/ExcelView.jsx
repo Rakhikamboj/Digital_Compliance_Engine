@@ -1,27 +1,22 @@
 import { useState, useEffect, useRef } from "react";
-import { Plus, Download, BarChart3, X, ChevronDown, ArrowUp, ArrowDown, Filter, Check, ChevronLeft } from "lucide-react";
-// import ComplianceDashboard from "../pages/Dashboard";
-import { useToast } from "../context/ToastContext"
+import { Plus, Download, X, ChevronDown, ArrowUp, ArrowDown, Filter, Check } from "lucide-react";
 import styles from "../styles/ExcelView.module.css";
 
-// Mock API URL - Replace with your actual API
 const API_URL = import.meta.env.VITE_API_KEY || "http://localhost:5000";
 
-// Waste Material Options
 const WASTE_MATERIALS = [
   "Paper", "Plastic", "Metal", "Electronics", "Medical Waste",
   "Sludges", "Ash", "Waste Water", "Agriculture Waste", "Glass",
   "Textile", "Construction Waste", "Chemical Waste", "Biological Waste", "Others"
 ];
 
-// Disposal Mode Options
 const DISPOSAL_MODES = [
   "Recycling", "Composting", "Reuse", "Landfill",
   "Incineration with Heat Recovery", "Incineration without Heat Recovery",
   "Treatment", "Others"
 ];
 
-// Column Header with Filter/Sort Dropdown
+// Column Header Component
 const ColumnHeader = ({ 
   label, 
   field, 
@@ -217,8 +212,8 @@ const WasteEntryExcel = ({ projectInfo }) => {
   const [showCopyIndicator, setShowCopyIndicator] = useState(false);
   const [editingCell, setEditingCell] = useState(null);
   const [editValue, setEditValue] = useState("");
-  const [expandedMonths, setExpandedMonths] = useState({});
-  const { showToast } = useToast();
+  const [expandedGroups, setExpandedGroups] = useState({});
+  const [groupBy, setGroupBy] = useState("month"); // "month", "material", "type"
   const [loading, setLoading] = useState(false);
   const [fetchLoading, setFetchLoading] = useState(true);
 
@@ -261,7 +256,7 @@ const WasteEntryExcel = ({ projectInfo }) => {
       const projectId = projectInfo?._id;
 
       if (!token || !userId) {
-        showToast("Please log in to view waste entries", "error");
+        console.error("Please log in to view waste entries");
         return;
       }
 
@@ -280,7 +275,6 @@ const WasteEntryExcel = ({ projectInfo }) => {
       }
     } catch (err) {
       console.error("Fetch error:", err);
-      showToast("Failed to fetch waste entries", "error");
     } finally {
       setFetchLoading(false);
     }
@@ -331,6 +325,7 @@ const WasteEntryExcel = ({ projectInfo }) => {
     setSortConfig({ field: null, direction: null });
   };
 
+  // Group by Month
   const groupByMonth = (entries) => {
     const grouped = {};
     entries.forEach((entry) => {
@@ -342,10 +337,35 @@ const WasteEntryExcel = ({ projectInfo }) => {
     return grouped;
   };
 
-  const formatMonth = (monthKey) => {
-    const [year, month] = monthKey.split("-");
-    const date = new Date(year, parseInt(month) - 1);
-    return date.toLocaleString("default", { month: "long", year: "numeric" });
+  // Group by Material
+  const groupByMaterial = (entries) => {
+    const grouped = {};
+    entries.forEach((entry) => {
+      const materialKey = entry.wasteMaterial || "Uncategorized";
+      if (!grouped[materialKey]) grouped[materialKey] = [];
+      grouped[materialKey].push(entry);
+    });
+    return grouped;
+  };
+
+  // Group by Type
+  const groupByType = (entries) => {
+    const grouped = {};
+    entries.forEach((entry) => {
+      const typeKey = entry.type === "hazardous" ? "Hazardous" : "Non-Hazardous";
+      if (!grouped[typeKey]) grouped[typeKey] = [];
+      grouped[typeKey].push(entry);
+    });
+    return grouped;
+  };
+
+  const formatGroupKey = (key) => {
+    if (groupBy === "month") {
+      const [year, month] = key.split("-");
+      const date = new Date(year, parseInt(month) - 1);
+      return date.toLocaleString("default", { month: "long", year: "numeric" });
+    }
+    return key;
   };
 
   const filteredData = gridData.filter((entry) => {
@@ -393,27 +413,46 @@ const WasteEntryExcel = ({ projectInfo }) => {
     return sortConfig.direction === "asc" ? comparison : -comparison;
   });
 
-  const groupedData = groupByMonth(sortedData);
-  const sortedMonths = Object.keys(groupedData).sort().reverse();
+  // Get grouped data based on selected grouping
+  const getGroupedData = () => {
+    switch (groupBy) {
+      case "material":
+        return groupByMaterial(sortedData);
+      case "type":
+        return groupByType(sortedData);
+      default:
+        return groupByMonth(sortedData);
+    }
+  };
+
+  const groupedData = getGroupedData();
+  
+  // Sort group keys
+  const sortedGroupKeys = Object.keys(groupedData).sort((a, b) => {
+    if (groupBy === "month") {
+      return b.localeCompare(a); // Reverse chronological
+    }
+    return a.localeCompare(b); // Alphabetical
+  });
 
   useEffect(() => {
     const initialExpanded = {};
-    sortedMonths.forEach(key => {
+    sortedGroupKeys.forEach(key => {
       initialExpanded[key] = true;
     });
-    setExpandedMonths(initialExpanded);
-  }, [sortedData.length]);
+    setExpandedGroups(initialExpanded);
+  }, [sortedData.length, groupBy, sortedGroupKeys]);
 
-  const toggleMonth = (monthKey) => {
-    setExpandedMonths(prev => ({
+  const toggleGroup = (groupKey) => {
+    setExpandedGroups(prev => ({
       ...prev,
-      [monthKey]: !prev[monthKey]
+      [groupKey]: !prev[groupKey]
     }));
   };
 
   const handleAddRow = async () => {
     if (!newRow.wasteMaterial || !newRow.total) {
-      showToast("Please fill in waste material and total amount", "error");
+      alert("Please fill in waste material and total amount");
       return;
     }
 
@@ -469,7 +508,6 @@ const WasteEntryExcel = ({ projectInfo }) => {
       
       if (response.ok) {
         setWasteEntries((prev) => [...prev, result.data]);
-        showToast("Entry added successfully", "success");
         setShowAddRow(false);
         
         setNewRow({
@@ -488,11 +526,9 @@ const WasteEntryExcel = ({ projectInfo }) => {
           landfill: "",
           exemption: "",
         });
-      } else {
-        showToast(result.message || "Failed to add entry", "error");
       }
-    } catch {
-      showToast("Failed to add entry", "error");
+    } catch (err) {
+      console.error("Failed to add entry:", err);
     } finally {
       setLoading(false);
     }
@@ -508,10 +544,9 @@ const WasteEntryExcel = ({ projectInfo }) => {
 
       if (response.ok) {
         setWasteEntries((prev) => prev.filter((e) => e._id !== id));
-        showToast("Entry deleted successfully", "success");
       }
-    } catch {
-      showToast("Failed to delete entry", "error");
+    } catch (err) {
+      console.error("Failed to delete entry:", err);
     }
   };
 
@@ -553,14 +588,11 @@ const WasteEntryExcel = ({ projectInfo }) => {
         setWasteEntries(prev => prev.map(e => 
           e._id === entryId ? result.data : e
         ));
-        showToast("Changes saved", "success");
       } else {
-        showToast(result.message || "Failed to save changes", "error");
         fetchWasteEntries();
       }
     } catch (error) {
       console.error("Update error:", error);
-      showToast("Failed to save changes", "error");
       fetchWasteEntries();
     }
   };
@@ -749,6 +781,8 @@ const WasteEntryExcel = ({ projectInfo }) => {
   });
 
   return (
+    <>
+  
     <div className={styles.container}>
       <div className={styles.toolbar}>
         <div className={styles.toolbarLeft}>
@@ -763,19 +797,28 @@ const WasteEntryExcel = ({ projectInfo }) => {
           )}
         </div>
         <div className={styles.toolbarRight}>
+          <select 
+            value={groupBy} 
+            onChange={(e) => setGroupBy(e.target.value)}
+            className={styles.groupBySelect}
+          >
+            <option value="month">Group by Month</option>
+            <option value="material">Group by Material</option>
+            <option value="type">Group by Type</option>
+          </select>
           <button className={styles.addBtn} onClick={() => setShowAddRow(!showAddRow)}>
             <Plus size={16} />
-            Add Entry
+           
           </button>
           <button className={styles.toolbarBtn} onClick={handleExport}>
             <Download size={16} />
-            Export
+           
           </button>
         </div>
       </div>
 
       <div className={styles.infoBanner}>
-        Click column headers to sort and filter.
+        Click column headers to sort and filter. Double-click cells to edit.
       </div>
 
       {fetchLoading && (
@@ -850,21 +893,21 @@ const WasteEntryExcel = ({ projectInfo }) => {
               </tr>
             )}
 
-            {sortedMonths.length === 0 ? (
+            {sortedGroupKeys.length === 0 ? (
               <tr>
                 <td colSpan="15" className={styles.emptyState}>
                   No entries yet. Add your first entry above.
                 </td>
               </tr>
             ) : (
-              sortedMonths.map((monthKey) => (
+              sortedGroupKeys.map((groupKey) => (
                 <>
-                  <tr key={`header-${monthKey}`} onClick={() => toggleMonth(monthKey)} className={styles.monthHeader}>
+                  <tr key={`header-${groupKey}`} onClick={() => toggleGroup(groupKey)} className={styles.monthHeader}>
                     <td colSpan="15" className={styles.monthHeaderCell}>
-                      <span className={styles.monthArrow}>{expandedMonths[monthKey] ? '▼' : '▶'}</span> {formatMonth(monthKey)} ({groupedData[monthKey].length} entries)
+                      <span className={styles.monthArrow}>{expandedGroups[groupKey] ? '▼' : '▶'}</span> {formatGroupKey(groupKey)} ({groupedData[groupKey].length} entries)
                     </td>
                   </tr>
-                  {expandedMonths[monthKey] && groupedData[monthKey].map((entry, idx) => (
+                  {expandedGroups[groupKey] && groupedData[groupKey].map((entry, idx) => (
                     <tr key={entry._id} className={`${styles.dataRow} ${idx % 2 === 0 ? styles.evenRow : ''}`}>
                       <td className={`${styles.td} ${styles.editableCell}`} onDoubleClick={() => handleCellDoubleClick(entry._id, "wasteMaterial", entry.wasteMaterial)}>
                         {renderCell(entry, "wasteMaterial")}
@@ -928,6 +971,7 @@ const WasteEntryExcel = ({ projectInfo }) => {
         </div>
       )}
     </div>
+    </>
   );
 };
 

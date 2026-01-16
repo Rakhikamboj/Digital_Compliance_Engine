@@ -17,248 +17,95 @@
 
 .container {
   animation: fadeInUp 0.5s ease;
-  width: 100%;
-  max-width: 100%;
-  height: calc(100vh - 80px);
-  overflow: hidden;
-  margin-top: 20px;
-  padding: 16px 20px;
-  display: flex;
-  flex-direction: column;
-}
-
-.header {
-  display: flex;
-  position: relative;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px 20px;
-  background: #fff;
-
-  box-shadow: 0 4px 10px rgba(15, 12, 42, 0.1);
-
-  margin-bottom: 20px;
-  z-index: 500
-}
-
-.logoContainer {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.logoIcon {
-  width: 56px;
-  height: 56px;
-  border-radius: 16px;
-  background: linear-gradient(135deg, #194d2a 0%, #0d3618 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #fff;
-  box-shadow: 0 4px 16px rgba(25, 77, 42, 0.3);
-}
-
-.logoText {
-  font-size: 20px;
-  font-weight: 700;
-  color: #194d2a;
-  letter-spacing: -0.5px;
-}
-
-.logoSubtext {
-  font-size: 13px;
-  color: #6b7280;
-  font-weight: 500;
-  margin-top: 2px;
-}
-
-.userButton {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 8px 16px 8px 8px;
-  background: #f5f8ee;
-  border: 2px solid rgba(25, 77, 42, 0.1);
-  border-radius: 14px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.userButton:hover {
-  background: #eef4e8;
-  border-color: rgba(25, 77, 42, 0.2);
-}
-
-.avatar {
-  width: 44px;
-  height: 44px;
-  border-radius: 12px;
-  background: linear-gradient(135deg, #194d2a 0%, #0d3618 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 16px;
-  font-weight: 700;
-  color: #fff;
-}
-
-.userInfo {
-  text-align: left;
-}
-
-.userName {
-  font-size: 15px;
-  font-weight: 600;
-  color: #194d2a;
-}
-
-.userRole {
-  font-size: 13px;
-  color: #6b7280;
-}
-
-.dropdown {
-  position: absolute;
-  top: 100%;
-  right: 0;
-  margin-top: 8px;
-  background: #fff;
-  border-radius: 16px;
-  box-shadow: 0 8px 32px rgba(25, 77, 42, 0.15);
-  border: 1px solid rgba(25, 77, 42, 0.08);
-  min-width: 240px;
-  padding: 8px;
-  z-index: 1000;
-}
-
-.dropdownItem {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 16px;
-  background: transparent;
-  border: none;
-  border-radius: 10px;
-  font-size: 15px;
-  font-weight: 500;
-  color: #194d2a;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  text-align: left;
-}
-
-.dropdownItem:hover {
-  background: #f5f8ee;
-}
-
-.dropdownItemDanger {
-  color: #dc2626;
-}
-
-.dropdownItemDanger:hover {
-  background: rgba(220, 38, 38, 0.1);
-}
-
-.dropdownDivider {
-  height: 1px;
-  background: #f5f8ee;
-  margin: 8px 0;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 40px 14px;
+  min-height: calc(100vh - 80px);
 }
 
 .contentWrapper {
-  margin-bottom: 20px;
-  flex-shrink: 0;
+  text-align: left;
+  margin-bottom: 24px;
+  max-width: 1400px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .title {
   font-size: 1.5rem;
-  font-weight: 600;
-  color: #194d2a;
-  margin-: 0px;
+  margin-top: 4.5rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 4px;
   letter-spacing: -0.5px;
 }
 
 .subtitle {
-  font-size: 14px;
-  color: #6b7280;
+  font-size: 13px;
+  color: #666;
   font-weight: 400;
 }
 
 .card {
   background: #ffffff;
-  border-radius: 16px;
+  border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 4px 20px rgba(25, 77, 42, 0.1);
-  border: 1px solid rgba(25, 77, 42, 0.06);
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  min-height: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e0e0e0;
+  max-width: 1400px;
+  margin: 32px auto;
 }
 
 .tableWrapper {
   overflow-x: auto;
-  overflow-y: auto;
-  flex: 1;
-  min-height: 0;
 }
 
 .table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 900px;
+  min-width: 800px;
 }
 
 .thead {
-  background: linear-gradient(135deg, #194d2a 0%, #0d3618 100%);
-  position: sticky;
-  top: 0;
-  z-index: 10;
+  background: #f5f5f5;
+  border-bottom: 2px solid #d0d0d0;
 }
 
 .th {
   text-align: left;
-  padding: 14px 16px;
+  padding: 10px 12px;
   font-size: 11px;
-  font-weight: 700;
-  color: #ffffff;
+  font-weight: 600;
+  color: #333;
   text-transform: uppercase;
-  letter-spacing: 0.8px;
-  white-space: nowrap;
+  letter-spacing: 0.5px;
 }
 
 .thCenter {
   text-align: center;
-  padding: 14px 16px;
+  padding: 10px 12px;
   font-size: 11px;
-  font-weight: 700;
-  color: #ffffff;
+  font-weight: 600;
+  color: #333;
   text-transform: uppercase;
-  letter-spacing: 0.8px;
+  letter-spacing: 0.5px;
 }
 
 .td {
-  padding: 14px 16px;
+  padding: 10px 12px;
   font-size: 13px;
-  color: #374151;
-  font-weight: 500;
-  vertical-align: middle;
+  color: #333;
+  border-bottom: 1px solid #e8e8e8;
 }
 
 .tdCenter {
   text-align: center;
-  padding: 14px 16px;
-}
-
-.tr {
-  border-bottom: 1px solid #f5f8ee;
-  transition: all 0.2s ease;
+  padding: 10px 12px;
+  border-bottom: 1px solid #e8e8e8;
 }
 
 .tr:hover {
-  background: #fefffa;
+  background: #fafafa;
 }
 
 .projectCell {
@@ -268,126 +115,103 @@
 }
 
 .projectIcon {
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
-  background: linear-gradient(135deg, #194d2a 0%, #0d3618 100%);
+  width: 32px;
+  height: 32px;
+  border-radius: 4px;
+  background: #194d2a;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   color: #fff;
-  box-shadow: 0 3px 10px rgba(25, 77, 42, 0.25);
   flex-shrink: 0;
 }
 
 .projectName {
   font-weight: 600;
-  color: #194d2a;
+  color: #1a1a1a;
   font-size: 13px;
 }
 
 .btn {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 8px 16px;
-  background: linear-gradient(135deg, #194d2a 0%, #0d3618 100%);
+  gap: 5px;
+  padding: 6px 14px;
+  background: #194d2a;
   color: #fff;
   border: none;
-  border-radius: 8px;
-  font-size: 13px;
-  font-weight: 600;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background 0.2s ease;
 }
 
 .btn:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(25, 77, 42, 0.3);
+  background: #0d3618;
 }
 
-.backBtn {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 18px;
-  background: #f5f8ee;
-  color: #194d2a;
-  border: 2px solid #194d2a;
-  border-radius: 10px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.25s ease;
-}
-
-.backBtn:hover {
-  background: #194d2a;
-  color: #fff;
+.btn:active {
+  transform: scale(0.98);
 }
 
 .badge {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 5px 12px;
-  border-radius: 8px;
-  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 11px;
   font-weight: 600;
-  letter-spacing: 0.3px;
 }
 
 .emptyState {
   text-align: center;
-  padding: 60px 24px;
-  background: linear-gradient(135deg, #fefffa 0%, #f5f8ee 100%);
-  border-radius: 16px;
-  border: 2px dashed rgba(25, 77, 42, 0.15);
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  padding: 80px 24px;
+  background: #fafafa;
+  border-radius: 8px;
+  border: 2px dashed #d0d0d0;
 }
 
 .emptyStateIcon {
   width: 80px;
   height: 80px;
-  background: linear-gradient(135deg, #ffffff 0%, #fefffa 100%);
-  border-radius: 20px;
-  margin: 0 auto 20px;
+  background: #fff;
+  border-radius: 8px;
+  margin: 0 auto 24px;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 6px 16px rgba(25, 77, 42, 0.12);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .emptyStateTitle {
   font-size: 20px;
-  font-weight: 700;
-  color: #194d2a;
+  font-weight: 600;
+  color: #1a1a1a;
   margin-bottom: 8px;
 }
 
 .emptyStateText {
-  font-size: 14px;
-  color: #6b7280;
+  font-size: 15px;
+  color: #666;
 }
 
 .spinner {
   display: inline-block;
-  width: 32px;
-  height: 32px;
-  border: 3px solid #f5f8ee;
+  width: 40px;
+  height: 40px;
+  border: 4px solid #e0e0e0;
   border-top-color: #194d2a;
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
-  margin-bottom: 12px;
+  margin-bottom: 16px;
 }
 
 .loadingText {
-  color: #6b7280;
-  font-size: 14px;
+  color: #666;
+  font-size: 15px;
+  font-weight: 500;
 }

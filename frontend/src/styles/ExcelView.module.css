@@ -1,6 +1,10 @@
 .container {
   display: flex;
   flex-direction: column;
+  width: 94%;
+  margin-left: auto; 
+  
+  
   height: 100vh;
   background: #ffffff;
   font-family: system-ui, -apple-system, sans-serif;
@@ -25,7 +29,11 @@
   display: flex;
   gap: 8px;
 }
+.groupBySelect{
+  border-radius: 50px;
+  padding: 0px 10px 0px 10px;
 
+}
 .title {
   font-size: 18px;
   font-weight: 600;

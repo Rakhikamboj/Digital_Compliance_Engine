@@ -1,586 +1,304 @@
-/* ============================================
-   SIDEBAR CONTAINER - OVERLAY MODE
-   ============================================ */
-
+/* Sidebar Base Styles */
 .sidebar {
-  position: absolute;
-  bottom: 6rem;
+  position: fixed;
   left: 0;
-  height: 100vh;
-  background: var(--color-bg-primary);
-  border-right: 1px solid var(--color-primary-200);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  transition: width var(--transition-base), transform var(--transition-base);
-  box-shadow: var(--shadow-xl);
-  z-index: 900;
-}
-
-.toolbarBtn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 14px;
-  background: #194d2a;
-  color: #ffffff;
-  border: none;
-  border-radius: 6px;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-/* Sidebar States */
-.sidebarStateCollapsed {
-  width: 64px;
-}
-
-.sidebarStateNormal {
-  width: 300px;
-}
-
-.sidebarStateExpanded {
-  width: 1220px;
-}
-
-/* ============================================
-   MAIN CONTENT ADJUSTMENTS
-   Add these classes to your main content wrapper
-   ============================================ */
-
-/* Base content wrapper - add this class to the main content container */
-.contentWrapper {
-  transition: margin-left var(--transition-base), width var(--transition-base);
-  width: 10 0%;
-  box-sizing: border-box;
-}
-
-/* When sidebar is collapsed (64px) */
-.contentWrapperCollapsed {
-  margin-left: 64px;
-  width: calc(100% - 64px);
-}
-
-/* When sidebar is normal (320px) */
-.contentWrapperNormal {
-  margin-left: 320px;
-  width: calc(100% - 320px);
-}
-
-/* When sidebar is expanded (720px) */
-.contentWrapperExpanded {
-  margin-left: 720px;
-  width: calc(100% - 720px);
-}
-
-/* Apply to wasteDataSection */
-
-/* Apply to excelContainer */
-.excelContainer {
-  display: flex;
-  flex-direction: column;
-  height: calc(100vh - 80px);
+  top: 7rem; /* Adjust this to match your header height */
+  height: calc(100vh - 60px); /* Full height minus header */
   background: #ffffff;
-  margin: 0;
-  border-radius: 12px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border-right: 1px solid #e5e7eb;
+  transition: width 0.3s ease;
+  z-index: 100;
   overflow: hidden;
-  transition: all var(--transition-base);
-  width: 100%;
-  box-sizing: border-box;
-}
-
-/* ============================================
-   COLLAPSED STATE (State 0)
-   ============================================ */
-
-.collapsedHeader {
-  padding: var(--spacing-lg) var(--spacing-md);
   display: flex;
-  justify-content: center;
-  border-bottom: 1px solid var(--color-primary-200);
-}
-.backButton{
-    width: 36px;
-    height: 36px;
-    border: none;
-    margin-left: 1.5rem;
-    color: var(--color-primary);
-    cursor: pointer;
-    border-radius: var(--radius-md);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all var(--transition-fast);
-    flex-shrink: 0;
+  flex-direction: column;
 }
 
-.projectInitial {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light));
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 18px;
-  font-weight: 600;
-  box-shadow: var(--shadow-md);
+/* Collapsed State (80px width) */
+.sidebarCollapsed {
+  width: 75px;
 }
 
+/* Expanded State (400px width) */
+.sidebarExpanded {
+  width: 1000px;
+}
+
+/* Collapsed Content */
 .collapsedContent {
-  flex: 1;
-  padding: var(--spacing-md) 0;
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-sm);
   align-items: center;
+  height: 100%;
+  padding: 20px 0;
+  gap: 16px;
 }
 
-.collapsedIconButton {
-  width: 40px;
-  height: 40px;
+/* Back Button (Collapsed) */
+.backButton {
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
+  background: #f3f4f6;
   border: none;
-  background: transparent;
-  color: var(--color-primary-600);
-  cursor: pointer;
-  border-radius: var(--radius-md);
+  color: #6b7280;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all var(--transition-fast);
+  cursor: pointer;
+  transition: all 0.2s;
 }
 
-.collapsedIconButton:hover {
-  background: var(--color-bg-accent);
-  color: var(--color-primary);
+.backButton:hover {
+  background: #e5e7eb;
+  color: #374151;
 }
 
-.collapsedFooter {
-  padding: var(--spacing-md);
-  border-top: 1px solid var(--color-primary-200);
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-sm);
-  align-items: center;
-}
-
-.collapsedExpandButton {
-  width: 40px;
-  height: 40px;
-  border: none;
-  background: var(--color-primary);
+/* Project Initial */
+.projectInitial {
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  background: #194d2a;
   color: white;
-  cursor: pointer;
-  border-radius: var(--radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all var(--transition-fast);
+  font-size: 20px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s;
 }
 
-.collapsedExpandButton:hover {
-  background: var(--color-primary-dark);
-  transform: translateX(2px);
+.projectInitial:hover {
+  transform: scale(1.05);
 }
 
-/* ============================================
-   TOGGLE BUTTONS (States 1 & 2)
-   ============================================ */
-
-.toggleButtonLeft,
-.toggleButtonRight {
-  position: absolute;
-  top: 1%;
-
-  transform: translateY(-50%);
-  width: 28px;
-  height: 60px;
-  /* background: var(--color-primary); */
-  color: #194d2a;
+/* Dashboard Navigation Button */
+.dashboardNavButton {
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
+  background: #f3f4f6;
   border: none;
-  cursor: pointer;
+  color: #6b7280;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all var(--transition-fast);
-  z-index: 10;
-  /* box-shadow: var(--shadow-md); */
+  cursor: pointer;
+  transition: all 0.2s;
 }
 
-.toggleButtonLeft {
-  left: 80%;
-  /* border-top-right-radius: var(--radius-lg);
-  border-bottom-right-radius: var(--radius-lg); */
+.dashboardNavButton:hover {
+  background: #e5e7eb;
+  color: #374151;
 }
 
-.toggleButtonRight {
-  right: 0;
-  /* border-top-left-radius: var(--radius-lg);
-  border-bottom-left-radius: var(--radius-lg); */
+/* Sidebar Bottom Section */
+.sidebarBottom {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding-bottom: 20px;
 }
 
-.toggleButtonLeft:hover,
-.toggleButtonRight:hover {
-
-  width: 32px;
+/* Toggle Button (Collapsed) */
+.toggleButton {
+  width: 35px;
+  height: 35px;
+  border-radius: 8px;
+  
+  border: none;
+  color: #6b7280;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
 }
 
-/* ============================================
-   SIDEBAR HEADER
-   ============================================ */
+.toggleButton:hover {
 
-.sidebarHeader {
-  padding: var(--spacing-lg);
-  border-bottom: 1px solid var(--color-primary-200);
-  background: var(--color-bg-secondary);
+  color: #374151;
+}
+
+/* Admin Initial */
+.adminInitial {
+  width: 35px;
+  height: 35px;
+  border-radius: 8px;
+  background: #194d2a;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.adminInitial:hover {
+  transform: scale(1.05);
+}
+
+/* Expanded Content */
+.expandedContent {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* Expanded Header */
+.expandedHeader {
+  padding: 20px;
+  border-bottom: 1px solid #e5e7eb;
+  flex-shrink: 0;
 }
 
 .headerTopRow {
   display: flex;
   align-items: center;
-  gap: var(--spacing-md);
-  margin-bottom: var(--spacing-md);
+  gap: 12px;
+  margin-bottom: 12px;
 }
 
 .backToProjectsBtn {
   width: 36px;
   height: 36px;
+  border-radius: 8px;
+  background: #f3f4f6;
   border: none;
-  background: var(--color-bg-accent);
-  color: var(--color-primary);
-  cursor: pointer;
-  border-radius: var(--radius-md);
+  color: #6b7280;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all var(--transition-fast);
+  cursor: pointer;
+  transition: all 0.2s;
   flex-shrink: 0;
 }
 
 .backToProjectsBtn:hover {
-  background: var(--color-primary);
-  color: white;
-  transform: translateX(-2px);
+  background: #e5e7eb;
+  color: #374151;
+}
+
+.projectInfo {
+  flex: 1;
+  min-width: 0;
 }
 
 .projectName {
   font-size: 18px;
   font-weight: 600;
-  color: var(--color-primary-800);
+  color: #111827;
   margin: 0;
+  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .projectMeta {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-xs);
+  gap: 4px;
+  margin-bottom: 12px;
 }
 
 .metaRow {
   display: flex;
-  gap: var(--spacing-sm);
+  gap: 6px;
   font-size: 13px;
 }
 
 .metaLabel {
-  color: var(--color-primary-500);
+  color: #6b7280;
   font-weight: 500;
 }
 
 .metaValue {
-  color: var(--color-primary-700);
+  color: #374151;
+}
+
+.toggleButtonExpanded {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: #f3f4f6;
+  border: none;
+  color: #6b7280;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.toggleButtonExpanded:hover {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+/* Entries Container */
+.entriesContainer {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+}
+
+.entriesTitle {
+  font-size: 16px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0 0 16px 0;
+}
+
+/* Loading and Empty States */
+.loadingState,
+.emptyState {
+  text-align: center;
+  padding: 40px 20px;
+  color: #9ca3af;
+  font-size: 14px;
+}
+
+/* Month Groups */
+.monthGroups {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.monthGroup {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #ffffff;
+}
+
+.monthHeader {
+  background: #f9fafb;
+  padding: 12px 16px;
+  font-weight: 600;
+  font-size: 14px;
+  color: #374151;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.entryCount {
+  color: #9ca3af;
   font-weight: 400;
 }
 
-/* ============================================
-   SIDEBAR SECTIONS
-   ============================================ */
-
-.sidebarSection {
-  padding: var(--spacing-lg);
-  border-bottom: 1px solid var(--color-primary-200);
-}
-
-.sectionHeading {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--color-primary-700);
-  margin: 0 0 var(--spacing-md) 0;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.sectionHeadingWithIcon {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-sm);
-  margin-bottom: var(--spacing-md);
-}
-
-.sectionHeadingWithIcon .sectionHeading {
-  margin: 0;
-}
-
-.sectionHeadingWithIcon svg {
-  color: var(--color-primary-500);
-}
-
-/* ============================================
-   RECENT ENTRIES
-   ============================================ */
-
-.recentEntriesList {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-sm);
-}
-
-.recentEntryCard {
-  padding: var(--spacing-md);
-  background: var(--color-bg-accent);
-  border-radius: var(--radius-md);
-  border-left: 3px solid var(--color-primary);
-  transition: all var(--transition-fast);
-}
-
-.recentEntryCard:hover {
-  background: var(--color-primary-100);
-  box-shadow: var(--shadow-sm);
-  transform: translateX(2px);
-}
-
-.recentEntryHeader {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-xs);
-}
-
-.recentEntryDate {
-  font-size: 13px;
-  color: var(--color-primary-700);
-  font-weight: 500;
-}
-
-/* ============================================
-   BADGES
-   ============================================ */
-
-.badge {
-  display: inline-block;
-  padding: 4px 10px;
-  border-radius: var(--radius-sm);
-  font-size: 11px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
-}
-
-.badgeHazardous {
-  background: rgba(220, 38, 38, 0.1);
-  color: var(--color-danger);
-  border: 1px solid rgba(220, 38, 38, 0.2);
-}
-
-.badgeNonHazardous {
-  background: rgba(22, 163, 74, 0.1);
-  color: var(--color-success);
-  border: 1px solid rgba(22, 163, 74, 0.2);
-}
-
-.badgeSmall {
-  padding: 2px 6px;
-  font-size: 10px;
-  border-radius: 4px;
-}
-
-/* ============================================
-   SORT BUTTONS
-   ============================================ */
-
-.sortButtons {
-  display: flex;
-  gap: var(--spacing-sm);
-}
-
-.sortButton {
-  flex: 1;
-  padding: var(--spacing-sm) var(--spacing-md);
-  border: 1px solid var(--color-primary-300);
-  background: white;
-  color: var(--color-primary-600);
-  cursor: pointer;
-  border-radius: var(--radius-md);
-  font-size: 13px;
-  font-weight: 500;
-  transition: all var(--transition-fast);
-}
-
-.sortButton:hover {
-  background: var(--color-bg-accent);
-  border-color: var(--color-primary);
-}
-
-.sortButtonActive {
-  background: var(--color-primary);
-  color: white;
-  border-color: var(--color-primary);
-}
-
-/* ============================================
-   ALL ENTRIES SECTION
-   ============================================ */
-
-.allEntriesSection {
-  flex: 1;
-  overflow-y: auto;
-  padding: var(--spacing-lg);
-  border-bottom: 1px solid var(--color-primary-200);
-}
-
-.monthGroupsList {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-md);
-}
-
-.monthGroupCompact {
-  background: var(--color-bg-secondary);
-  border-radius: var(--radius-md);
-  overflow: hidden;
-  border: 1px solid var(--color-primary-200);
-}
-
-.monthHeaderCompact {
-  padding: var(--spacing-md);
-  background: var(--color-bg-accent);
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--color-primary-700);
-  border-bottom: 1px solid var(--color-primary-200);
-}
-
-.monthEntriesCompact {
-  display: flex;
-  flex-direction: column;
-}
-
-.compactEntry {
-  padding: var(--spacing-md);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: var(--spacing-sm);
-  border-bottom: 1px solid var(--color-primary-100);
-  transition: background var(--transition-fast);
-}
-
-.compactEntry:last-child {
-  border-bottom: none;
-}
-
-.compactEntry:hover {
-  background: var(--color-bg-accent);
-}
-
-.compactEntryText {
-  font-size: 12px;
-  color: var(--color-primary-700);
-  flex: 1;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-/* ============================================
-   EXPANDED STATE FILTERS
-   ============================================ */
-
-.sortFiltersExpanded {
-  padding: var(--spacing-lg);
-  background: var(--color-bg-accent);
-  border-bottom: 1px solid var(--color-primary-200);
-}
-
-.filterGroup {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-md);
-  flex-wrap: wrap;
-}
-
-.filterGroup svg {
-  color: var(--color-primary-500);
-}
-
-.filterLabel {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--color-primary-700);
-}
-
-.filterSelect {
-  padding: var(--spacing-sm) var(--spacing-md);
-  border: 1px solid var(--color-primary-300);
-  background: white;
-  color: var(--color-primary-700);
-  border-radius: var(--radius-md);
-  font-size: 13px;
-  cursor: pointer;
-  transition: all var(--transition-fast);
-  outline: none;
-}
-
-.filterSelect:hover {
-  border-color: var(--color-primary);
-}
-
-.filterSelect:focus {
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(25, 77, 42, 0.1);
-}
-
-/* ============================================
-   EXPANDED TABLE VIEW
-   ============================================ */
-
-.expandedTableContainer {
-  flex: 1;
-  overflow-y: auto;
-  padding: var(--spacing-lg);
-}
-
-.tableGroupsList {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-lg);
-}
-
-.tableMonthGroup {
-  background: var(--color-bg-secondary);
-  border-radius: var(--radius-md);
-  overflow: hidden;
-  border: 1px solid var(--color-primary-200);
-}
-
-.monthHeaderTable {
-  padding: var(--spacing-md) var(--spacing-lg);
-  background: var(--color-bg-accent);
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--color-primary-700);
-  border-bottom: 1px solid var(--color-primary-200);
-}
-
+/* Table Wrapper */
 .tableWrapper {
   overflow-x: auto;
 }
 
+/* Entries Table */
 .entriesTable {
   width: 100%;
   border-collapse: collapse;
@@ -588,182 +306,139 @@
 }
 
 .entriesTable thead {
-  background: var(--color-primary-50);
-  position: sticky;
-  top: 0;
+  background: #f9fafb;
 }
 
 .entriesTable th {
-  padding: var(--spacing-md);
   text-align: left;
+  padding: 10px 12px;
   font-weight: 600;
-  color: var(--color-primary-700);
-  border-bottom: 2px solid var(--color-primary-200);
+  color: #6b7280;
+  border-bottom: 1px solid #e5e7eb;
   white-space: nowrap;
-}
-
-.entriesTable td {
-  padding: var(--spacing-md);
-  border-bottom: 1px solid var(--color-primary-100);
-  color: var(--color-primary-700);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .entriesTable tbody tr {
-  transition: background var(--transition-fast);
+  border-bottom: 1px solid #f3f4f6;
+  transition: background-color 0.15s;
 }
 
 .entriesTable tbody tr:hover {
-  background: var(--color-bg-accent);
+  background: #f9fafb;
 }
 
-.dateCell {
-  white-space: nowrap;
+.entriesTable tbody tr:last-child {
+  border-bottom: none;
 }
 
-.materialCell {
-  font-weight: 500;
+.entriesTable td {
+  padding: 12px;
+  color: #194d2a;
 }
 
-.handlerCell {
-  color: var(--color-primary-500);
-}
-
-.totalCell {
+/* Badge Styles */
+.badgeHazardous,
+.badgeNonHazardous {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
   font-weight: 600;
-  text-align: right;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
-.unitCell {
-  color: var(--color-primary-500);
-  text-align: center;
+.badgeHazardous {
+  background: #fee2e2;
+  color: #991b1b;
 }
 
-.actionCell {
-  text-align: center;
+.badgeNonHazardous {
+  background: #d1fae5;
+  color: #065f46;
 }
 
-.deleteButton {
-  padding: var(--spacing-sm);
-  border: none;
+/* Delete Button */
+.deleteBtn {
   background: transparent;
-  color: var(--color-danger);
+  border: none;
+  color: #ef4444;
   cursor: pointer;
-  border-radius: var(--radius-sm);
+  padding: 4px;
+  border-radius: 4px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  transition: all var(--transition-fast);
+  transition: all 0.2s;
 }
 
-.deleteButton:hover {
-  background: rgba(220, 38, 38, 0.1);
-  color: var(--color-danger-light);
+.deleteBtn:hover {
+  background: #fee2e2;
+  color: #dc2626;
 }
 
-/* ============================================
-   FOOTER
-   ============================================ */
-
-.sidebarFooter {
-  padding: var(--spacing-lg);
-  border-top: 1px solid var(--color-primary-200);
-  background: var(--color-bg-secondary);
+/* Expanded Footer */
+.expandedFooter {
+  padding: 16px 20px;
+  border-top: 1px solid #e5e7eb;
+  flex-shrink: 0;
 }
 
 .submitButton {
   width: 100%;
-  padding: var(--spacing-md) var(--spacing-lg);
-  border: none;
+  padding: 12px 20px;
   background: #194d2a;
   color: white;
-  cursor: pointer;
-  border-radius: var(--radius-md);
+  border: none;
+  border-radius: 8px;
   font-size: 14px;
   font-weight: 600;
-  transition: all var(--transition-fast);
-  box-shadow: var(--shadow-sm);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--spacing-sm);
+  cursor: pointer;
+  transition: all 0.2s;
 }
 
 .submitButton:hover {
-  background: var(--color-success-dark);
-  box-shadow: var(--shadow-md);
   transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(102, 234, 157, 0.4);
 }
 
 .submitButton:active {
   transform: translateY(0);
 }
 
-/* ============================================
-   STATES
-   ============================================ */
-
-.loadingState,
-.emptyState {
-  padding: var(--spacing-lg);
-  text-align: center;
-  color: var(--color-primary-500);
-  font-size: 14px;
+/* Scrollbar Styling */
+.entriesContainer::-webkit-scrollbar {
+  width: 6px;
 }
 
-.loadingState {
-  font-style: italic;
+.entriesContainer::-webkit-scrollbar-track {
+  background: #f3f4f6;
 }
 
-.emptyState {
-  opacity: 0.7;
+.entriesContainer::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 3px;
 }
 
-/* ============================================
-   SCROLLBAR STYLING
-   ============================================ */
-
-.allEntriesSection::-webkit-scrollbar,
-.expandedTableContainer::-webkit-scrollbar,
-.tableWrapper::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+.entriesContainer::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
 }
 
-.allEntriesSection::-webkit-scrollbar-track,
-.expandedTableContainer::-webkit-scrollbar-track,
-.tableWrapper::-webkit-scrollbar-track {
-  background: var(--color-primary-100);
-  border-radius: var(--radius-sm);
-}
-
-.allEntriesSection::-webkit-scrollbar-thumb,
-.expandedTableContainer::-webkit-scrollbar-thumb,
-.tableWrapper::-webkit-scrollbar-thumb {
-  background: var(--color-primary-300);
-  border-radius: var(--radius-sm);
-}
-
-.allEntriesSection::-webkit-scrollbar-thumb:hover,
-.expandedTableContainer::-webkit-scrollbar-thumb:hover,
-.tableWrapper::-webkit-scrollbar-thumb:hover {
-  background: var(--color-primary-400);
-}
-
-/* ============================================
-   RESPONSIVE ADJUSTMENTS
-   ============================================ */
-
-@media (max-height: 800px) {
-  .sidebarHeader {
-    padding: var(--spacing-md);
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .sidebarExpanded {
+    width: 320px;
   }
   
-  .sidebarSection {
-    padding: var(--spacing-md);
+  .entriesTable {
+    font-size: 12px;
   }
   
-  .sectionHeading {
-    font-size: 13px;
-    margin-bottom: var(--spacing-sm);
+  .entriesTable th,
+  .entriesTable td {
+    padding: 8px;
   }
 }

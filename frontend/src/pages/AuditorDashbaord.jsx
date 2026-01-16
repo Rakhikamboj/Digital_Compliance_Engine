@@ -100,7 +100,7 @@ const handleLogout = () => {
   if (showWasteEntry && selectedProject) {
     return (
       <>
-        <AuditorHeader user={user} onLogout={onLogout}/>
+        <AuditorHeader user={user} onLogout={handleLogout} />
         <WasteDataEntry
           onNext={handleWasteEntryComplete}
           projectInfo={selectedProject}

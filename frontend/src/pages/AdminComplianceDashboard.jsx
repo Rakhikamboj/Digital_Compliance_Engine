@@ -92,10 +92,10 @@ const AdminComplianceDashboard = ({ user }) => {
       {/* Stats Grid */}
       <div style={styles.statsGrid}>
         <StatCard
-          icon={<Briefcase size={24} />}
-          value={projects.length}
-          label="Total Projects"
+          icon={<Briefcase size={24} />}      
+          value={projects.length}         
           trend={null}
+          label="Total Projects"
         />
         
         <StatCard
@@ -126,12 +126,7 @@ const AdminComplianceDashboard = ({ user }) => {
           trend={unassignedProjects > 0 ? "Requires attention" : null}
         />
         
-        <StatCard
-          icon={<TrendingUp size={24} />}
-          value={`${completionRate}%`}
-          label="Success Rate"
-          trend={null}
-        />
+       
       </div>
     </div>
   )
@@ -159,8 +154,7 @@ const styles = {
     padding: '40px',
     maxWidth: '1400px',
     margin: '0 auto',
-    backgroundColor: '#f8f9fa',
-    minHeight: '100vh',
+    height: '100vh',
     fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
   },
   header: {
@@ -197,7 +191,7 @@ const styles = {
   },
   statsGrid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 3fr))',
     gap: '20px'
   },
   statCard: {
@@ -210,7 +204,7 @@ const styles = {
     boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)'
   },
   statCardHeader: {
-    marginBottom: '16px'
+    marginBottom: '0px'
   },
   iconWrapper: {
     width: '48px',
@@ -224,21 +218,24 @@ const styles = {
   },
   statCardBody: {
     display: 'flex',
-    flexDirection: 'column',
-    gap: '4px'
+    flex: 1,
+    flexDirection: 'row',
+    gap: '14px'
   },
   statValue: {
     fontSize: '32px',
     fontWeight: '700',
     color: '#1f2937',
+    justifyContent: 'center',
     lineHeight: '1',
-    letterSpacing: '-0.025em'
+    letterSpacing: '0.8em'
   },
   statLabel: {
     fontSize: '14px',
     color: '#6b7280',
     fontWeight: '500',
-    marginTop: '4px'
+    
+    marginTop: '12px'
   },
   statTrend: {
     fontSize: '12px',

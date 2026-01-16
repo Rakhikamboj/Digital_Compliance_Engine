@@ -4,15 +4,14 @@ import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import AdminDashboard from "./pages/AdminDashboard";
-import AuditorDashboard from "./pages/AuditorDashbaord"
+import AuditorDashboard from "./pages/AuditorDashbaord";
+import ComplianceDashboard from "./pages/Dashboard";
 
 import { AuthProvider } from "./context/AuthContext";
 import { ToastProvider, useToast } from "./context/ToastContext";
 import Toast from "./common/Toast";
 
 import WasteEntryContainer from "./components/CalculateDiversion";
-import WasteDataEntryForm from "./components/FormView";
-import WasteDataEntryExcel from "./components/ExcelView";
 
 const API_URL = import.meta.env.VITE_API_KEY;
 
@@ -115,11 +114,19 @@ const AppContent = () => {
               <Navigate to="/login" replace />
             )
           }
-        >
-          <Route index element={<Navigate to="excel" replace />} />
-          <Route path="excel" element={<WasteDataEntryExcel user={user} />} />
-          <Route path="form" element={<WasteDataEntryForm user={user} />} />
-        </Route>
+        />
+
+        {/* COMPLIANCE DASHBOARD */}
+        <Route
+          path="/dashboard"
+          element={
+            user ? (
+              <ComplianceDashboard user={user} onLogout={handleLogout} />
+            ) : (
+              <Navigate to="/login" replace />
+            )
+          }
+        />
 
         {/* FALLBACK */}
         <Route path="*" element={<Navigate to="/login" replace />} />

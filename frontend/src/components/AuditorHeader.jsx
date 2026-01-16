@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Briefcase, ChevronDown, LogOut } from "lucide-react";
-import styles from "../styles/AuditorDashboard.module.css"
+import styles from "../styles/AuditorHeader.module.css"
 
 const AuditorHeader = ({ user, onLogout }) => {
   const [showUserDropdown, setShowUserDropdown] = useState(false);
@@ -47,7 +47,7 @@ const AuditorHeader = ({ user, onLogout }) => {
               className={`${styles.dropdownItem} ${styles.logout}`}
               onClick={
                // 🔑 prevents dropdown click issues
-                onLogout          // 🔑 guaranteed execution
+                onLogout         
               }
             >
               <LogOut size={18} />
