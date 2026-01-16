@@ -6,10 +6,8 @@
   padding: 10px 20px;
   background: #fff;
   width: 100%;
-  box-shadow: 0 4px 10px rgba(15, 12, 42, 0.1);
-
-  margin-bottom: 20px;
-  z-index: 500
+  border-bottom: 1px solid #d6f6d6;
+  z-index: 1000;
 }
 
 .logoContainer {

@@ -2,7 +2,7 @@
 .sidebar {
   position: fixed;
   left: 0;
-  top: 7rem; /* Adjust this to match your header height */
+  top: 4.5rem; /* Adjust this to match your header height */
   height: calc(100vh - 60px); /* Full height minus header */
   background: #ffffff;
   border-right: 1px solid #e5e7eb;

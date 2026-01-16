@@ -149,7 +149,7 @@ const WasteEntryContainer = ({ projectInfo, onBackToProjects }) => {
           minHeight: "100vh",
           display: "flex",
           flexDirection: "column",
-          padding: "20px",
+          padding: "0px",
           transition: "margin-left 0.25s ease, width 0.25s ease",
         }}
       >

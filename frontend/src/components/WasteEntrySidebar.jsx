@@ -228,7 +228,7 @@ const WasteEntrySidebar = ({
           {/* Submit Button Footer */}
           {wasteEntries.length > 0 && (
             <div className={styles.expandedFooter}>
-              <button style={{color: '#194d2a'}}onClick={onSubmitEntries} className={styles.submitButton}>
+              <button style={{color: '#f3f7f4'}}onClick={onSubmitEntries} className={styles.submitButton}>
                 Submit All Entries
               </button>
             </div>

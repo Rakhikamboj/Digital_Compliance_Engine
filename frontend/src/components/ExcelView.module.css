@@ -29,7 +29,7 @@
   display: flex;
   flex-direction: column;
   height: calc(100vh - 80px);
-  background: #ffffff;
+  /* background: #ffffff; */
   margin: 0;
   border-radius: 12px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
@@ -39,7 +39,7 @@
 .dashboardContainer {
   min-height: 100vh;
   padding: 24px;
-  background: linear-gradient(135deg, #fefffa 0%, #f5f8ee 100%);
+  /* background: linear-gradient(135deg, #fefffa 0%, #f5f8ee 100%); */
 }
 
 .backButton {
