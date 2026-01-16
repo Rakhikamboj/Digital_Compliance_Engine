@@ -4,10 +4,10 @@
   width: 100%;
   flex-direction: column;
   height: 100vh;
-  /* background: #ffffff; */
+
   font-family: system-ui, -apple-system, sans-serif;
   overflow: hidden;
-  margin-left: 80px; /* Default collapsed sidebar width */
+  margin-left: 80px; 
   transition: margin-left 0.3s ease;
   width: calc(100% - 80px); /* Adjust total width */
 }
@@ -23,7 +23,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 16px 24px;
-  background: linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%);
+  /* background: linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%); */
   border-bottom: 1px solid #e5e7eb;
   flex-shrink: 0;
 }
@@ -57,7 +57,7 @@
 
 /* Info Banner - Matching Excel view */
 .infoBanner {
-  padding: 10px 20px;
+  padding: 8px 20px;
   background: #dbeafe;
   border-bottom: 1px solid #93c5fd;
   font-size: 12px;
@@ -69,15 +69,15 @@
 .contentWrapper {
   flex: 1;
   overflow-y: auto;
-  background: #f9fafb;
-  padding: 24px 20px;
+
+  padding: 10px 20px;
 }
 
 /* Card - Form container */
 .card {
   max-width: 1400px;
   margin: 0 auto;
-  background: #ffffff;
+
   border: 1px solid #e5e7eb;
   border-radius: 8px;
   padding: 24px;

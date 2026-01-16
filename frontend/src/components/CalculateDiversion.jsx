@@ -169,14 +169,16 @@ const WasteEntryContainer = ({ projectInfo, onBackToProjects }) => {
           style={{
             display: "flex",
             background: "#f3f4f6",
-            borderRadius: "10px",
+            borderRadius: "20px",
+            height: "40px",
             padding: "4px",
-            gap: "4px",
+            gap: "2px",
             alignItems: "center",
             justifyContent: "flex-end",
             width: "fit-content",
             marginLeft: "auto",
-            marginBottom: "16px",
+            marginRight: "1rem",
+            marginBottom: "10px",
           }}
         >
           <button
@@ -185,18 +187,19 @@ const WasteEntryContainer = ({ projectInfo, onBackToProjects }) => {
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              gap: "8px",
-              padding: "10px 20px",
+              gap: "4px",
+              padding: "10px 10px",
               background: activeView === "excel" ? "#194d2a" : "transparent",
-              color: activeView === "excel" ? "#fff" : "#6b7280",
+              color: activeView === "excel" ? "#c4c4c4" : "#1b1b1b",
+              width: activeView === "excel" ? "80px" : "40px",
               border: "none",
-              borderRadius: "8px",
+              borderRadius: "42px",
               cursor: "pointer",
               transition: "all 0.2s ease",
             }}
           >
             <FileSpreadsheet size={18} />
-            Spreadsheet
+           
           </button>
 
           <button
@@ -205,17 +208,18 @@ const WasteEntryContainer = ({ projectInfo, onBackToProjects }) => {
               display: "flex",
               alignItems: "center",
               gap: "8px",
-              padding: "10px 20px",
+              padding: "10px 10px",
               background: activeView === "form" ? "#194d2a" : "transparent",
               color: activeView === "form" ? "#fff" : "#6b7280",
+              width: activeView === "form" ? "80px" : "40px",
               border: "none",
-              borderRadius: "8px",
+              borderRadius: "42px",
               cursor: "pointer",
               transition: "all 0.2s ease",
             }}
           >
             <Table size={18} />
-            Form Entry
+            
           </button>
         </div>
 
