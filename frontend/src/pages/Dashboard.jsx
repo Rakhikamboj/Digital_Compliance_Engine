@@ -588,7 +588,7 @@ const ComplianceDashboard = ({ projectSelected, reportingPeriod = { periodType: 
 
   return (
     <div className="dashboardContainer">
-      <div style={{ maxWidth: '1500px', margin: '6rem auto', height: '80vh', overflow:'hidden', display: 'flex', flexDirection: 'column', padding: '16px', gap: '12px' }}>
+      <div style={{ maxWidth: '1500px', margin: '6rem auto', height: '100vh',  display: 'flex', flexDirection: 'column', padding: '16px', gap: '12px', overflow: 'hidden' }}>
         {/* Compact Header */}
         <div className="dashboardHeader" style={{ padding: '12px 20px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -637,7 +637,7 @@ const ComplianceDashboard = ({ projectSelected, reportingPeriod = { periodType: 
             <div className="chartCard" style={{ padding: '16px', flex: '0 0 auto' }}>
               <h3 style={{ fontSize: '13px', fontWeight: 600, color: '#194d2a', margin: '0 0 8px 0' }}>Overall Diversion Rate</h3>
               <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '12px' }}>
-                <CircularProgress percentage={metrics.overallPercent} size={120} />
+                <CircularProgress percentage={metrics.overallPercent} size={160} />
               </div>
               <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
                 <MetricBox label="Total" value={`${metrics.overallTotal.toFixed(0)} kg`} color="#194d2a" />
@@ -731,7 +731,7 @@ const ComplianceDashboard = ({ projectSelected, reportingPeriod = { periodType: 
             </div>
 
             {/* Waste Entries Table */}
-            <div className="chartCard" style={{ padding: '12px', flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
+            <div className="chartCard" style={{ padding: '12px', flex: 1, height: 600, display: 'flex', flexDirection: 'column' }}>
               <h3 style={{ fontSize: '13px', fontWeight: 600, color: '#194d2a', margin: '0 0 8px 0' }}>Waste Entries Summary</h3>
               <div style={{ overflowY: 'auto', flex: 1 }}>
                 <table className="dataTable">
@@ -859,7 +859,7 @@ const ComplianceDashboard = ({ projectSelected, reportingPeriod = { periodType: 
           height: 100vh;
           // background: linear-gradient(180deg, #f8fcf7 0%, #e8f0e3 100%);
           font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, sans-serif;
-          overflow: hidden;
+          overflow: auto;
         }
 
         .dashboardHeader {

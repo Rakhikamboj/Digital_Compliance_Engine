@@ -435,13 +435,13 @@ const WasteEntryExcel = ({ projectInfo }) => {
     return a.localeCompare(b); // Alphabetical
   });
 
-  useEffect(() => {
+ useEffect(() => {
     const initialExpanded = {};
     sortedGroupKeys.forEach(key => {
-      initialExpanded[key] = true;
+      initialExpanded[key] = false; // Changed to false for collapsed by default
     });
     setExpandedGroups(initialExpanded);
-  }, [sortedData.length, groupBy, sortedGroupKeys]);
+  }, [sortedData.length, groupBy]);
 
   const toggleGroup = (groupKey) => {
     setExpandedGroups(prev => ({
