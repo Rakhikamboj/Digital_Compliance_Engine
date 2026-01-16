@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Table, FileSpreadsheet } from "lucide-react";
+import { Table, FileSpreadsheet, MoveLeft } from "lucide-react";
 
 import WasteDataEntryExcel from "./ExcelView";
 import WasteDataEntryForm from "./FormView";
@@ -142,6 +142,7 @@ const WasteEntryContainer = ({ projectInfo, onBackToProjects }) => {
         onShowDashboard={() => setShowDashboard(true)} // NEW: Pass callback
       />
 
+
       <div
         className={`${styles.contentWrapper} ${getContentWrapperClass()}`}
         style={{
@@ -149,21 +150,29 @@ const WasteEntryContainer = ({ projectInfo, onBackToProjects }) => {
           minHeight: "100vh",
           display: "flex",
           flexDirection: "column",
-          padding: "0px",
+          padding: "90px 24px",
+        
           transition: "margin-left 0.25s ease, width 0.25s ease",
         }}
       >
         {/* Header */}
-        <p
+        {/* <p
           style={{
             fontSize: "14px",
             color: "#6b7280",
-            margin: "3rem 0",
+            margin: "1rem 0",
           }}
         >
           {activeView === "excel" ? "Spreadsheet View" : "Form Entry View"}
-        </p>
+        </p> */}
 
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "8px",  marginLeft: "5.5rem" }}>
+          <h3>
+            Waste Entry {activeView === "excel" ? "Spreadsheet" : "Form"}
+            
+          </h3>
+        </div> 
         {/* Toggle */}
         <div
           style={{
@@ -171,14 +180,14 @@ const WasteEntryContainer = ({ projectInfo, onBackToProjects }) => {
             background: "#f3f4f6",
             borderRadius: "20px",
             height: "40px",
-            padding: "4px",
+            padding: "0px",
             gap: "2px",
             alignItems: "center",
             justifyContent: "flex-end",
             width: "fit-content",
             marginLeft: "auto",
             marginRight: "1rem",
-            marginBottom: "10px",
+          
           }}
         >
           <button
@@ -222,7 +231,7 @@ const WasteEntryContainer = ({ projectInfo, onBackToProjects }) => {
             
           </button>
         </div>
-
+</div>
         {/* Content */}
         <main style={{ flex: 1 }}>
           {activeView === "excel" ? (

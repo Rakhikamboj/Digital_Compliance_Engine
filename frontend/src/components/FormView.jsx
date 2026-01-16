@@ -471,7 +471,7 @@ const WasteDataEntryForm = ({ projectInfo, sidebarExpanded }) => {
       {/* Toolbar */}
       <div className={styles.toolbar}>
         <div className={styles.toolbarLeft}>
-          <h2 className={styles.heading}>Waste Entry Form</h2>
+         
           <span className={styles.entryCount}>
             {wasteEntries.length} total entries
           </span>
@@ -479,9 +479,9 @@ const WasteDataEntryForm = ({ projectInfo, sidebarExpanded }) => {
       </div>
 
       {/* Info Banner */}
-      <div className={styles.infoBanner}>
+      {/* <div className={styles.infoBanner}>
         Fill in the form below to add a new waste entry. Switch between tabs to enter hazardous or non-hazardous waste data.
-      </div>
+      </div> */}
 
       {/* Content Wrapper */}
       <div className={styles.contentWrapper}>

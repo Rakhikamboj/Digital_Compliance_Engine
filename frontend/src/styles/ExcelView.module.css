@@ -19,6 +19,14 @@
   border-bottom: 1px solid #e5e7eb;
 }
 
+.heading{
+  padding: 0;
+  display: flex;
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
 .toolbarLeft {
   display: flex;
   align-items: center;

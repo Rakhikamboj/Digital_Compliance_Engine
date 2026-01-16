@@ -784,12 +784,15 @@ const WasteEntryExcel = ({ projectInfo }) => {
     <>
   
     <div className={styles.container}>
+      <div className={styles.heading}>
+     
+          {/* <div className={styles.infoBanner}>
+        Click column headers to sort and filter. Double-click cells to edit.
+      </div> */}
+          </div>
       <div className={styles.toolbar}>
         <div className={styles.toolbarLeft}>
-          <h2 className={styles.title}>Waste Entry Spreadsheet</h2>
-          <span className={styles.entryCount}>
-            {sortedData.length} {sortedData.length !== gridData.length && `of ${gridData.length}`} entries
-          </span>
+          
           {hasActiveFilters && (
             <button className={styles.clearAllBtn} onClick={clearAllFilters}>
               Clear All Filters
@@ -817,9 +820,7 @@ const WasteEntryExcel = ({ projectInfo }) => {
         </div>
       </div>
 
-      <div className={styles.infoBanner}>
-        Click column headers to sort and filter. Double-click cells to edit.
-      </div>
+     
 
       {fetchLoading && (
         <div className={styles.loadingState}>Loading waste entries...</div>
