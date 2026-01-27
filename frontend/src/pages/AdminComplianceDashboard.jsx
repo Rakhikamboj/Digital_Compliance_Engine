@@ -58,7 +58,7 @@ const AdminComplianceDashboard = ({ user }) => {
   const inProgressProjects = projects.filter(p => p.status === "In Progress").length
   const activeAuditors = auditors.filter(a => a.isActive).length
   const unassignedProjects = projects.filter(p => !p.assignedAuditor).length
-  const completionRate = projects.length > 0 ? Math.round((completedProjects / projects.length) * 100) : 0
+
 
   if (loading) {
     return (
@@ -109,7 +109,7 @@ const AdminComplianceDashboard = ({ user }) => {
           icon={<FileText size={24} />}
           value={completedProjects}
           label="Completed"
-          trend={`${completionRate}% completion rate`}
+         
         />
         
         <StatCard
@@ -125,8 +125,6 @@ const AdminComplianceDashboard = ({ user }) => {
           label="Unassigned Projects"
           trend={unassignedProjects > 0 ? "Requires attention" : null}
         />
-        
-       
       </div>
     </div>
   )
@@ -139,11 +137,13 @@ const StatCard = ({ icon, value, label, trend }) => {
         <div style={styles.iconWrapper}>
           {icon}
         </div>
+        <div style={styles.labelWrapper}>
+          <div style={styles.statLabel}>{label}</div>
+          {trend && <div style={styles.statTrend}>{trend}</div>}
+        </div>
       </div>
       <div style={styles.statCardBody}>
         <div style={styles.statValue}>{value}</div>
-        <div style={styles.statLabel}>{label}</div>
-        {trend && <div style={styles.statTrend}>{trend}</div>}
       </div>
     </div>
   )
@@ -191,7 +191,7 @@ const styles = {
   },
   statsGrid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 3fr))',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
     gap: '20px'
   },
   statCard: {
@@ -204,7 +204,10 @@ const styles = {
     boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)'
   },
   statCardHeader: {
-    marginBottom: '0px'
+    display: 'flex',
+    alignItems: 'flex-start',
+    gap: '12px',
+    marginBottom: '16px'
   },
   iconWrapper: {
     width: '48px',
@@ -214,34 +217,39 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    color: '#4b5563'
+    color: '#4b5563',
+    flexShrink: 0
+  },
+  labelWrapper: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '2px',
+    flex: 1,
+    paddingTop: '4px'
   },
   statCardBody: {
     display: 'flex',
-    flex: 1,
-    flexDirection: 'row',
-    gap: '14px'
+    alignItems: 'center',
+    justifyContent: 'center'
   },
   statValue: {
-    fontSize: '32px',
+    fontSize: '36px',
     fontWeight: '700',
     color: '#1f2937',
-    justifyContent: 'center',
     lineHeight: '1',
-    letterSpacing: '0.8em'
+    letterSpacing: '-0.02em'
   },
   statLabel: {
     fontSize: '14px',
-    color: '#6b7280',
-    fontWeight: '500',
-    
-    marginTop: '12px'
+    color: '#1f2937',
+    fontWeight: '600',
+    lineHeight: '1.3'
   },
   statTrend: {
     fontSize: '12px',
-    color: '#9ca3af',
+    color: '#6b7280',
     fontWeight: '400',
-    marginTop: '4px'
+    lineHeight: '1.3'
   },
   loadingContainer: {
     display: 'flex',

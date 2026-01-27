@@ -21,8 +21,8 @@
   max-width: 100%;
   height: calc(100vh - 80px);
   overflow: hidden;
-  margin-top: 60px;
-  padding: 16px 20px;
+  margin-top: 35px;
+  padding: 12px 20px;
   display: flex;
   flex-direction: column;
 }
@@ -44,7 +44,7 @@
   font-size: 1.5rem;
   font-weight: 600;
   color: #194d2a;
-  margin-bottom: 4px;
+
   letter-spacing: -0.5px;
 }
 
