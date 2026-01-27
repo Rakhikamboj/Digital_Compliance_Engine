@@ -206,7 +206,7 @@ const ColumnHeader = ({
 
 const WasteEntryExcel = ({ projectInfo }) => {
   const [wasteEntries, setWasteEntries] = useState([]);
-  const [showAddRow, setShowAddRow] = useState(false);
+  const [showAddRow, setShowAddRow] = useState(true);
   const [sortConfig, setSortConfig] = useState({ field: null, direction: null });
   const [filterConfig, setFilterConfig] = useState({});
   const [showCopyIndicator, setShowCopyIndicator] = useState(false);
@@ -217,11 +217,16 @@ const WasteEntryExcel = ({ projectInfo }) => {
   const [loading, setLoading] = useState(false);
   const [fetchLoading, setFetchLoading] = useState(true);
 
+    const getCurrentMonthYear = () => {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+  };
+
   const [newRow, setNewRow] = useState({
     wasteMaterial: "",
     wasteHandler: "",
     modeOfDisposal: "",
-    inputDate: new Date().toISOString().split("T")[0],
+   inputMonth: getCurrentMonthYear(),
     type: "hazardous",
     unit: "kg",
     total: "",
@@ -809,10 +814,10 @@ const WasteEntryExcel = ({ projectInfo }) => {
             <option value="material">Group by Material</option>
             <option value="type">Group by Type</option>
           </select>
-          <button className={styles.addBtn} onClick={() => setShowAddRow(!showAddRow)}>
+          {/* <button className={styles.addBtn} onClick={() => setShowAddRow(!showAddRow)}>
             <Plus size={16} />
            
-          </button>
+          </button> */}
           <button className={styles.toolbarBtn} onClick={handleExport}>
             <Download size={16} />
            
