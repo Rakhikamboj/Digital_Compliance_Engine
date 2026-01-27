@@ -286,6 +286,317 @@
   border-radius: 4px;
   font-size: 13px;
 }
+/* Add these styles to your ExcelView.module.css file */
+
+/* Month/Year Picker Styles */
+.monthYearPickerContainer {
+  position: relative;
+  width: 100%;
+}
+
+.monthYearButton {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  font-size: 14px;
+  color: #374151;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.monthYearButton:hover {
+  border-color: #3b82f6;
+  background: #f9fafb;
+}
+
+.monthYearButton:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.monthYearButton svg:first-child {
+  color: #6b7280;
+}
+
+.monthYearButton span {
+  flex: 1;
+  text-align: left;
+}
+
+.monthYearButton svg:last-child {
+  color: #9ca3af;
+}
+
+.monthYearDropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  width: 300px;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  max-height: 400px;
+  overflow-y: auto;
+  padding: 12px;
+}
+
+.pickerSection {
+  padding: 8px 0;
+}
+
+.pickerTitle {
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+
+.pickerDivider {
+  height: 1px;
+  background: #e5e7eb;
+  margin: 12px -12px;
+}
+
+.yearGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.yearOption {
+  padding: 10px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+}
+
+.yearOption:hover {
+  background: #eff6ff;
+  border-color: #3b82f6;
+  color: #3b82f6;
+}
+
+.yearOptionSelected {
+  background: #3b82f6;
+  border-color: #3b82f6;
+  color: white;
+}
+
+.yearOptionSelected:hover {
+  background: #2563eb;
+  border-color: #2563eb;
+}
+
+.monthGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.monthOption {
+  padding: 8px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #374151;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+}
+
+.monthOption:hover {
+  background: #eff6ff;
+  border-color: #3b82f6;
+  color: #3b82f6;
+}
+
+.monthOptionSelected {
+  background: #3b82f6;
+  border-color: #3b82f6;
+  color: white;
+}
+
+.monthOptionSelected:hover {
+  background: #2563eb;
+  border-color: #2563eb;
+}
+
+.monthOptionDisabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  background: #f3f4f6;
+}
+
+.monthOptionDisabled:hover {
+  background: #f3f4f6;
+  border-color: #e5e7eb;
+  color: #374151;
+}
+
+.noReportingPeriod {
+  padding: 16px;
+  text-align: center;
+  color: #6b7280;
+}
+
+.noReportingPeriod p {
+  margin: 8px 0;
+  font-size: 13px;
+}
+
+.noReportingPeriod p:first-child {
+  font-weight: 600;
+  color: #374151;
+}
+/* Add this to your ExcelView.module.css file */
+
+.duplicateMonthWarning {
+  background-color: #fff3cd;
+  border: 1px solid #ffc107;
+  border-radius: 6px;
+  padding: 12px 16px;
+  margin: 12px 0;
+  color: #856404;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Optional: Add a hover effect */
+.duplicateMonthWarning:hover {
+  background-color: #fff8e1;
+}
+
+/* Disabled month button style */
+.monthOptionDisabled {
+  opacity: 0.4;
+  cursor: not-allowed !important;
+  background-color: #f5f5f5 !important;
+}
+
+.monthOptionDisabled:hover {
+  background-color: #f5f5f5 !important;
+  transform: none !important;
+}
+
+/* No reporting period message */
+.noReportingPeriod {
+  padding: 20px;
+  text-align: center;
+  color: #666;
+}
+
+.noReportingPeriod p {
+  margin: 8px 0;
+  font-size: 14px;
+}
+
+.noReportingPeriod p:first-child {
+  font-weight: 600;
+  color: #333;
+}
+
+/* Month filter input for column headers */
+.monthFilterContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px 0;
+}
+
+.monthInput {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  font-size: 13px;
+  color: #374151;
+}
+
+.monthInput:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Auto-calculated badge styling */
+.autoCalculatedBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  background: #dbeafe;
+  color: #1e40af;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+/* Read-only input styling */
+.inputReadOnly {
+  background-color: #f3f4f6 !important;
+  color: #6b7280 !important;
+  cursor: not-allowed !important;
+  border-color: #d1d5db !important;
+}
+
+.inputReadOnly:focus {
+  box-shadow: none !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .monthYearDropdown {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    right: auto;
+    transform: translate(-50%, -50%);
+    width: 90%;
+    max-width: 320px;
+  }
+
+  .yearGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .monthGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
 
 .filterInput {
   width: 100%;

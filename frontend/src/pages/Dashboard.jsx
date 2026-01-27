@@ -832,6 +832,7 @@ const ComplianceDashboard = ({ projectSelected, reportingPeriod = { periodType: 
                       <span>Diverted: {metrics.hazDiv.toFixed(1)} kg ({metrics.hazPercent.toFixed(1)}%)</span>
                     </div>
                   </div>
+                  
                 )}
                 {metrics.nonHazTotal > 0 && (
                   <div style={{ padding: '16px', borderRadius: '10px', marginBottom: '12px', background: '#d4edda' }}>
