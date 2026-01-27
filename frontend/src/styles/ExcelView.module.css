@@ -281,13 +281,7 @@
   gap: 8px;
 }
 
-.dateInput {
-  width: 100%;
-  padding: 8px 10px;
-  border: 1px solid #d1d5db;
-  border-radius: 4px;
-  font-size: 13px;
-}
+
 /* Add these styles to your ExcelView.module.css file */
 
 /* Month/Year Picker Styles */
@@ -312,13 +306,13 @@
 }
 
 .monthYearButton:hover {
-  border-color: #3b82f6;
+  /* border-color: #3b82f6; */
   background: #f9fafb;
 }
 
 .monthYearButton:focus {
   outline: none;
-  border-color: #3b82f6;
+  border-color: #0d7c4e;
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
@@ -391,19 +385,19 @@
 
 .yearOption:hover {
   background: #eff6ff;
-  border-color: #3b82f6;
-  color: #3b82f6;
+  border-color: #0d7c4e;
+  color: #0d7c4e;
 }
 
 .yearOptionSelected {
-  background: #3b82f6;
-  border-color: #3b82f6;
+  background: #0d7c4e;
+  border-color: #0d7c4e;
   color: white;
 }
 
 .yearOptionSelected:hover {
-  background: #2563eb;
-  border-color: #2563eb;
+  background: #0d7c4e;
+  border-color: #0d7c4e;
 }
 
 .monthGrid {
@@ -427,18 +421,18 @@
 
 .monthOption:hover {
   background: #eff6ff;
-  border-color: #3b82f6;
-  color: #3b82f6;
+  border-color: #0d7c4e;
+  color: #0d7c4e;
 }
 
 .monthOptionSelected {
-  background: #3b82f6;
-  border-color: #3b82f6;
+  background: #0d7c4e;
+  border-color: #0d7c4e;
   color: white;
 }
 
 .monthOptionSelected:hover {
-  background: #2563eb;
+  background: #0d7c4e;
   border-color: #2563eb;
 }
 
