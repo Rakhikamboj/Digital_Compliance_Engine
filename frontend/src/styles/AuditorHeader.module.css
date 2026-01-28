@@ -13,7 +13,7 @@
 .logoContainer {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 13px;
 }
 
 .logoIcon {
@@ -46,7 +46,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 8px 16px 8px 8px;
+  padding: 8px 14px 8px 8px;
   background: #f5f8ee;
   border: 2px solid rgba(25, 77, 42, 0.1);
   border-radius: 14px;
@@ -60,9 +60,9 @@
 }
 
 .avatar {
-  width: 44px;
-  height: 44px;
-  border-radius: 12px;
+  width: 30px;
+  height: 30px;
+  border-radius: 20px;
   background: linear-gradient(135deg, #194d2a 0%, #0d3618 100%);
   display: flex;
   align-items: center;
