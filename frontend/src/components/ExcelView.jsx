@@ -16,6 +16,67 @@ const DISPOSAL_MODES = [
   "Treatment", "Others"
 ];
 
+// Helper function to get valid months based on reporting period
+const getValidMonthsForPeriod = (reportingPeriod) => {
+  if (!reportingPeriod) return [];
+
+  const { periodType, year } = reportingPeriod;
+  const periodYear = parseInt(year);
+
+  if (periodType === "calendar") {
+    // Calendar Year: Jan to Dec of the same year
+    return Array.from({ length: 12 }, (_, i) => {
+      const month = String(i + 1).padStart(2, "0");
+      return `${periodYear}-${month}`;
+    });
+  } else if (periodType === "financial") {
+    // Financial Year: Apr of previous year to Mar of current year
+    // For FY 2025-26, it means Apr 2025 to Mar 2026
+    const startYear = periodYear;
+    const endYear = periodYear + 1;
+    const months = [];
+    
+    // Apr to Dec of start year (2025)
+    for (let m = 4; m <= 12; m++) {
+      months.push(`${startYear}-${String(m).padStart(2, "0")}`);
+    }
+    
+    // Jan to Mar of end year (2026)
+    for (let m = 1; m <= 3; m++) {
+      months.push(`${endYear}-${String(m).padStart(2, "0")}`);
+    }
+    
+    return months;
+  }
+
+  return [];
+};
+
+// Helper function to format month-year display
+const formatMonthYearDisplay = (monthYear) => {
+  if (!monthYear) return "";
+  const [year, month] = monthYear.split("-");
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  return `${months[parseInt(month) - 1]} ${year}`;
+};
+
+// Helper function to get year range for reporting period
+const getYearRangeForPeriod = (reportingPeriod) => {
+  if (!reportingPeriod) return [];
+
+  const { periodType, year } = reportingPeriod;
+  const periodYear = parseInt(year);
+
+  if (periodType === "calendar") {
+    return [periodYear];
+  } else if (periodType === "financial") {
+    // For FY 2025-26, show both 2025 and 2026
+    return [periodYear, periodYear + 1];
+  }
+
+  return [];
+};
+
 // Month/Year Picker Component
 const MonthYearPicker = ({ value, onChange, reportingPeriod, className }) => {
   const [showPicker, setShowPicker] = useState(false);
@@ -28,6 +89,10 @@ const MonthYearPicker = ({ value, onChange, reportingPeriod, className }) => {
       const [year, month] = value.split("-");
       setSelectedYear(year);
       setSelectedMonth(month);
+    } else {
+      // Reset to empty if no value
+      setSelectedYear("");
+      setSelectedMonth("");
     }
   }, [value]);
 
@@ -41,18 +106,9 @@ const MonthYearPicker = ({ value, onChange, reportingPeriod, className }) => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const getYearRange = () => {
-    const currentYear = new Date().getFullYear();
-    // Allow selection of past 5 years, current year, and next 2 years
-    return Array.from({ length: 8 }, (_, i) => currentYear - 5 + i);
-  };
+  const validMonths = getValidMonthsForPeriod(reportingPeriod);
+  const yearRange = getYearRangeForPeriod(reportingPeriod);
 
-  const getValidMonths = (year) => {
-    // Allow all months for any year
-    return Array.from({ length: 12 }, (_, i) => i + 1);
-  };
-
-  const yearRange = getYearRange();
   const months = [
     { value: "01", label: "January" },
     { value: "02", label: "February" },
@@ -68,24 +124,45 @@ const MonthYearPicker = ({ value, onChange, reportingPeriod, className }) => {
     { value: "12", label: "December" },
   ];
 
+  const getValidMonthsForYear = (year) => {
+    if (!year) return [];
+    return validMonths
+      .filter(m => m.startsWith(year))
+      .map(m => m.split("-")[1]);
+  };
+
   const handleMonthSelect = (month) => {
     setSelectedMonth(month);
     if (selectedYear && month) {
       const newValue = `${selectedYear}-${month}`;
-      onChange(newValue);
-      setShowPicker(false);
+      if (validMonths.includes(newValue)) {
+        onChange(newValue);
+        setShowPicker(false);
+      }
     }
   };
 
   const handleYearSelect = (year) => {
     setSelectedYear(year);
+    // Clear month selection when changing year
+    setSelectedMonth("");
   };
 
   const formatDisplayValue = () => {
     if (!value) return "Select Month & Year";
-    const [year, month] = value.split("-");
-    const monthObj = months.find(m => m.value === month);
-    return `${monthObj?.label.slice(0, 3)} ${year}`;
+    return formatMonthYearDisplay(value);
+  };
+
+  const getPeriodLabel = () => {
+    if (!reportingPeriod) return "";
+    const { periodType, year } = reportingPeriod;
+    
+    if (periodType === "calendar") {
+      return `Calendar Year ${year}`;
+    } else if (periodType === "financial") {
+      return `Financial Year ${year}`;
+    }
+    return "";
   };
 
   return (
@@ -102,6 +179,8 @@ const MonthYearPicker = ({ value, onChange, reportingPeriod, className }) => {
 
       {showPicker && (
         <div className={styles.monthYearDropdown}>
+          <div className={styles.periodLabel}>{getPeriodLabel()}</div>
+          
           <div className={styles.pickerSection}>
             <div className={styles.pickerTitle}>Select Year</div>
             <div className={styles.yearGrid}>
@@ -125,15 +204,15 @@ const MonthYearPicker = ({ value, onChange, reportingPeriod, className }) => {
                 <div className={styles.pickerTitle}>Select Month</div>
                 <div className={styles.monthGrid}>
                   {months.map((month) => {
-                    const validMonths = getValidMonths(selectedYear);
-                    const isValid = validMonths.includes(parseInt(month.value));
+                    const validMonthsForYear = getValidMonthsForYear(selectedYear);
+                    const isValid = validMonthsForYear.includes(month.value);
                     return (
                       <button
                         key={month.value}
                         type="button"
                         className={`${styles.monthOption} ${
                           selectedMonth === month.value ? styles.monthOptionSelected : ''
-                        }`}
+                        } ${!isValid ? styles.monthOptionDisabled : ''}`}
                         onClick={() => isValid && handleMonthSelect(month.value)}
                         disabled={!isValid}
                       >
@@ -141,6 +220,17 @@ const MonthYearPicker = ({ value, onChange, reportingPeriod, className }) => {
                       </button>
                     );
                   })}
+                </div>
+              </div>
+            </>
+          )}
+
+          {!selectedYear && (
+            <>
+              <div className={styles.pickerDivider}></div>
+              <div className={styles.pickerSection}>
+                <div className={styles.pickerPlaceholder}>
+                  Please select a year first
                 </div>
               </div>
             </>
@@ -353,18 +443,22 @@ const WasteEntryExcel = ({ projectInfo }) => {
   const [fetchLoading, setFetchLoading] = useState(true);
   const [duplicateMonthMessage, setDuplicateMonthMessage] = useState("");
 
-  // Get current month-year
-  const getCurrentMonthYear = () => {
-    const now = new Date();
-    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+
+
+  // Convert month-year to full date (first day of the month)
+  const monthYearToDate = (monthYear) => {
+    if (!monthYear) return null;
+    const [year, month] = monthYear.split("-");
+    return `${year}-${month}-01`;
   };
 
-  // Format month-year for display (e.g., "Jan 2026")
-  const formatMonthYearDisplay = (monthYear) => {
-    if (!monthYear) return "";
-    const [year, month] = monthYear.split("-");
-    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-    return `${months[parseInt(month) - 1]} ${year}`;
+  // Convert date to month-year
+  const dateToMonthYear = (date) => {
+    if (!date) return "";
+    const dateObj = new Date(date);
+    const year = dateObj.getFullYear();
+    const month = String(dateObj.getMonth() + 1).padStart(2, "0");
+    return `${year}-${month}`;
   };
 
   // Initialize newRow with all fields defined
@@ -372,10 +466,10 @@ const WasteEntryExcel = ({ projectInfo }) => {
     wasteMaterial: "",
     wasteHandler: "",
     modeOfDisposal: "",
-    inputMonthYear: getCurrentMonthYear(),
+    inputMonthYear: "",
     type: "hazardous",
     unit: "kg",
-    total: "0", // Will be auto-calculated
+    total: "0",
     reuse: "",
     recycle: "",
     composting: "",
@@ -424,7 +518,7 @@ const WasteEntryExcel = ({ projectInfo }) => {
       
       if (existingEntry) {
         setDuplicateMonthMessage(
-          `Data for ${formatMonthYearDisplay(newRow.inputMonthYear)} already exists. Please edit the existing record.`
+          `⚠️ Data for ${formatMonthYearDisplay(newRow.inputMonthYear)} already exists. Please edit the existing record.`
         );
       } else {
         setDuplicateMonthMessage("");
@@ -444,22 +538,6 @@ const WasteEntryExcel = ({ projectInfo }) => {
       console.error("Error decoding token:", error);
       return null;
     }
-  };
-
-  // Convert month-year to full date (first day of the month)
-  const monthYearToDate = (monthYear) => {
-    if (!monthYear) return null;
-    const [year, month] = monthYear.split("-");
-    return `${year}-${month}-01`;
-  };
-
-  // Convert date to month-year
-  const dateToMonthYear = (date) => {
-    if (!date) return "";
-    const dateObj = new Date(date);
-    const year = dateObj.getFullYear();
-    const month = String(dateObj.getMonth() + 1).padStart(2, "0");
-    return `${year}-${month}`;
   };
 
   const fetchWasteEntries = async () => {
@@ -497,6 +575,13 @@ const WasteEntryExcel = ({ projectInfo }) => {
   useEffect(() => {
     fetchWasteEntries();
   }, [projectInfo?._id]);
+
+  useEffect(() => {
+    // Reset newRow month when project info changes
+    if (projectInfo?.reportingPeriod) {
+      setNewRow(prev => ({ ...prev, inputMonthYear: "" }));
+    }
+  }, [projectInfo?.reportingPeriod]);
 
   const gridData = wasteEntries.map((entry) => {
     const data = entry.includeHazardous ? entry.hazardousData : entry.nonHazardousData;
@@ -661,6 +746,11 @@ const WasteEntryExcel = ({ projectInfo }) => {
       return;
     }
 
+    if (!newRow.inputMonthYear) {
+      alert("Please select a month and year");
+      return;
+    }
+
     const total = parseFloat(newRow.total) || 0;
     if (total <= 0) {
       alert("Total must be greater than 0. Please enter at least one disposal value.");
@@ -674,6 +764,13 @@ const WasteEntryExcel = ({ projectInfo }) => {
     
     if (existingEntry) {
       alert(`Data for ${formatMonthYearDisplay(newRow.inputMonthYear)} already exists. Please edit the existing record.`);
+      return;
+    }
+
+    // Validate month is within reporting period
+    const validMonths = getValidMonthsForPeriod(projectInfo?.reportingPeriod);
+    if (!validMonths.includes(newRow.inputMonthYear)) {
+      alert("Please select a month within the reporting period.");
       return;
     }
 
@@ -756,12 +853,12 @@ const WasteEntryExcel = ({ projectInfo }) => {
         setShowAddRow(false);
         setDuplicateMonthMessage("");
         
-        // Reset form with all fields defined
+        // Reset form with empty month
         setNewRow({
           wasteMaterial: "",
           wasteHandler: "",
           modeOfDisposal: "",
-          inputMonthYear: getCurrentMonthYear(),
+          inputMonthYear: "",
           type: "hazardous",
           unit: "kg",
           total: "0",
@@ -845,6 +942,23 @@ const WasteEntryExcel = ({ projectInfo }) => {
         };
       }
     } else if (field === 'inputMonthYear') {
+      // Validate month is within reporting period
+      const validMonths = getValidMonthsForPeriod(projectInfo?.reportingPeriod);
+      if (!validMonths.includes(value)) {
+        alert("Please select a month within the reporting period.");
+        return;
+      }
+
+      // Check if this month already exists (excluding current entry)
+      const existingEntry = wasteEntries.find(e => 
+        e._id !== entryId && dateToMonthYear(e.inputDate) === value
+      );
+      
+      if (existingEntry) {
+        alert(`Data for ${formatMonthYearDisplay(value)} already exists. Please choose a different month.`);
+        return;
+      }
+
       // Convert month-year to full date
       updatePayload = { inputDate: monthYearToDate(value) };
     } else {
@@ -1102,7 +1216,7 @@ const WasteEntryExcel = ({ projectInfo }) => {
 
       {duplicateMonthMessage && (
         <div className={styles.duplicateMonthWarning}>
-          ⚠️ {duplicateMonthMessage}
+          {duplicateMonthMessage}
         </div>
       )}
 
@@ -1210,7 +1324,7 @@ const WasteEntryExcel = ({ projectInfo }) => {
                   </td>
                 ))}
                 <td className={styles.td}>
-                  <button onClick={handleAddRow} disabled={loading} className={styles.saveBtn}>
+                  <button onClick={handleAddRow} disabled={loading || !!duplicateMonthMessage || !newRow.inputMonthYear} className={styles.saveBtn}>
                     <Plus size={16} />
                   </button>
                 </td>

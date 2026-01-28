@@ -149,6 +149,7 @@
 
 .th {
   position: relative;
+  width: auto;
   padding: 8px 12px;
   text-align: left;
   font-size: 11px;
@@ -282,86 +283,78 @@
 }
 
 
-/* Add these styles to your ExcelView.module.css file */
+/* Add these styles to your existing ExcelView.module.css */
 
-/* Month/Year Picker Styles */
+/* Month Year Picker Styles */
 .monthYearPickerContainer {
   position: relative;
-  width: 100%;
+  display: inline-block;
 }
 
 .monthYearButton {
-  width: 100%;
   display: flex;
   align-items: center;
   gap: 8px;
   padding: 8px 12px;
   background: white;
-  border: 1px solid #e5e7eb;
+  border: 1px solid #e0e0e0;
   border-radius: 6px;
-  font-size: 14px;
-  color: #374151;
   cursor: pointer;
+  font-size: 14px;
   transition: all 0.2s;
 }
 
 .monthYearButton:hover {
-  /* border-color: #3b82f6; */
-  background: #f9fafb;
-}
-
-.monthYearButton:focus {
-  outline: none;
-  border-color: #0d7c4e;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
-
-.monthYearButton svg:first-child {
-  color: #6b7280;
-}
-
-.monthYearButton span {
-  flex: 1;
-  text-align: left;
-}
-
-.monthYearButton svg:last-child {
-  color: #9ca3af;
+  border-color: #4caf50;
+  background: #f9f9f9;
 }
 
 .monthYearDropdown {
   position: absolute;
   top: calc(100% + 4px);
-  width: 300px;
   left: 0;
-  right: 0;
   background: white;
-  border: 1px solid #e5e7eb;
+  border: 1px solid #e0e0e0;
   border-radius: 8px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   z-index: 1000;
-  max-height: 400px;
-  overflow-y: auto;
+  min-width: 320px;
+  max-width: 400px;
   padding: 12px;
 }
 
+.periodLabel {
+  font-size: 12px;
+  font-weight: 600;
+  color: #2d3748;
+  padding: 8px 12px;
+  background: #f7fafc;
+  border-radius: 6px;
+  margin-bottom: 12px;
+  text-align: center;
+  border: 1px solid #e2e8f0;
+}
+
 .pickerSection {
-  padding: 8px 0;
+  margin-bottom: 12px;
+}
+
+.pickerSection:last-child {
+  margin-bottom: 0;
 }
 
 .pickerTitle {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
-  color: #6b7280;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  color: #4a5568;
   margin-bottom: 8px;
+  padding: 0 4px;
 }
 
 .pickerDivider {
   height: 1px;
-  background: #e5e7eb;
-  margin: 12px -12px;
+  background: #e0e0e0;
+  margin: 12px 0;
 }
 
 .yearGrid {
@@ -371,33 +364,31 @@
 }
 
 .yearOption {
-  padding: 10px;
-  background: #f9fafb;
-  border: 1px solid #e5e7eb;
+  padding: 10px 16px;
+  background: white;
+  border: 1px solid #e0e0e0;
   border-radius: 6px;
+  cursor: pointer;
   font-size: 14px;
   font-weight: 500;
-  color: #374151;
-  cursor: pointer;
+  color: #2d3748;
   transition: all 0.2s;
   text-align: center;
 }
 
 .yearOption:hover {
-  background: #eff6ff;
-  border-color: #0d7c4e;
-  color: #0d7c4e;
+  background: #f7fafc;
+  border-color: #4caf50;
 }
 
 .yearOptionSelected {
-  background: #0d7c4e;
-  border-color: #0d7c4e;
+  background: #4caf50;
   color: white;
+  border-color: #4caf50;
 }
 
 .yearOptionSelected:hover {
-  background: #0d7c4e;
-  border-color: #0d7c4e;
+  background: #45a049;
 }
 
 .monthGrid {
@@ -407,389 +398,480 @@
 }
 
 .monthOption {
-  padding: 8px;
-  background: #f9fafb;
-  border: 1px solid #e5e7eb;
+  padding: 10px 12px;
+  background: white;
+  border: 1px solid #e0e0e0;
   border-radius: 6px;
+  cursor: pointer;
   font-size: 13px;
   font-weight: 500;
-  color: #374151;
-  cursor: pointer;
+  color: #2d3748;
   transition: all 0.2s;
   text-align: center;
 }
 
-.monthOption:hover {
-  background: #eff6ff;
-  border-color: #0d7c4e;
-  color: #0d7c4e;
+.monthOption:hover:not(:disabled) {
+  background: #f7fafc;
+  border-color: #4caf50;
 }
 
 .monthOptionSelected {
-  background: #0d7c4e;
-  border-color: #0d7c4e;
+  background: #4caf50;
   color: white;
+  border-color: #4caf50;
 }
 
 .monthOptionSelected:hover {
-  background: #0d7c4e;
-  border-color: #2563eb;
+  background: #45a049;
 }
 
 .monthOptionDisabled {
-  opacity: 0.3;
+  opacity: 0.4;
   cursor: not-allowed;
-  background: #f3f4f6;
+  background: #f5f5f5;
+  color: #9e9e9e;
 }
 
 .monthOptionDisabled:hover {
-  background: #f3f4f6;
-  border-color: #e5e7eb;
-  color: #374151;
+  background: #f5f5f5;
+  border-color: #e0e0e0;
 }
 
-.noReportingPeriod {
-  padding: 16px;
+.pickerPlaceholder {
   text-align: center;
-  color: #6b7280;
-}
-
-.noReportingPeriod p {
-  margin: 8px 0;
+  padding: 20px 12px;
+  color: #9e9e9e;
   font-size: 13px;
+  font-style: italic;
 }
 
-.noReportingPeriod p:first-child {
-  font-weight: 600;
-  color: #374151;
-}
-/* Add this to your ExcelView.module.css file */
-
+/* Duplicate Month Warning */
 .duplicateMonthWarning {
-  background-color: #fff3cd;
+  background: #fff3cd;
   border: 1px solid #ffc107;
   border-radius: 6px;
   padding: 12px 16px;
   margin: 12px 0;
   color: #856404;
+  font-size: 14px;
   display: flex;
   align-items: center;
   gap: 8px;
+}
+
+/* Rest of the existing styles... */
+
+
+
+.clearAllBtn {
+  padding: 8px 16px;
+  background: #f44336;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
   font-size: 14px;
   font-weight: 500;
-  animation: slideDown 0.3s ease-out;
+  transition: all 0.2s;
 }
 
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.clearAllBtn:hover {
+  background: #d32f2f;
 }
 
-/* Optional: Add a hover effect */
-.duplicateMonthWarning:hover {
-  background-color: #fff8e1;
+
+
+
+
+
+
+
+
+
+
+
+
+.headerContent {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
 }
 
-/* Disabled month button style */
-.monthOptionDisabled {
-  opacity: 0.4;
-  cursor: not-allowed !important;
-  background-color: #f5f5f5 !important;
-}
-
-.monthOptionDisabled:hover {
-  background-color: #f5f5f5 !important;
-  transform: none !important;
-}
-
-/* No reporting period message */
-.noReportingPeriod {
-  padding: 20px;
-  text-align: center;
-  color: #666;
-}
-
-.noReportingPeriod p {
-  margin: 8px 0;
+.headerLabel {
   font-size: 14px;
 }
 
-.noReportingPeriod p:first-child {
-  font-weight: 600;
-  color: #333;
+.headerButton {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  border-radius: 4px;
+  transition: all 0.2s;
+  color: #718096;
 }
 
-/* Month filter input for column headers */
+.headerButton:hover {
+  background: #e2e8f0;
+  color: #4caf50;
+}
+
+.headerButtonActive {
+  color: #4caf50;
+  background: #e8f5e9;
+}
+
+.dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  min-width: 240px;
+  max-width: 320px;
+  padding: 8px;
+}
+
+.dropdownSection {
+  padding: 8px 0;
+}
+
+.sectionTitle {
+  font-size: 12px;
+  font-weight: 600;
+  color: #718096;
+  padding: 4px 12px;
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.divider {
+  height: 1px;
+  background: #e0e0e0;
+  margin: 8px 0;
+}
+
+.dropdownItem {
+  width: 100%;
+  padding: 10px 12px;
+  background: transparent;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  color: #2d3748;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.dropdownItem:hover {
+  background: #f7fafc;
+}
+
+.dropdownItemActive {
+  background: #e8f5e9;
+  color: #4caf50;
+  font-weight: 500;
+}
+
+.searchInput,
+.filterInput {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+.searchInput:focus,
+.filterInput:focus {
+  outline: none;
+  border-color: #4caf50;
+}
+
+.optionsList {
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 14px;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.checkboxLabel:hover {
+  background: #f7fafc;
+}
+
+.checkboxLabel input[type="checkbox"] {
+  cursor: pointer;
+}
+
 .monthFilterContainer {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  padding: 8px 0;
 }
 
 .monthInput {
-  width: 100%;
-  padding: 8px;
-  border: 1px solid #e5e7eb;
-  border-radius: 4px;
-  font-size: 13px;
-  color: #374151;
+  padding: 8px 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  font-size: 14px;
 }
 
 .monthInput:focus {
   outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
-
-/* Auto-calculated badge styling */
-.autoCalculatedBadge {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 4px 8px;
-  background: #dbeafe;
-  color: #1e40af;
-  border-radius: 4px;
-  font-size: 13px;
-  font-weight: 500;
-}
-
-/* Read-only input styling */
-.inputReadOnly {
-  background-color: #f3f4f6 !important;
-  color: #6b7280 !important;
-  cursor: not-allowed !important;
-  border-color: #d1d5db !important;
-}
-
-.inputReadOnly:focus {
-  box-shadow: none !important;
-}
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-  .monthYearDropdown {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    right: auto;
-    transform: translate(-50%, -50%);
-    width: 90%;
-    max-width: 320px;
-  }
-
-  .yearGrid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .monthGrid {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-.filterInput {
-  width: 100%;
-  padding: 8px 10px;
-  border: 1px solid #d1d5db;
-  border-radius: 4px;
-  font-size: 13px;
+  border-color: #4caf50;
 }
 
 .clearFilterBtn {
   width: 100%;
-  padding: 6px 10px;
-  background: #dc2626;
-  color: #ffffff;
+  padding: 8px 12px;
+  background: #f44336;
+  color: white;
   border: none;
-  border-radius: 4px;
-  font-size: 12px;
-  font-weight: 600;
+  border-radius: 6px;
   cursor: pointer;
+  font-size: 14px;
   margin-top: 8px;
+  transition: all 0.2s;
+}
+
+.clearFilterBtn:hover {
+  background: #d32f2f;
 }
 
 .td {
-  padding: 8px 12px;
-  border: 1px solid #e5e7eb;
-  background: #ffffff;
+  padding: 12px 16px;
+  border-bottom: 1px solid #e0e0e0;
+  color: #2d3748;
 }
 
-.editableCell {
-  cursor: pointer;
-  transition: background 0.1s;
-  position: relative;
-}
-
-.editInput {
-  width: 100%;
-  padding: 6px 8px;
-  border: 2px solid #10b981;
-  border-radius: 4px;
-  font-size: 13px;
-  outline: none;
-  background: #f0fdf4;
-}
-
-.editInputNumeric {
+.tdNumeric {
   text-align: right;
-}
-
-.editSelect {
-  width: 100%;
-  padding: 6px 8px;
-  border: 2px solid #10b981;
-  border-radius: 4px;
-  font-size: 13px;
-  outline: none;
-  background: #f0fdf4;
-  cursor: pointer;
+  font-variant-numeric: tabular-nums;
 }
 
 .newRow {
-  background: #f0fdf4;
-  border-bottom: 2px solid #10b981;
+  background: #f0f9ff;
 }
 
-.dataRow {
-  transition: background 0.1s;
+.newRow .td {
+  padding: 8px 12px;
 }
 
-.evenRow {
-  background: #fafbfc;
-}
-
+.select,
 .input {
-  width: 100%;
-  padding: 6px 8px;
-  border: none;
-  background: transparent;
-  font-size: 13px;
+ width: 110%;
+  padding: 8px 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  font-size: 14px;
+  background: white;
+}
+
+.select:focus,
+.input:focus {
   outline: none;
+  border-color: #4caf50;
+}
+
+.inputReadOnly {
+  background: #f5f5f5;
+  cursor: not-allowed;
+  color: #718096;
+  font-weight: 600;
 }
 
 .inputNumeric {
   text-align: right;
-}
-
-.select {
-  width: 100%;
-  padding: 6px 8px;
-  border: none;
-  background: transparent;
-  font-size: 13px;
-  cursor: pointer;
-  outline: none;
+  font-variant-numeric: tabular-nums;
 }
 
 .saveBtn {
+  padding: 8px 12px;
+  background: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
-  background: #10b981;
-  color: #ffffff;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.saveBtn:hover:not(:disabled) {
+  background: #45a049;
+}
+
+.saveBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .deleteBtn {
+  padding: 6px 10px;
+  background: #f44336;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
-  background: transparent;
-  color: #dc2626;
-  border: 1px solid transparent;
-  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.deleteBtn:hover {
+  background: #d32f2f;
+}
+
+.monthHeader {
+  background: #e8f5e9;
   cursor: pointer;
-  margin: 0 auto;
+  transition: all 0.2s;
+}
+
+.monthHeader:hover {
+  background: #c8e6c9;
+}
+
+.monthHeaderCell {
+  padding: 12px 16px;
+  font-weight: 600;
+  color: #2d3748;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.monthArrow {
+  font-size: 12px;
+  color: #4caf50;
+}
+
+.dataRow {
+  transition: all 0.2s;
+}
+
+.dataRow:hover {
+  background: #f7fafc;
+}
+
+.evenRow {
+  background: #fafafa;
+}
+
+.editableCell {
+  cursor: cell;
+  position: relative;
+}
+
+.editableCell:hover {
+  background: #e8f5e9;
+}
+
+.editInput,
+.editSelect {
+  width: 100%;
+  padding: 6px 10px;
+  border: 2px solid #4caf50;
+  border-radius: 4px;
+  font-size: 14px;
+  background: white;
+}
+
+.editInput:focus,
+.editSelect:focus {
+  outline: none;
+  border-color: #45a049;
+}
+
+.editInputNumeric {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
 }
 
 .badgeHazardous {
   display: inline-block;
-  padding: 4px 8px;
-  background: #fef2f2;
-  color: #dc2626;
-  border: 1px solid #fecaca;
-  border-radius: 4px;
-  font-size: 11px;
+  padding: 4px 10px;
+  background: #ffebee;
+  color: #c62828;
+  border-radius: 12px;
+  font-size: 12px;
   font-weight: 600;
-  text-transform: uppercase;
 }
 
 .badgeNonHazardous {
   display: inline-block;
-  padding: 4px 8px;
-  background: #f0fdf4;
-  color: #16a34a;
-  border: 1px solid #bbf7d0;
-  border-radius: 4px;
-  font-size: 11px;
+  padding: 4px 10px;
+  background: #e8f5e9;
+  color: #2e7d32;
+  border-radius: 12px;
+  font-size: 12px;
   font-weight: 600;
-  text-transform: uppercase;
 }
 
+.autoCalculatedBadge {
+  display: inline-block;
+  padding: 4px 10px;
+  background: #e3f2fd;
+  color: #1565c0;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: help;
+}
+
+.loadingState,
 .emptyState {
-  padding: 60px 20px;
   text-align: center;
-  color: #6b7280;
-  font-size: 14px;
-  background: #fafbfc;
-}
-
-.loadingState {
   padding: 40px 20px;
-  text-align: center;
-  color: #6b7280;
+  color: #718096;
   font-size: 14px;
-  background: #f9fafb;
 }
 
 .copyIndicator {
   position: fixed;
   bottom: 20px;
   right: 20px;
-  padding: 12px 16px;
-  background: #10b981;
-  color: #ffffff;
+  background: #4caf50;
+  color: white;
+  padding: 12px 20px;
   border-radius: 8px;
-  font-size: 13px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  font-size: 14px;
   font-weight: 500;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  z-index: 1000;
+  animation: slideIn 0.3s ease;
 }
 
-.monthHeader {
-  background: #194d2a;
-  cursor: pointer;
-  user-select: none;
-}
-
-.monthHeaderCell {
-  padding: 10px 16px;
-  font-size: 12px;
-  font-weight: 600;
-  color: #ffffff;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.monthArrow {
-  display: inline-block;
-  width: 16px;
-  text-align: center;
-}
-
-.tdNumeric {
-  text-align: right;
+@keyframes slideIn {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
