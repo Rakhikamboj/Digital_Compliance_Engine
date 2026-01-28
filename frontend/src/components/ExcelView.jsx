@@ -84,17 +84,7 @@ const MonthYearPicker = ({ value, onChange, reportingPeriod, className }) => {
   const [selectedYear, setSelectedYear] = useState("");
   const pickerRef = useRef(null);
 
-  useEffect(() => {
-    if (value) {
-      const [year, month] = value.split("-");
-      setSelectedYear(year);
-      setSelectedMonth(month);
-    } else {
-      // Reset to empty if no value
-      setSelectedYear("");
-      setSelectedMonth("");
-    }
-  }, [value]);
+
 
   useEffect(() => {
     const handleClickOutside = (e) => {
